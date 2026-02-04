@@ -1,0 +1,234 @@
+.memorial-candle-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px;
+}
+
+/* Incense holder */
+.incense-holder {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding: 20px 40px;
+    background: linear-gradient(to bottom, #8B4513 0%, #5D3A1A 100%);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Incense stick */
+.incense-stick {
+    position: relative;
+    width: 4px;
+    height: 100px;
+    background: linear-gradient(to top, #8B4513 0%, #CD853F 50%, #D2691E 100%);
+    border-radius: 2px;
+}
+
+.incense-stick.burning .incense-glow,
+.incense-stick.burning .incense-smoke {
+    opacity: 1;
+}
+
+/* Glowing tip */
+.incense-glow {
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 8px;
+    background: #ff4500;
+    border-radius: 50%;
+    opacity: 0;
+    box-shadow:
+        0 0 8px #ff4500,
+        0 0 16px #ff6600,
+        0 0 24px #ff8800;
+    animation: glow-pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes glow-pulse {
+    from {
+        box-shadow:
+            0 0 8px #ff4500,
+            0 0 16px #ff6600,
+            0 0 24px #ff8800;
+        transform: translateX(-50%) scale(1);
+    }
+
+    to {
+        box-shadow:
+            0 0 12px #ff4500,
+            0 0 24px #ff6600,
+            0 0 36px #ff8800;
+        transform: translateX(-50%) scale(1.1);
+    }
+}
+
+/* Smoke effect */
+.incense-smoke {
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 80px;
+    opacity: 0;
+}
+
+.smoke-particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: rgba(200, 200, 200, 0.4);
+    border-radius: 50%;
+    filter: blur(4px);
+    animation: smoke-rise 3s ease-out infinite;
+}
+
+.smoke-particle:nth-child(1) {
+    left: 10px;
+    animation-delay: 0s;
+}
+
+.smoke-particle:nth-child(2) {
+    left: 5px;
+    animation-delay: 0.8s;
+}
+
+.smoke-particle:nth-child(3) {
+    left: 15px;
+    animation-delay: 1.6s;
+}
+
+@keyframes smoke-rise {
+    0% {
+        opacity: 0.6;
+        transform: translateY(0) translateX(0) scale(1);
+    }
+
+    50% {
+        opacity: 0.3;
+        transform: translateY(-40px) translateX(5px) scale(1.5);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-80px) translateX(-5px) scale(2);
+    }
+}
+
+/* Button */
+.incense-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 40px;
+    background: linear-gradient(135deg, #D4AF37 0%, #b8962f 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+}
+
+.incense-button:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 25px rgba(212, 175, 55, 0.6);
+}
+
+.incense-button:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+}
+
+.incense-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.incense-button.lighting {
+    animation: button-pulse 0.5s ease;
+}
+
+@keyframes button-pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.incense-icon {
+    font-size: 24px;
+}
+
+/* Count display */
+.incense-count {
+    text-align: center;
+    margin-top: 24px;
+}
+
+.count-number {
+    display: block;
+    font-size: 36px;
+    font-weight: 700;
+    color: #D4AF37;
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+.count-label {
+    display: block;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 4px;
+}
+
+/* Success message */
+.incense-message {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background: rgba(212, 175, 55, 0.2);
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    border-radius: 8px;
+    color: #D4AF37;
+    font-size: 16px;
+    animation: fade-in-up 0.5s ease;
+}
+
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .memorial-candle-container {
+        padding: 20px;
+    }
+
+    .incense-button {
+        padding: 14px 32px;
+        font-size: 16px;
+    }
+
+    .count-number {
+        font-size: 28px;
+    }
+}
