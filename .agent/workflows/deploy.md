@@ -15,8 +15,13 @@ description: Quy trình deploy website Gia Phả lên production
 
 ### Admin Website
 - **URL**: https://giapha-ho-dang.vercel.app/admin
-- **Username**: admin
-- **Password**: admin123
+
+### Tài khoản đăng nhập
+| Vai trò | Username | Password |
+|---------|----------|----------|
+| Quản trị viên | admin | admin123 |
+| Chi họ | chinho | chi123 |
+| Thành viên | member | member123 |
 
 ---
 

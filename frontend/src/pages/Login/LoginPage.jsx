@@ -118,22 +118,7 @@ const LoginPage = () => {
                     </Form.Item>
                 </Form>
 
-                <div style={{
-                    textAlign: 'center',
-                    padding: 16,
-                    background: '#f8f9fa',
-                    borderRadius: 8,
-                    marginTop: 16
-                }}>
-                    <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>
-                        <strong>Tài khoản demo:</strong>
-                    </p>
-                    <p style={{ margin: '4px 0 0', fontSize: 12, color: '#94a3b8' }}>
-                        admin / admin123 (Quản trị viên)<br />
-                        chinho / chi123 (Chi họ)<br />
-                        member / member123 (Thành viên)
-                    </p>
-                </div>
+
             </Card>
         </div>
     );
