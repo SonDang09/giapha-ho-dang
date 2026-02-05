@@ -7,7 +7,7 @@ import { membersAPI } from '../../api';
 import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const LunarCalendarPage = () => {
-    useDocumentTitle('Lịch Ngày Giỗ');
+    useDocumentTitle('Lịch Ngày Giỗ', 'Lịch ngày giỗ âm lịch của các cụ trong dòng họ Đặng Đà Nẵng. Tra cứu ngày giỗ sắp tới để chuẩn bị cúng giỗ tổ tiên.');
     const [loading, setLoading] = useState(true);
     const [anniversaries, setAnniversaries] = useState([]);
     const [selectedDate, setSelectedDate] = useState(dayjs());

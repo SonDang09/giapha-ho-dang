@@ -7,7 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const AlbumsPage = () => {
-    useDocumentTitle('Album Ảnh');
+    useDocumentTitle('Album Ảnh', 'Bộ sưu tập hình ảnh dòng họ Đặng Đà Nẵng. Xem ảnh từ đường, họp mặt gia đình, mộ phần tổ tiên và các sự kiện quan trọng.');
     const { id } = useParams();
     const { canEdit } = useAuth();
     const [loading, setLoading] = useState(true);

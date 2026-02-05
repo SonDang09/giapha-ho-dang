@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const LoginPage = () => {
-    useDocumentTitle('Đăng Nhập');
+    useDocumentTitle('Đăng Nhập', 'Đăng nhập vào hệ thống Gia Phả Họ Đặng Đà Nẵng để quản lý thông tin gia đình và tham gia các hoạt động dòng họ.');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const { login } = useAuth();

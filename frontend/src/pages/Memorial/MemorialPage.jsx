@@ -10,7 +10,7 @@ import useDocumentTitle from '../../hooks/useDocumentTitle';
 const { TextArea } = Input;
 
 const MemorialPage = () => {
-    useDocumentTitle('Nghĩa Trang Trực Tuyến');
+    useDocumentTitle('Nghĩa Trang Trực Tuyến', 'Nghĩa trang trực tuyến dòng họ Đặng Đà Nẵng. Tưởng nhớ và thắp nén hương lòng cho các cụ đã khuất.');
     const { memberId } = useParams();
     const [loading, setLoading] = useState(true);
     const [member, setMember] = useState(null);

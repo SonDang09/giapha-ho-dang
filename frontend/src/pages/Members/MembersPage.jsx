@@ -11,7 +11,7 @@ const { Search } = Input;
 const { TextArea } = Input;
 
 const MembersPage = () => {
-    useDocumentTitle('Thành Viên');
+    useDocumentTitle('Thành Viên', 'Danh sách thành viên họ Đặng Đà Nẵng qua các thế hệ. Tìm kiếm, tra cứu thông tin chi tiết và xuất dữ liệu gia phả.');
     const { canEdit, isAdmin } = useAuth();
     const [loading, setLoading] = useState(true);
     const [members, setMembers] = useState([]);

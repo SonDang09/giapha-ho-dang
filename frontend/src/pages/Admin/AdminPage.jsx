@@ -22,7 +22,7 @@ const { TabPane } = Tabs;
 const { TextArea } = Input;
 
 const AdminPage = () => {
-    useDocumentTitle('Trang Quản Trị');
+    useDocumentTitle('Trang Quản Trị', 'Trang quản trị hệ thống Gia Phả Họ Đặng. Quản lý thành viên, tin tức, album ảnh và người dùng.');
     const { user, isAuthenticated } = useAuth();
     const [activeTab, setActiveTab] = useState('overview');
     const [loading, setLoading] = useState(false);

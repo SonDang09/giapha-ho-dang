@@ -15,7 +15,7 @@ import { membersAPI, newsAPI, albumsAPI } from '../../api';
 import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const HomePage = () => {
-    useDocumentTitle('Trang chủ');
+    useDocumentTitle('Trang chủ', 'Gia phả họ Đặng Đà Nẵng - Trang web lưu giữ và kết nối các thế hệ trong dòng họ. Xem cây gia phả, lịch giỗ, tin tức và hình ảnh gia đình.');
     const [loading, setLoading] = useState(true);
     const [anniversaries, setAnniversaries] = useState([]);
     const [news, setNews] = useState([]);

@@ -6,7 +6,7 @@ import { membersAPI } from '../../api';
 import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const TreePage = () => {
-    useDocumentTitle('Cây Gia Phả');
+    useDocumentTitle('Cây Gia Phả', 'Xem sơ đồ cây gia phả họ Đặng Đà Nẵng với đầy đủ các thế hệ. Tra cứu quan hệ huyết thống, thông tin từng thành viên trong dòng họ.');
     const [treeData, setTreeData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isFullscreen, setIsFullscreen] = useState(false);

@@ -10,7 +10,7 @@ import useDocumentTitle from '../../hooks/useDocumentTitle';
 const { TextArea } = Input;
 
 const NewsPage = () => {
-    useDocumentTitle('Tin Tức & Sự Kiện');
+    useDocumentTitle('Tin Tức & Sự Kiện', 'Tin tức và sự kiện của họ Đặng Đà Nẵng. Cập nhật lễ giỗ tổ, đại hội họ, hoạt động từ thiện và các sự kiện quan trọng.');
     const { slug } = useParams();
     const { canEdit } = useAuth();
     const [loading, setLoading] = useState(true);

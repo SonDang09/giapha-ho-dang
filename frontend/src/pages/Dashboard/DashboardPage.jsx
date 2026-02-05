@@ -14,7 +14,7 @@ import { membersAPI } from '../../api';
 import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const DashboardPage = () => {
-    useDocumentTitle('Thống Kê Dòng Họ');
+    useDocumentTitle('Thống Kê Dòng Họ', 'Thống kê tổng quan về dòng họ Đặng Đà Nẵng. Xem số lượng thành viên, phân bổ theo thế hệ, giới tính và các chỉ số quan trọng.');
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
         totalMembers: 0,

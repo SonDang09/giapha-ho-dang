@@ -18,7 +18,7 @@ import { transactionsAPI } from '../../api';
 import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const FundPage = () => {
-    useDocumentTitle('Quỹ Dòng Họ');
+    useDocumentTitle('Quỹ Dòng Họ', 'Quản lý quỹ dòng họ Đặng Đà Nẵng. Theo dõi thu chi, đóng góp của các thành viên và sử dụng quỹ cho hoạt động chung.');
     const { canEdit, isAdmin } = useAuth();
     const [loading, setLoading] = useState(true);
     const [transactions, setTransactions] = useState([]);

@@ -6,7 +6,7 @@ import { authAPI } from '../../api';
 import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const ProfilePage = () => {
-    useDocumentTitle('Thông Tin Tài Khoản');
+    useDocumentTitle('Thông Tin Tài Khoản', 'Quản lý thông tin tài khoản cá nhân trong hệ thống Gia Phả Họ Đặng. Cập nhật hồ sơ và đổi mật khẩu.');
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
     const [passwordLoading, setPasswordLoading] = useState(false);
