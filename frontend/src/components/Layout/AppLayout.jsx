@@ -122,13 +122,14 @@ const AppLayout = ({ children }) => {
                 />
 
                 {/* Right Section */}
-                <Space size="middle">
+                <Space size="middle" style={{ flexShrink: 0 }}>
                     {/* Search */}
                     <Search
                         placeholder="Tìm kiếm..."
                         onSearch={handleSearch}
-                        style={{ width: 200 }}
+                        style={{ width: 180, minWidth: 120 }}
                         className="header-search"
+                        allowClear
                     />
 
                     {/* Theme Toggle */}
@@ -222,7 +223,36 @@ const AppLayout = ({ children }) => {
           .mobile-menu-btn { display: none !important; }
           .logo-text { display: block !important; }
           .user-name { display: inline; }
-          .header-search { display: block !important; }
+          .header-search { 
+            display: inline-flex !important; 
+          }
+          .header-search .ant-input-search {
+            border-radius: 6px;
+            overflow: hidden;
+          }
+          .header-search .ant-input {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+            color: white;
+          }
+          .header-search .ant-input::placeholder {
+            color: rgba(255,255,255,0.5);
+          }
+          .header-search .ant-input:focus,
+          .header-search .ant-input:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.3);
+          }
+          .header-search .ant-input-search-button {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+          }
+        }
+        
+        @media (min-width: 1024px) {
+          .header-search {
+            width: 200px !important;
+          }
         }
       `}</style>
         </Layout>
