@@ -35,10 +35,13 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
     // Action modals
     const [addChildVisible, setAddChildVisible] = useState(false);
     const [editVisible, setEditVisible] = useState(false);
+    const [addSpouseVisible, setAddSpouseVisible] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
     const [addForm] = Form.useForm();
     const [editForm] = Form.useForm();
+    const [spouseForm] = Form.useForm();
     const [allMembers, setAllMembers] = useState([]);
+    const [currentMemberGender, setCurrentMemberGender] = useState(null);
 
     // Detect mobile on resize - MUST be useEffect not useState!
     useEffect(() => {
@@ -309,12 +312,16 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
     // Open edit modal with pre-filled data
     const openEditModal = async () => {
         const attrs = selectedMember?.attributes || {};
+        setCurrentMemberGender(attrs.gender); // Track gender for spouse label
         // Fetch all members for spouse dropdown
         try {
             const res = await membersAPI.getAll({ limit: 500 });
-            // Filter out current member and set list
-            const otherMembers = res.data.data.filter(m => m._id !== attrs.id);
-            setAllMembers(otherMembers);
+            // Filter out current member and show only opposite gender for spouse
+            const oppositeGender = attrs.gender === 'male' ? 'female' : 'male';
+            const potentialSpouses = res.data.data.filter(m =>
+                m._id !== attrs.id && m.gender === oppositeGender
+            );
+            setAllMembers(potentialSpouses);
         } catch (e) {
             console.error('Failed to load members:', e);
         }
@@ -326,6 +333,37 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
             spouseId: attrs.spouseId || undefined
         });
         setEditVisible(true);
+    };
+
+    // Handle creating a new spouse
+    const handleAddSpouse = async (values) => {
+        setActionLoading(true);
+        try {
+            const attrs = selectedMember?.attributes || {};
+            // Create new spouse with opposite gender
+            const spouseGender = attrs.gender === 'male' ? 'female' : 'male';
+            const newSpouseData = {
+                ...values,
+                gender: spouseGender,
+                generation: attrs.generation,
+                spouseId: attrs.id // Link back to current member
+            };
+            const res = await membersAPI.create(newSpouseData);
+            const newSpouseId = res.data.data._id;
+
+            // Update current member with new spouse
+            await membersAPI.update(attrs.id, { spouseId: newSpouseId });
+
+            message.success(`Đã thêm ${spouseGender === 'female' ? 'vợ' : 'chồng'} thành công!`);
+            setAddSpouseVisible(false);
+            spouseForm.resetFields();
+            loadTreeData();
+            setSelectedMember(null);
+        } catch (error) {
+            message.error('Lỗi: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setActionLoading(false);
+        }
     };
 
     const containerRef = useCallback((containerElem) => {
@@ -611,22 +649,41 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                         />
                     </Form.Item>
 
-                    <Form.Item name="spouseId" label="Vợ/Chồng">
-                        <Select
-                            allowClear
-                            showSearch
-                            placeholder="Chọn vợ/chồng"
-                            optionFilterProp="children"
-                            filterOption={(input, option) =>
-                                option.children.toLowerCase().includes(input.toLowerCase())
-                            }
-                        >
-                            {allMembers.map(m => (
-                                <Select.Option key={m._id} value={m._id}>
-                                    {m.fullName} {m.birthYear ? `(${m.birthYear})` : ''}
-                                </Select.Option>
-                            ))}
-                        </Select>
+                    <Form.Item
+                        name="spouseId"
+                        label={currentMemberGender === 'male' ? 'Vợ' : currentMemberGender === 'female' ? 'Chồng' : 'Vợ/Chồng'}
+                    >
+                        <Space.Compact style={{ width: '100%' }}>
+                            <Select
+                                allowClear
+                                showSearch
+                                placeholder={`Chọn ${currentMemberGender === 'male' ? 'vợ' : 'chồng'} từ danh sách`}
+                                optionFilterProp="children"
+                                filterOption={(input, option) =>
+                                    option.children.toLowerCase().includes(input.toLowerCase())
+                                }
+                                style={{ width: 'calc(100% - 100px)' }}
+                                onChange={(value) => editForm.setFieldValue('spouseId', value)}
+                                value={editForm.getFieldValue('spouseId')}
+                            >
+                                {allMembers.map(m => (
+                                    <Select.Option key={m._id} value={m._id}>
+                                        {m.fullName} {m.birthYear ? `(${m.birthYear})` : ''}
+                                    </Select.Option>
+                                ))}
+                            </Select>
+                            <Button
+                                type="primary"
+                                ghost
+                                onClick={() => {
+                                    setEditVisible(false);
+                                    setAddSpouseVisible(true);
+                                    spouseForm.resetFields();
+                                }}
+                            >
+                                + Thêm mới
+                            </Button>
+                        </Space.Compact>
                     </Form.Item>
 
                     <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
@@ -634,6 +691,69 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                             <Button onClick={() => setEditVisible(false)}>Hủy</Button>
                             <Button type="primary" htmlType="submit" loading={actionLoading}>
                                 Lưu
+                            </Button>
+                        </Space>
+                    </Form.Item>
+                </Form>
+            </Modal>
+
+            {/* Add Spouse Modal */}
+            <Modal
+                title={`Thêm ${currentMemberGender === 'male' ? 'Vợ' : 'Chồng'} cho ${selectedMember?.name || ''}`}
+                open={addSpouseVisible}
+                onCancel={() => setAddSpouseVisible(false)}
+                footer={null}
+                destroyOnHidden
+            >
+                <Form form={spouseForm} layout="vertical" onFinish={handleAddSpouse}>
+                    <Form.Item
+                        name="fullName"
+                        label="Họ và tên"
+                        rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
+                    >
+                        <Input placeholder={`Nhập họ tên ${currentMemberGender === 'male' ? 'vợ' : 'chồng'}`} />
+                    </Form.Item>
+
+                    <Form.Item name="birthYear" label="Năm sinh">
+                        <InputNumber
+                            placeholder="Nhập năm sinh"
+                            min={1800}
+                            max={new Date().getFullYear()}
+                            style={{ width: '100%' }}
+                        />
+                    </Form.Item>
+
+                    <Form.Item name="deathYear" label="Năm mất (nếu có)">
+                        <InputNumber
+                            placeholder="Để trống nếu còn sống"
+                            min={1800}
+                            max={new Date().getFullYear()}
+                            style={{ width: '100%' }}
+                        />
+                    </Form.Item>
+
+                    <div style={{
+                        padding: '12px',
+                        background: '#f6ffed',
+                        borderRadius: 8,
+                        marginBottom: 16,
+                        border: '1px solid #b7eb8f'
+                    }}>
+                        <strong>Thông tin tự động:</strong>
+                        <ul style={{ margin: '8px 0 0', paddingLeft: 20 }}>
+                            <li>Giới tính: <Tag color={currentMemberGender === 'male' ? 'magenta' : 'blue'}>
+                                {currentMemberGender === 'male' ? 'Nữ' : 'Nam'}
+                            </Tag></li>
+                            <li>Đời thứ: {selectedMember?.attributes?.generation || '?'}</li>
+                            <li>Liên kết với: {selectedMember?.name}</li>
+                        </ul>
+                    </div>
+
+                    <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+                        <Space>
+                            <Button onClick={() => setAddSpouseVisible(false)}>Hủy</Button>
+                            <Button type="primary" htmlType="submit" loading={actionLoading}>
+                                Thêm {currentMemberGender === 'male' ? 'Vợ' : 'Chồng'}
                             </Button>
                         </Space>
                     </Form.Item>
