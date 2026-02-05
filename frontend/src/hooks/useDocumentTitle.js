@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useSiteSettings } from '../context/SiteSettingsContext';
 
 /**
  * Custom hook to update document title and meta description dynamically
@@ -7,8 +8,10 @@ import { useEffect } from 'react';
  * @param {boolean} withSuffix - Whether to append site name (default: true)
  */
 const useDocumentTitle = (title, description = '', withSuffix = true) => {
+    const { siteTitle } = useSiteSettings();
+
     useEffect(() => {
-        const suffix = 'Gia Phả Họ Đặng Đà Nẵng';
+        const suffix = siteTitle;
         document.title = withSuffix && title ? `${title} | ${suffix}` : (title || suffix);
 
         // Update or create meta description
@@ -25,7 +28,8 @@ const useDocumentTitle = (title, description = '', withSuffix = true) => {
         return () => {
             document.title = suffix;
         };
-    }, [title, description, withSuffix]);
+    }, [title, description, withSuffix, siteTitle]);
 };
 
 export default useDocumentTitle;
+
