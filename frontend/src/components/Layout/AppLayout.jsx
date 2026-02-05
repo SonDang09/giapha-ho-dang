@@ -78,8 +78,30 @@ const AppLayout = ({ children }) => {
                 top: 0,
                 zIndex: 100
             }}>
-                {/* Logo */}
-                <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 12, overflow: 'hidden' }}>
+                {/* Mobile Logo - Đặng Đức Tộc */}
+                <Link to="/" className="mobile-logo" style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    textDecoration: 'none'
+                }}>
+                    <span style={{
+                        fontFamily: "'Times New Roman', Georgia, serif",
+                        fontSize: 20,
+                        fontWeight: 700,
+                        background: 'linear-gradient(135deg, #D4AF37 0%, #F4E4A6 50%, #D4AF37 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                        textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                        letterSpacing: '2px',
+                        textTransform: 'uppercase'
+                    }}>
+                        Đặng Đức Tộc
+                    </span>
+                </Link>
+
+                {/* Desktop Logo */}
+                <Link to="/" className="logo-text-wrapper" style={{ display: 'flex', alignItems: 'center', gap: 12, overflow: 'hidden' }}>
                     <span style={{
                         color: 'white',
                         fontSize: 18,
@@ -203,6 +225,8 @@ const AppLayout = ({ children }) => {
         .desktop-menu { display: none !important; }
         .mobile-menu-btn { display: block !important; }
         .logo-text { display: none !important; }
+        .logo-text-wrapper { display: none !important; }
+        .mobile-logo { display: flex !important; }
         .user-name { display: none; }
         .header-search { display: none !important; }
         
@@ -210,6 +234,8 @@ const AppLayout = ({ children }) => {
           .desktop-menu { display: flex !important; }
           .mobile-menu-btn { display: none !important; }
           .logo-text { display: block !important; }
+          .logo-text-wrapper { display: flex !important; }
+          .mobile-logo { display: none !important; }
           .user-name { display: inline; }
           .header-search { 
             display: flex !important;
