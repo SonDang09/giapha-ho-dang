@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Tabs, Card, Table, Button, Modal, Form, Input, Select, DatePicker, Space, Tag, Popconfirm, message, Statistic, Row, Col, Avatar, InputNumber, Upload } from 'antd';
+import { Tabs, Card, Table, Button, Modal, Form, Input, Select, DatePicker, Space, Tag, Popconfirm, message, Statistic, Row, Col, Avatar, InputNumber, Switch, Alert } from 'antd';
 import {
     UserOutlined,
     TeamOutlined,
@@ -9,18 +9,22 @@ import {
     PlusOutlined,
     EditOutlined,
     DeleteOutlined,
-    UploadOutlined,
     ManOutlined,
-    WomanOutlined
+    WomanOutlined,
+    ReloadOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { membersAPI, newsAPI, albumsAPI, authAPI } from '../../api';
+import { useAuth } from '../../context/AuthContext';
 
 const { TabPane } = Tabs;
 const { TextArea } = Input;
 
 const AdminPage = () => {
+    const { user, isAuthenticated } = useAuth();
     const [activeTab, setActiveTab] = useState('overview');
     const [loading, setLoading] = useState(false);
+    const [apiError, setApiError] = useState(null);
 
     // Data states
     const [members, setMembers] = useState([]);
@@ -48,33 +52,20 @@ const AdminPage = () => {
 
     const loadAllData = async () => {
         setLoading(true);
+        setApiError(null);
         try {
-            // Load from API with timeout fallback to demo data
-            const fetchWithTimeout = async (url, timeout = 2000) => {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), timeout);
-                try {
-                    const response = await fetch(url, { signal: controller.signal });
-                    clearTimeout(timeoutId);
-                    return await response.json();
-                } catch (e) {
-                    clearTimeout(timeoutId);
-                    return null;
-                }
-            };
-
-            // Try to load real data
-            const [membersRes, newsRes, albumsRes, usersRes] = await Promise.all([
-                fetchWithTimeout('http://localhost:5001/api/members'),
-                fetchWithTimeout('http://localhost:5001/api/news'),
-                fetchWithTimeout('http://localhost:5001/api/albums'),
-                fetchWithTimeout('http://localhost:5001/api/users')
+            // Load data using API service (with auth token automatically)
+            const [membersRes, newsRes, albumsRes] = await Promise.all([
+                membersAPI.getAll({ limit: 100 }).catch(e => ({ data: { data: [] } })),
+                newsAPI.getAll({ limit: 100, published: 'all' }).catch(e => ({ data: { data: [] } })),
+                albumsAPI.getAll({ limit: 100 }).catch(e => ({ data: { data: [] } }))
             ]);
 
             // Members
-            if (membersRes?.data?.length > 0) {
-                setMembers(membersRes.data);
+            if (membersRes?.data?.data?.length > 0) {
+                setMembers(membersRes.data.data);
             } else {
+                // Demo data fallback
                 setMembers([
                     { _id: '1', fullName: 'Đặng Văn Tổ', gender: 'male', generation: 1, birthDate: '1850-01-01', deathDate: '1920-03-15', isDeceased: true },
                     { _id: '2', fullName: 'Đặng Văn Nhất', gender: 'male', generation: 2, birthDate: '1880-05-10', deathDate: '1950-08-20', isDeceased: true },
@@ -84,8 +75,8 @@ const AdminPage = () => {
             }
 
             // News
-            if (newsRes?.data?.length > 0) {
-                setNews(newsRes.data);
+            if (newsRes?.data?.data?.length > 0) {
+                setNews(newsRes.data.data);
             } else {
                 setNews([
                     { _id: '1', title: 'Lễ Giỗ Tổ 2024', category: 'gio_to', createdAt: '2024-01-15', viewCount: 156 },
@@ -94,34 +85,31 @@ const AdminPage = () => {
             }
 
             // Albums
-            if (albumsRes?.data?.length > 0) {
-                setAlbums(albumsRes.data);
+            if (albumsRes?.data?.data?.length > 0) {
+                setAlbums(albumsRes.data.data);
             } else {
                 setAlbums([
-                    { _id: '1', title: 'Từ đường họ Đặng', category: 'tu_duong', photoCount: 15 },
-                    { _id: '2', title: 'Họp mặt 2023', category: 'hop_mat', photoCount: 50 }
+                    { _id: '1', title: 'Từ đường họ Đặng', category: 'tu_duong', photos: [], isFeatured: true },
+                    { _id: '2', title: 'Họp mặt 2023', category: 'hop_mat', photos: [], isFeatured: false }
                 ]);
             }
 
-            // Users
-            if (usersRes?.data?.length > 0) {
-                setUsers(usersRes.data);
-            } else {
-                setUsers([
-                    { _id: '1', username: 'admin', email: 'admin@giapha.vn', fullName: 'Quản trị viên', role: 'admin_toc', isActive: true },
-                    { _id: '2', username: 'user1', email: 'user1@giapha.vn', fullName: 'Đặng Văn Minh', role: 'member', isActive: true }
-                ]);
-            }
+            // Demo users (no API for users list yet)
+            setUsers([
+                { _id: '1', username: 'admin', email: 'admin@giapha.vn', fullName: 'Quản trị viên', role: 'admin_toc', isActive: true },
+            ]);
 
             // Calculate stats
-            const allMembers = membersRes?.data || [];
             setStats({
-                totalMembers: allMembers.length || 4,
-                totalNews: newsRes?.data?.length || 2,
-                totalAlbums: albumsRes?.data?.length || 2,
-                totalUsers: usersRes?.data?.length || 2
+                totalMembers: membersRes?.data?.data?.length || members.length || 4,
+                totalNews: newsRes?.data?.data?.length || news.length || 2,
+                totalAlbums: albumsRes?.data?.data?.length || albums.length || 2,
+                totalUsers: 1
             });
 
+        } catch (error) {
+            console.error('Load data error:', error);
+            setApiError('Không thể tải dữ liệu. Vui lòng thử lại.');
         } finally {
             setLoading(false);
         }
@@ -130,19 +118,18 @@ const AdminPage = () => {
     // Member CRUD
     const handleMemberSubmit = async (values) => {
         try {
+            const data = {
+                ...values,
+                birthDate: values.birthDate ? values.birthDate.format('YYYY-MM-DD') : null,
+                deathDate: values.deathDate ? values.deathDate.format('YYYY-MM-DD') : null,
+                isDeceased: !!values.deathDate
+            };
+
             if (editingItem) {
-                await fetch(`http://localhost:5001/api/members/${editingItem._id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(values)
-                });
+                await membersAPI.update(editingItem._id, data);
                 message.success('Cập nhật thành viên thành công!');
             } else {
-                await fetch('http://localhost:5001/api/members', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(values)
-                });
+                await membersAPI.create(data);
                 message.success('Thêm thành viên thành công!');
             }
             setMemberModal(false);
@@ -150,39 +137,35 @@ const AdminPage = () => {
             setEditingItem(null);
             loadAllData();
         } catch (error) {
-            message.error('Có lỗi xảy ra!');
+            console.error('Member submit error:', error);
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra! Vui lòng kiểm tra quyền truy cập.');
         }
     };
 
     const handleDeleteMember = async (id) => {
         try {
-            await fetch(`http://localhost:5001/api/members/${id}`, { method: 'DELETE' });
+            await membersAPI.delete(id);
             message.success('Xóa thành viên thành công!');
             loadAllData();
         } catch (error) {
-            message.error('Có lỗi xảy ra!');
+            console.error('Delete member error:', error);
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra khi xóa!');
         }
     };
 
     // News CRUD
     const handleNewsSubmit = async (values) => {
         try {
-            const data = { ...values };
-            if (values.eventDate) data.eventDate = values.eventDate.format('YYYY-MM-DD');
+            const data = {
+                ...values,
+                eventDate: values.eventDate ? values.eventDate.format('YYYY-MM-DD') : null
+            };
 
             if (editingItem) {
-                await fetch(`http://localhost:5001/api/news/${editingItem._id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
+                await newsAPI.update(editingItem._id, data);
                 message.success('Cập nhật tin tức thành công!');
             } else {
-                await fetch('http://localhost:5001/api/news', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
+                await newsAPI.create(data);
                 message.success('Thêm tin tức thành công!');
             }
             setNewsModal(false);
@@ -190,17 +173,19 @@ const AdminPage = () => {
             setEditingItem(null);
             loadAllData();
         } catch (error) {
-            message.error('Có lỗi xảy ra!');
+            console.error('News submit error:', error);
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra! Vui lòng kiểm tra quyền truy cập.');
         }
     };
 
     const handleDeleteNews = async (id) => {
         try {
-            await fetch(`http://localhost:5001/api/news/${id}`, { method: 'DELETE' });
+            await newsAPI.delete(id);
             message.success('Xóa tin tức thành công!');
             loadAllData();
         } catch (error) {
-            message.error('Có lỗi xảy ra!');
+            console.error('Delete news error:', error);
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra khi xóa!');
         }
     };
 
@@ -208,18 +193,10 @@ const AdminPage = () => {
     const handleAlbumSubmit = async (values) => {
         try {
             if (editingItem) {
-                await fetch(`http://localhost:5001/api/albums/${editingItem._id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(values)
-                });
+                await albumsAPI.update(editingItem._id, values);
                 message.success('Cập nhật album thành công!');
             } else {
-                await fetch('http://localhost:5001/api/albums', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(values)
-                });
+                await albumsAPI.create(values);
                 message.success('Thêm album thành công!');
             }
             setAlbumModal(false);
@@ -227,17 +204,19 @@ const AdminPage = () => {
             setEditingItem(null);
             loadAllData();
         } catch (error) {
-            message.error('Có lỗi xảy ra!');
+            console.error('Album submit error:', error);
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra! Vui lòng kiểm tra quyền truy cập.');
         }
     };
 
     const handleDeleteAlbum = async (id) => {
         try {
-            await fetch(`http://localhost:5001/api/albums/${id}`, { method: 'DELETE' });
+            await albumsAPI.delete(id);
             message.success('Xóa album thành công!');
             loadAllData();
         } catch (error) {
-            message.error('Có lỗi xảy ra!');
+            console.error('Delete album error:', error);
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra khi xóa!');
         }
     };
 
@@ -245,18 +224,9 @@ const AdminPage = () => {
     const handleUserSubmit = async (values) => {
         try {
             if (editingItem) {
-                await fetch(`http://localhost:5001/api/users/${editingItem._id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(values)
-                });
-                message.success('Cập nhật người dùng thành công!');
+                message.info('Chức năng cập nhật người dùng đang được phát triển');
             } else {
-                await fetch('http://localhost:5001/api/auth/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(values)
-                });
+                await authAPI.register(values);
                 message.success('Thêm người dùng thành công!');
             }
             setUserModal(false);
@@ -264,7 +234,8 @@ const AdminPage = () => {
             setEditingItem(null);
             loadAllData();
         } catch (error) {
-            message.error('Có lỗi xảy ra!');
+            console.error('User submit error:', error);
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra!');
         }
     };
 
@@ -328,7 +299,7 @@ const AdminPage = () => {
             key: 'category',
             width: 100,
             render: (c) => {
-                const labels = { gio_to: 'Giỗ Tổ', dai_hoi: 'Đại hội', tin_tuc: 'Tin tức', thong_bao: 'Thông báo' };
+                const labels = { gio_to: 'Giỗ Tổ', dai_hoi: 'Đại hội', tin_tuc: 'Tin tức', thong_bao: 'Thông báo', cung_te: 'Cúng tế', khac: 'Khác' };
                 return <Tag>{labels[c] || c}</Tag>;
             }
         },
@@ -370,11 +341,25 @@ const AdminPage = () => {
             key: 'category',
             width: 100,
             render: (c) => {
-                const labels = { tu_duong: 'Từ đường', hop_mat: 'Họp mặt', gio_to: 'Giỗ Tổ', mo_phan: 'Mộ phần' };
+                const labels = { tu_duong: 'Từ đường', hop_mat: 'Họp mặt', gio_to: 'Giỗ Tổ', mo_phan: 'Mộ phần', dai_hoi: 'Đại hội', khac: 'Khác' };
                 return <Tag>{labels[c] || c}</Tag>;
             }
         },
-        { title: 'Số ảnh', dataIndex: 'photoCount', key: 'photoCount', width: 80, align: 'center' },
+        {
+            title: 'Số ảnh',
+            dataIndex: 'photos',
+            key: 'photoCount',
+            width: 80,
+            align: 'center',
+            render: (photos) => photos?.length || 0
+        },
+        {
+            title: 'Nổi bật',
+            dataIndex: 'isFeatured',
+            key: 'isFeatured',
+            width: 80,
+            render: (v) => v ? <Tag color="gold">Có</Tag> : <Tag>Không</Tag>
+        },
         {
             title: 'Thao tác',
             key: 'actions',
@@ -404,8 +389,8 @@ const AdminPage = () => {
             key: 'role',
             width: 120,
             render: (r) => {
-                const roles = { admin_toc: 'Admin', truong_chi: 'Trưởng chi', member: 'Thành viên' };
-                return <Tag color={r === 'admin_toc' ? 'red' : r === 'truong_chi' ? 'blue' : 'default'}>{roles[r] || r}</Tag>;
+                const roles = { admin_toc: 'Admin', chi_ho: 'Trưởng chi', thanh_vien: 'Thành viên' };
+                return <Tag color={r === 'admin_toc' ? 'red' : r === 'chi_ho' ? 'blue' : 'default'}>{roles[r] || r}</Tag>;
             }
         },
         {
@@ -429,11 +414,46 @@ const AdminPage = () => {
         }
     ];
 
+    // Check authentication
+    if (!isAuthenticated) {
+        return (
+            <div className="page-container">
+                <Alert
+                    type="warning"
+                    message="Yêu cầu đăng nhập"
+                    description="Bạn cần đăng nhập với tài khoản Admin để truy cập trang quản trị."
+                    showIcon
+                    style={{ maxWidth: 500, margin: '100px auto' }}
+                />
+            </div>
+        );
+    }
+
     return (
         <div className="page-container">
             <h1 className="page-title" style={{ marginBottom: 24 }}>
                 <DashboardOutlined style={{ color: '#D4AF37' }} /> Trang Quản Trị
+                <Button
+                    icon={<ReloadOutlined />}
+                    onClick={loadAllData}
+                    loading={loading}
+                    style={{ marginLeft: 16 }}
+                >
+                    Tải lại
+                </Button>
             </h1>
+
+            {apiError && (
+                <Alert type="error" message={apiError} style={{ marginBottom: 16 }} closable onClose={() => setApiError(null)} />
+            )}
+
+            {user && (
+                <Alert
+                    type="info"
+                    message={`Đăng nhập với: ${user.fullName} (${user.role === 'admin_toc' ? 'Admin' : user.role})`}
+                    style={{ marginBottom: 16 }}
+                />
+            )}
 
             <Tabs activeKey={activeTab} onChange={setActiveTab} type="card">
                 {/* Overview Tab */}
@@ -555,12 +575,12 @@ const AdminPage = () => {
                 <Form form={memberForm} layout="vertical" onFinish={handleMemberSubmit}>
                     <Row gutter={16}>
                         <Col span={12}>
-                            <Form.Item name="fullName" label="Họ và tên" rules={[{ required: true }]}>
+                            <Form.Item name="fullName" label="Họ và tên" rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}>
                                 <Input />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="gender" label="Giới tính" rules={[{ required: true }]}>
+                            <Form.Item name="gender" label="Giới tính" rules={[{ required: true, message: 'Vui lòng chọn giới tính' }]}>
                                 <Select>
                                     <Select.Option value="male">Nam</Select.Option>
                                     <Select.Option value="female">Nữ</Select.Option>
@@ -570,7 +590,7 @@ const AdminPage = () => {
                     </Row>
                     <Row gutter={16}>
                         <Col span={8}>
-                            <Form.Item name="generation" label="Đời thứ" rules={[{ required: true }]}>
+                            <Form.Item name="generation" label="Đời thứ" rules={[{ required: true, message: 'Vui lòng nhập đời' }]}>
                                 <InputNumber min={1} max={20} style={{ width: '100%' }} />
                             </Form.Item>
                         </Col>
@@ -606,17 +626,19 @@ const AdminPage = () => {
                 width={600}
             >
                 <Form form={newsForm} layout="vertical" onFinish={handleNewsSubmit}>
-                    <Form.Item name="title" label="Tiêu đề" rules={[{ required: true }]}>
+                    <Form.Item name="title" label="Tiêu đề" rules={[{ required: true, message: 'Vui lòng nhập tiêu đề' }]}>
                         <Input />
                     </Form.Item>
                     <Row gutter={16}>
                         <Col span={12}>
-                            <Form.Item name="category" label="Danh mục" rules={[{ required: true }]}>
+                            <Form.Item name="category" label="Danh mục" rules={[{ required: true, message: 'Vui lòng chọn danh mục' }]}>
                                 <Select>
                                     <Select.Option value="gio_to">Giỗ Tổ</Select.Option>
                                     <Select.Option value="dai_hoi">Đại hội</Select.Option>
+                                    <Select.Option value="cung_te">Cúng tế</Select.Option>
                                     <Select.Option value="tin_tuc">Tin tức</Select.Option>
                                     <Select.Option value="thong_bao">Thông báo</Select.Option>
+                                    <Select.Option value="khac">Khác</Select.Option>
                                 </Select>
                             </Form.Item>
                         </Col>
@@ -629,7 +651,7 @@ const AdminPage = () => {
                     <Form.Item name="excerpt" label="Tóm tắt">
                         <TextArea rows={2} />
                     </Form.Item>
-                    <Form.Item name="content" label="Nội dung" rules={[{ required: true }]}>
+                    <Form.Item name="content" label="Nội dung" rules={[{ required: true, message: 'Vui lòng nhập nội dung' }]}>
                         <TextArea rows={5} />
                     </Form.Item>
                     <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
@@ -650,20 +672,24 @@ const AdminPage = () => {
                 width={500}
             >
                 <Form form={albumForm} layout="vertical" onFinish={handleAlbumSubmit}>
-                    <Form.Item name="title" label="Tên album" rules={[{ required: true }]}>
+                    <Form.Item name="title" label="Tên album" rules={[{ required: true, message: 'Vui lòng nhập tên album' }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="category" label="Danh mục" rules={[{ required: true }]}>
+                    <Form.Item name="category" label="Danh mục" rules={[{ required: true, message: 'Vui lòng chọn danh mục' }]}>
                         <Select>
                             <Select.Option value="tu_duong">Từ đường</Select.Option>
                             <Select.Option value="hop_mat">Họp mặt</Select.Option>
                             <Select.Option value="gio_to">Giỗ Tổ</Select.Option>
                             <Select.Option value="mo_phan">Mộ phần</Select.Option>
+                            <Select.Option value="dai_hoi">Đại hội</Select.Option>
                             <Select.Option value="khac">Khác</Select.Option>
                         </Select>
                     </Form.Item>
                     <Form.Item name="description" label="Mô tả">
                         <TextArea rows={3} />
+                    </Form.Item>
+                    <Form.Item name="isFeatured" label="Album nổi bật" valuePropName="checked">
+                        <Switch />
                     </Form.Item>
                     <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
                         <Space>
@@ -683,7 +709,7 @@ const AdminPage = () => {
                 width={500}
             >
                 <Form form={userForm} layout="vertical" onFinish={handleUserSubmit}>
-                    <Form.Item name="username" label="Tên đăng nhập" rules={[{ required: true }]}>
+                    <Form.Item name="username" label="Tên đăng nhập" rules={[{ required: true, min: 3 }]}>
                         <Input disabled={!!editingItem} />
                     </Form.Item>
                     {!editingItem && (
@@ -694,21 +720,14 @@ const AdminPage = () => {
                     <Form.Item name="fullName" label="Họ và tên" rules={[{ required: true }]}>
                         <Input />
                     </Form.Item>
-                    <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email' }]}>
+                    <Form.Item name="email" label="Email" rules={[{ type: 'email' }]}>
                         <Input />
                     </Form.Item>
                     <Form.Item name="role" label="Vai trò" rules={[{ required: true }]}>
                         <Select>
                             <Select.Option value="admin_toc">Admin (Quản trị viên)</Select.Option>
-                            <Select.Option value="truong_chi">Trưởng chi</Select.Option>
-                            <Select.Option value="member">Thành viên</Select.Option>
-                            <Select.Option value="guest">Khách</Select.Option>
-                        </Select>
-                    </Form.Item>
-                    <Form.Item name="isActive" label="Trạng thái" valuePropName="checked" initialValue={true}>
-                        <Select defaultValue={true}>
-                            <Select.Option value={true}>Hoạt động</Select.Option>
-                            <Select.Option value={false}>Khóa</Select.Option>
+                            <Select.Option value="chi_ho">Trưởng chi</Select.Option>
+                            <Select.Option value="thanh_vien">Thành viên</Select.Option>
                         </Select>
                     </Form.Item>
                     <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>

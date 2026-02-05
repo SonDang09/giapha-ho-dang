@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Table, Card, Button, Space, Input, Tag, Avatar, Modal, Form, Select, DatePicker, message, Popconfirm, Dropdown } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, UserOutlined, ManOutlined, WomanOutlined, DownloadOutlined, FilePdfOutlined, FileExcelOutlined, FileWordOutlined } from '@ant-design/icons';
+import { Table, Card, Button, Space, Input, Tag, Avatar, Modal, Form, Select, DatePicker, message, Popconfirm, Dropdown, Alert } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, UserOutlined, ManOutlined, WomanOutlined, DownloadOutlined, FilePdfOutlined, FileExcelOutlined, FileWordOutlined, ReloadOutlined } from '@ant-design/icons';
 import { membersAPI } from '../../api';
 import { useAuth } from '../../context/AuthContext';
 import { exportToPDF, exportToExcel, exportToWord } from '../../utils/export';
@@ -17,6 +17,7 @@ const MembersPage = () => {
     const [searchText, setSearchText] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [editingMember, setEditingMember] = useState(null);
+    const [apiConnected, setApiConnected] = useState(false);
     const [form] = Form.useForm();
 
     useEffect(() => {
@@ -26,29 +27,30 @@ const MembersPage = () => {
     const loadMembers = async () => {
         setLoading(true);
         try {
-            // Try API with quick timeout
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            // Use API service with auth token
+            const response = await membersAPI.getAll({
+                page: pagination.page,
+                limit: pagination.limit,
+                search: searchText || undefined
+            });
 
-            try {
-                const response = await fetch(`http://localhost:5001/api/demo/members`, {
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-                const data = await response.json();
-                if (data.data) {
-                    setMembers(data.data);
-                    return;
-                }
-            } catch (fetchError) {
-                clearTimeout(timeoutId);
+            if (response?.data?.data?.length > 0) {
+                setMembers(response.data.data);
+                setPagination(prev => ({
+                    ...prev,
+                    total: response.data.pagination?.total || response.data.data.length
+                }));
+                setApiConnected(true);
+                return;
             }
-
-            // Fallback to hardcoded demo data
-            setMembers(getDemoMembers());
-        } finally {
-            setLoading(false);
+        } catch (error) {
+            console.log('API not available, using demo data');
+            setApiConnected(false);
         }
+
+        // Fallback to demo data
+        setMembers(getDemoMembers());
+        setLoading(false);
     };
 
     const getDemoMembers = () => [
@@ -157,7 +159,7 @@ const MembersPage = () => {
             message.success('Đã xóa thành viên');
             loadMembers();
         } catch (error) {
-            message.error('Không thể xóa thành viên');
+            message.error(error.response?.data?.message || 'Không thể xóa thành viên');
         }
     };
 
@@ -165,8 +167,9 @@ const MembersPage = () => {
         try {
             const data = {
                 ...values,
-                birthDate: values.birthDate?.toISOString(),
-                deathDate: values.deathDate?.toISOString()
+                birthDate: values.birthDate?.format('YYYY-MM-DD'),
+                deathDate: values.deathDate?.format('YYYY-MM-DD'),
+                isDeceased: !!values.deathDate
             };
 
             if (editingMember) {
@@ -182,18 +185,31 @@ const MembersPage = () => {
             setEditingMember(null);
             loadMembers();
         } catch (error) {
-            message.error('Có lỗi xảy ra');
+            console.error('Submit error:', error);
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra. Vui lòng kiểm tra quyền truy cập.');
         }
     };
 
     return (
         <div className="page-container">
+            {!apiConnected && (
+                <Alert
+                    type="info"
+                    message="Đang hiển thị dữ liệu mẫu. Kết nối backend để xem dữ liệu thực."
+                    style={{ marginBottom: 16 }}
+                    closable
+                />
+            )}
+
             <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
                 <h1 className="page-title" style={{ margin: 0 }}>
                     <UserOutlined style={{ color: '#D4AF37' }} /> Danh Sách Thành Viên
                 </h1>
 
                 <Space wrap>
+                    <Button icon={<ReloadOutlined />} onClick={loadMembers} loading={loading}>
+                        Tải lại
+                    </Button>
                     <Search
                         placeholder="Tìm kiếm..."
                         allowClear
@@ -309,11 +325,11 @@ const MembersPage = () => {
 
                     <Space style={{ width: '100%' }} size="large">
                         <Form.Item name="birthDate" label="Ngày sinh" style={{ flex: 1 }}>
-                            <DatePicker style={{ width: '100%' }} placeholder="Chọn ngày sinh" />
+                            <DatePicker style={{ width: '100%' }} placeholder="Chọn ngày sinh" format="DD/MM/YYYY" />
                         </Form.Item>
 
                         <Form.Item name="deathDate" label="Ngày mất" style={{ flex: 1 }}>
-                            <DatePicker style={{ width: '100%' }} placeholder="Chọn ngày mất (nếu có)" />
+                            <DatePicker style={{ width: '100%' }} placeholder="Chọn ngày mất (nếu có)" format="DD/MM/YYYY" />
                         </Form.Item>
                     </Space>
 

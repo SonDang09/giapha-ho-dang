@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, Spin, Button, Space } from 'antd';
 import { FullscreenOutlined, ReloadOutlined, ZoomInOutlined, ZoomOutOutlined } from '@ant-design/icons';
 import FamilyTreeView from '../../components/FamilyTree/FamilyTreeView';
-import { demoAPI, membersAPI } from '../../api';
+import { membersAPI } from '../../api';
 
 const TreePage = () => {
     const [treeData, setTreeData] = useState(null);
@@ -15,31 +15,21 @@ const TreePage = () => {
     const loadTreeData = async () => {
         setLoading(true);
         try {
-            // Use demo data directly for fast loading
-            // In production, this would try real API with timeout
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            // Use API service
+            const response = await membersAPI.getTree();
 
-            try {
-                const response = await fetch('http://localhost:5001/api/demo/tree', {
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-                const data = await response.json();
-                if (data.data) {
-                    setTreeData(data.data);
-                }
-            } catch (fetchError) {
-                clearTimeout(timeoutId);
-                // Use hardcoded demo data as fallback
-                setTreeData(getDemoTreeData());
+            if (response?.data?.data) {
+                setTreeData(response.data.data);
+                setLoading(false);
+                return;
             }
         } catch (error) {
-            console.error('Failed to load tree data');
-            setTreeData(getDemoTreeData());
-        } finally {
-            setLoading(false);
+            console.log('API not available, using demo data');
         }
+
+        // Fallback to demo data
+        setTreeData(getDemoTreeData());
+        setLoading(false);
     };
 
     // Fallback demo data

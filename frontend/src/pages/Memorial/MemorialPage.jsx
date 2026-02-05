@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Card, Row, Col, Avatar, Spin, Empty, List, Form, Input, Button, message, Divider } from 'antd';
 import { UserOutlined, HeartOutlined, CalendarOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import MemorialCandle from '../../components/Memorial/MemorialCandle';
-import { memorialsAPI, demoAPI } from '../../api';
+import { memorialsAPI, membersAPI } from '../../api';
 import dayjs from 'dayjs';
 
 const { TextArea } = Input;
@@ -28,82 +28,66 @@ const MemorialPage = () => {
     const loadMemorial = async () => {
         setLoading(true);
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            // Use API service
+            const response = await memorialsAPI.getByMemberId(memberId);
 
-            try {
-                const response = await fetch(`http://localhost:5001/api/memorials/member/${memberId}`, {
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-                const data = await response.json();
-                if (data.data) {
-                    setMemorial(data.data);
-                    setMember(data.data.memberId);
-                    setCondolences(data.data.condolences || []);
-                    return;
-                }
-            } catch (fetchError) {
-                clearTimeout(timeoutId);
+            if (response?.data?.data) {
+                setMemorial(response.data.data);
+                setMember(response.data.data.memberId);
+                setCondolences(response.data.data.condolences || []);
+                setLoading(false);
+                return;
             }
-
-            // Demo data fallback - use memberId to get correct data
-            const demoMemberData = {
-                '1': { fullName: 'Đặng Văn Tổ', birthDate: '1850-01-01', deathDate: '1920-03-15', generation: 1, biography: 'Người sáng lập dòng họ Đặng tại Đà Nẵng. Cụ là một người có công lớn trong việc khai phá và phát triển vùng đất này.' },
-                '2': { fullName: 'Đặng Văn Nhất', birthDate: '1880-05-10', deathDate: '1950-08-20', generation: 2, biography: 'Con trai trưởng của cụ Tổ. Tiếp nối sự nghiệp của cha, phát triển dòng họ.' },
-                '3': { fullName: 'Đặng Văn Nhì', birthDate: '1885-07-15', deathDate: '1960-12-25', generation: 2, biography: 'Con trai thứ của cụ Tổ. Có công trong việc mở mang ruộng vườn.' },
-                '4': { fullName: 'Đặng Văn An', birthDate: '1910-03-20', deathDate: '1980-11-05', generation: 3, biography: 'Cháu đích tôn. Là người có học thức cao trong dòng họ.' },
-                '5': { fullName: 'Đặng Thị Bình', birthDate: '1915-09-05', deathDate: '2000-11-10', generation: 3, biography: 'Người phụ nữ mẫu mực, chăm lo cho gia đình và dòng họ.' },
-                '6': { fullName: 'Đặng Văn Cường', birthDate: '1920-06-12', deathDate: '1995-04-28', generation: 3, biography: 'Tham gia cách mạng, có công với đất nước.' }
-            };
-
-            const memberData = demoMemberData[memberId] || demoMemberData['1'];
-            setMember({ _id: memberId, ...memberData });
-            setMemorial({ incenseCount: 358 });
-            setCondolences([
-                { name: 'Đặng Văn Minh', message: 'Con cháu luôn tưởng nhớ công ơn của cụ.', createdAt: '2024-01-15' },
-                { name: 'Đặng Thị Hương', message: 'Cầu mong cụ thanh thản nơi cõi vĩnh hằng.', createdAt: '2024-01-10' }
-            ]);
-        } finally {
-            setLoading(false);
+        } catch (error) {
+            console.log('API not available, using demo data');
         }
+
+        // Demo data fallback - use memberId to get correct data
+        const demoMemberData = {
+            '1': { fullName: 'Đặng Văn Tổ', birthDate: '1850-01-01', deathDate: '1920-03-15', generation: 1, biography: 'Người sáng lập dòng họ Đặng tại Đà Nẵng. Cụ là một người có công lớn trong việc khai phá và phát triển vùng đất này.' },
+            '2': { fullName: 'Đặng Văn Nhất', birthDate: '1880-05-10', deathDate: '1950-08-20', generation: 2, biography: 'Con trai trưởng của cụ Tổ. Tiếp nối sự nghiệp của cha, phát triển dòng họ.' },
+            '3': { fullName: 'Đặng Văn Nhì', birthDate: '1885-07-15', deathDate: '1960-12-25', generation: 2, biography: 'Con trai thứ của cụ Tổ. Có công trong việc mở mang ruộng vườn.' },
+            '4': { fullName: 'Đặng Văn An', birthDate: '1910-03-20', deathDate: '1980-11-05', generation: 3, biography: 'Cháu đích tôn. Là người có học thức cao trong dòng họ.' },
+            '5': { fullName: 'Đặng Thị Bình', birthDate: '1915-09-05', deathDate: '2000-11-10', generation: 3, biography: 'Người phụ nữ mẫu mực, chăm lo cho gia đình và dòng họ.' },
+            '6': { fullName: 'Đặng Văn Cường', birthDate: '1920-06-12', deathDate: '1995-04-28', generation: 3, biography: 'Tham gia cách mạng, có công với đất nước.' }
+        };
+
+        const memberData = demoMemberData[memberId] || demoMemberData['1'];
+        setMember({ _id: memberId, ...memberData });
+        setMemorial({ incenseCount: 358 });
+        setCondolences([
+            { name: 'Đặng Văn Minh', message: 'Con cháu luôn tưởng nhớ công ơn của cụ.', createdAt: '2024-01-15' },
+            { name: 'Đặng Thị Hương', message: 'Cầu mong cụ thanh thản nơi cõi vĩnh hằng.', createdAt: '2024-01-10' }
+        ]);
+        setLoading(false);
     };
 
     const loadAllMemorials = async () => {
         setLoading(true);
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            // Use API service
+            const response = await membersAPI.getAll({ limit: 100 });
 
-            try {
-                const response = await fetch('http://localhost:5001/api/demo/members', {
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-                const data = await response.json();
-                if (data.data) {
-                    const deceased = data.data.filter(m => m.isDeceased);
-                    setCondolences(deceased); // Reuse condolences state for deceased members
-                    return;
-                }
-            } catch (fetchError) {
-                clearTimeout(timeoutId);
+            if (response?.data?.data) {
+                const deceased = response.data.data.filter(m => m.isDeceased);
+                setCondolences(deceased); // Reuse condolences state for deceased members
+                setLoading(false);
+                return;
             }
-
-            // Demo deceased members
-            setCondolences([
-                { _id: '1', fullName: 'Đặng Văn Tổ', generation: 1, birthDate: '1850-01-01', deathDate: '1920-03-15', isDeceased: true },
-                { _id: '2', fullName: 'Đặng Văn Nhất', generation: 2, birthDate: '1880-05-10', deathDate: '1950-08-20', isDeceased: true },
-                { _id: '3', fullName: 'Đặng Văn Nhì', generation: 2, birthDate: '1885-07-15', deathDate: '1960-12-25', isDeceased: true },
-                { _id: '4', fullName: 'Đặng Văn An', generation: 3, birthDate: '1910-03-20', deathDate: '1980-11-05', isDeceased: true },
-                { _id: '5', fullName: 'Đặng Thị Bình', generation: 3, birthDate: '1915-09-05', deathDate: '2000-11-10', isDeceased: true },
-                { _id: '6', fullName: 'Đặng Văn Cường', generation: 3, birthDate: '1920-06-12', deathDate: '1995-04-28', isDeceased: true }
-            ]);
         } catch (error) {
-            console.error('Error loading memorials');
-        } finally {
-            setLoading(false);
+            console.log('API not available, using demo data');
         }
+
+        // Demo deceased members
+        setCondolences([
+            { _id: '1', fullName: 'Đặng Văn Tổ', generation: 1, birthDate: '1850-01-01', deathDate: '1920-03-15', isDeceased: true },
+            { _id: '2', fullName: 'Đặng Văn Nhất', generation: 2, birthDate: '1880-05-10', deathDate: '1950-08-20', isDeceased: true },
+            { _id: '3', fullName: 'Đặng Văn Nhì', generation: 2, birthDate: '1885-07-15', deathDate: '1960-12-25', isDeceased: true },
+            { _id: '4', fullName: 'Đặng Văn An', generation: 3, birthDate: '1910-03-20', deathDate: '1980-11-05', isDeceased: true },
+            { _id: '5', fullName: 'Đặng Thị Bình', generation: 3, birthDate: '1915-09-05', deathDate: '2000-11-10', isDeceased: true },
+            { _id: '6', fullName: 'Đặng Văn Cường', generation: 3, birthDate: '1920-06-12', deathDate: '1995-04-28', isDeceased: true }
+        ]);
+        setLoading(false);
     };
 
     const handleLightIncense = async () => {

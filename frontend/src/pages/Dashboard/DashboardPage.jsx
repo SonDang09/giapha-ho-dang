@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Row, Col, Card, Statistic, Tag, Table, Progress, Spin } from 'antd';
+import { Row, Col, Card, Statistic, Tag, Table, Progress, Spin, Button } from 'antd';
 import {
     TeamOutlined,
     ManOutlined,
@@ -7,8 +7,10 @@ import {
     CalendarOutlined,
     RiseOutlined,
     HeartOutlined,
-    TrophyOutlined
+    TrophyOutlined,
+    ReloadOutlined
 } from '@ant-design/icons';
+import { membersAPI } from '../../api';
 
 const DashboardPage = () => {
     const [loading, setLoading] = useState(true);
@@ -30,40 +32,33 @@ const DashboardPage = () => {
     const loadStats = async () => {
         setLoading(true);
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            // Use API service
+            const response = await membersAPI.getAll({ limit: 1000 });
 
-            try {
-                const response = await fetch('http://localhost:5001/api/demo/members', {
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-                const data = await response.json();
-                if (data.data) {
-                    calculateStats(data.data);
-                    return;
-                }
-            } catch (fetchError) {
-                clearTimeout(timeoutId);
+            if (response?.data?.data) {
+                calculateStats(response.data.data);
+                setLoading(false);
+                return;
             }
-
-            // Demo data
-            const demoMembers = [
-                { _id: '1', fullName: 'Đặng Văn Tổ', gender: 'male', generation: 1, birthDate: '1850-01-01', deathDate: '1920-03-15', isDeceased: true },
-                { _id: '2', fullName: 'Đặng Văn Nhất', gender: 'male', generation: 2, birthDate: '1880-05-10', deathDate: '1950-08-20', isDeceased: true },
-                { _id: '3', fullName: 'Đặng Văn Nhì', gender: 'male', generation: 2, birthDate: '1885-07-15', deathDate: '1960-12-25', isDeceased: true },
-                { _id: '4', fullName: 'Đặng Văn An', gender: 'male', generation: 3, birthDate: '1910-03-20', deathDate: '1980-11-05', isDeceased: true },
-                { _id: '5', fullName: 'Đặng Thị Bình', gender: 'female', generation: 3, birthDate: '1915-09-05', deathDate: '2000-11-10', isDeceased: true },
-                { _id: '6', fullName: 'Đặng Văn Cường', gender: 'male', generation: 3, birthDate: '1920-06-12', deathDate: '1995-04-28', isDeceased: true },
-                { _id: '7', fullName: 'Đặng Văn Minh', gender: 'male', generation: 4, birthDate: '1945-11-30', isDeceased: false },
-                { _id: '8', fullName: 'Đặng Thị Hương', gender: 'female', generation: 4, birthDate: '1948-04-18', isDeceased: false },
-                { _id: '9', fullName: 'Đặng Văn Đức', gender: 'male', generation: 4, birthDate: '1950-08-25', isDeceased: false },
-                { _id: '10', fullName: 'Đặng Văn Em', gender: 'male', generation: 5, birthDate: '1980-02-14', isDeceased: false },
-            ];
-            calculateStats(demoMembers);
-        } finally {
-            setLoading(false);
+        } catch (error) {
+            console.log('API not available, using demo data');
         }
+
+        // Demo data
+        const demoMembers = [
+            { _id: '1', fullName: 'Đặng Văn Tổ', gender: 'male', generation: 1, birthDate: '1850-01-01', deathDate: '1920-03-15', isDeceased: true },
+            { _id: '2', fullName: 'Đặng Văn Nhất', gender: 'male', generation: 2, birthDate: '1880-05-10', deathDate: '1950-08-20', isDeceased: true },
+            { _id: '3', fullName: 'Đặng Văn Nhì', gender: 'male', generation: 2, birthDate: '1885-07-15', deathDate: '1960-12-25', isDeceased: true },
+            { _id: '4', fullName: 'Đặng Văn An', gender: 'male', generation: 3, birthDate: '1910-03-20', deathDate: '1980-11-05', isDeceased: true },
+            { _id: '5', fullName: 'Đặng Thị Bình', gender: 'female', generation: 3, birthDate: '1915-09-05', deathDate: '2000-11-10', isDeceased: true },
+            { _id: '6', fullName: 'Đặng Văn Cường', gender: 'male', generation: 3, birthDate: '1920-06-12', deathDate: '1995-04-28', isDeceased: true },
+            { _id: '7', fullName: 'Đặng Văn Minh', gender: 'male', generation: 4, birthDate: '1945-11-30', isDeceased: false },
+            { _id: '8', fullName: 'Đặng Thị Hương', gender: 'female', generation: 4, birthDate: '1948-04-18', isDeceased: false },
+            { _id: '9', fullName: 'Đặng Văn Đức', gender: 'male', generation: 4, birthDate: '1950-08-25', isDeceased: false },
+            { _id: '10', fullName: 'Đặng Văn Em', gender: 'male', generation: 5, birthDate: '1980-02-14', isDeceased: false },
+        ];
+        calculateStats(demoMembers);
+        setLoading(false);
     };
 
     const calculateStats = (members) => {
@@ -128,9 +123,14 @@ const DashboardPage = () => {
 
     return (
         <div className="page-container">
-            <h1 className="page-title">
-                <RiseOutlined style={{ color: '#D4AF37' }} /> Thống Kê Dòng Họ
-            </h1>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                <h1 className="page-title" style={{ margin: 0 }}>
+                    <RiseOutlined style={{ color: '#D4AF37' }} /> Thống Kê Dòng Họ
+                </h1>
+                <Button icon={<ReloadOutlined />} onClick={loadStats} loading={loading}>
+                    Tải lại
+                </Button>
+            </div>
 
             {/* Main Stats */}
             <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>

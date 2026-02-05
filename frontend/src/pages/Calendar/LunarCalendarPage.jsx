@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Row, Col, Card, Calendar, Badge, List, Avatar, Tag, Spin, Empty, Tooltip } from 'antd';
-import { CalendarOutlined, BellOutlined, HeartOutlined } from '@ant-design/icons';
+import { Row, Col, Card, Calendar, Badge, List, Avatar, Tag, Spin, Empty, Tooltip, Button } from 'antd';
+import { CalendarOutlined, BellOutlined, HeartOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
+import { membersAPI } from '../../api';
 
 const LunarCalendarPage = () => {
     const [loading, setLoading] = useState(true);
@@ -16,35 +17,28 @@ const LunarCalendarPage = () => {
     const loadAnniversaries = async () => {
         setLoading(true);
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            // Use API service
+            const response = await membersAPI.getAnniversaries();
 
-            try {
-                const response = await fetch('http://localhost:5001/api/demo/anniversaries', {
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-                const data = await response.json();
-                if (data.data) {
-                    setAnniversaries(data.data);
-                    return;
-                }
-            } catch (fetchError) {
-                clearTimeout(timeoutId);
+            if (response?.data?.data) {
+                setAnniversaries(response.data.data);
+                setLoading(false);
+                return;
             }
-
-            // Demo data with lunar dates
-            setAnniversaries([
-                { _id: '1', fullName: 'Đặng Văn Tổ', generation: 1, deathDate: '1920-03-15', anniversaryDate: { lunarDay: 15, lunarMonth: 2 } },
-                { _id: '2', fullName: 'Đặng Văn Nhất', generation: 2, deathDate: '1950-08-20', anniversaryDate: { lunarDay: 8, lunarMonth: 7 } },
-                { _id: '3', fullName: 'Đặng Văn Nhì', generation: 2, deathDate: '1960-12-25', anniversaryDate: { lunarDay: 25, lunarMonth: 11 } },
-                { _id: '4', fullName: 'Đặng Văn An', generation: 3, deathDate: '1980-11-05', anniversaryDate: { lunarDay: 5, lunarMonth: 10 } },
-                { _id: '5', fullName: 'Đặng Thị Bình', generation: 3, deathDate: '2000-11-10', anniversaryDate: { lunarDay: 10, lunarMonth: 10 } },
-                { _id: '6', fullName: 'Đặng Văn Cường', generation: 3, deathDate: '1995-04-28', anniversaryDate: { lunarDay: 28, lunarMonth: 3 } }
-            ]);
-        } finally {
-            setLoading(false);
+        } catch (error) {
+            console.log('API not available, using demo data');
         }
+
+        // Demo data with lunar dates
+        setAnniversaries([
+            { _id: '1', fullName: 'Đặng Văn Tổ', generation: 1, deathDate: '1920-03-15', anniversaryDate: { lunarDay: 15, lunarMonth: 2 } },
+            { _id: '2', fullName: 'Đặng Văn Nhất', generation: 2, deathDate: '1950-08-20', anniversaryDate: { lunarDay: 8, lunarMonth: 7 } },
+            { _id: '3', fullName: 'Đặng Văn Nhì', generation: 2, deathDate: '1960-12-25', anniversaryDate: { lunarDay: 25, lunarMonth: 11 } },
+            { _id: '4', fullName: 'Đặng Văn An', generation: 3, deathDate: '1980-11-05', anniversaryDate: { lunarDay: 5, lunarMonth: 10 } },
+            { _id: '5', fullName: 'Đặng Thị Bình', generation: 3, deathDate: '2000-11-10', anniversaryDate: { lunarDay: 10, lunarMonth: 10 } },
+            { _id: '6', fullName: 'Đặng Văn Cường', generation: 3, deathDate: '1995-04-28', anniversaryDate: { lunarDay: 28, lunarMonth: 3 } }
+        ]);
+        setLoading(false);
     };
 
     // Get anniversaries for a specific month
@@ -128,9 +122,14 @@ const LunarCalendarPage = () => {
 
     return (
         <div className="page-container">
-            <h1 className="page-title">
-                <CalendarOutlined style={{ color: '#D4AF37' }} /> Lịch Ngày Giỗ Âm Lịch
-            </h1>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                <h1 className="page-title" style={{ margin: 0 }}>
+                    <CalendarOutlined style={{ color: '#D4AF37' }} /> Lịch Ngày Giỗ Âm Lịch
+                </h1>
+                <Button icon={<ReloadOutlined />} onClick={loadAnniversaries} loading={loading}>
+                    Tải lại
+                </Button>
+            </div>
 
             <Row gutter={[24, 24]}>
                 {/* Upcoming Anniversaries */}

@@ -11,7 +11,7 @@ import {
     TeamOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { demoAPI } from '../../api';
+import { membersAPI, newsAPI, albumsAPI } from '../../api';
 
 const HomePage = () => {
     const [loading, setLoading] = useState(true);
@@ -25,39 +25,43 @@ const HomePage = () => {
 
     const loadData = async () => {
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            // Load data from API service
+            const loadAnniversaries = membersAPI.getAnniversaries().catch(() => null);
+            const loadNews = newsAPI.getLatest().catch(() => null);
+            const loadAlbums = albumsAPI.getFeatured().catch(() => null);
 
-            try {
-                const [annRes, newsRes, albumRes] = await Promise.all([
-                    fetch('http://localhost:5001/api/demo/anniversaries', { signal: controller.signal }),
-                    fetch('http://localhost:5001/api/demo/news', { signal: controller.signal }),
-                    fetch('http://localhost:5001/api/demo/albums', { signal: controller.signal })
-                ]);
-                clearTimeout(timeoutId);
+            const [annRes, newsRes, albumRes] = await Promise.all([
+                loadAnniversaries,
+                loadNews,
+                loadAlbums
+            ]);
 
-                const [annData, newsData, albumData] = await Promise.all([
-                    annRes.json(), newsRes.json(), albumRes.json()
-                ]);
-
-                setAnniversaries(annData.data || []);
-                setNews(newsData.data || []);
-                setAlbums(albumData.data || []);
-            } catch (fetchError) {
-                clearTimeout(timeoutId);
+            if (annRes?.data?.data) {
+                setAnniversaries(annRes.data.data);
+            } else {
                 // Use embedded demo data
                 setAnniversaries([
                     { _id: 'ann-1', fullName: 'Đặng Văn Tổ', generation: 1, anniversaryDate: { lunarDay: 15, lunarMonth: 2 } },
                     { _id: 'ann-2', fullName: 'Đặng Văn Nhất', generation: 2, anniversaryDate: { lunarDay: 8, lunarMonth: 2 } },
                     { _id: 'ann-3', fullName: 'Đặng Văn An', generation: 3, anniversaryDate: { lunarDay: 20, lunarMonth: 2 } }
                 ]);
+            }
+
+            if (newsRes?.data?.data) {
+                setNews(newsRes.data.data);
+            } else {
                 setNews([
                     { _id: 'news-1', title: 'Thông báo: Lễ Giỗ Tổ họ Đặng năm 2024', category: 'gio_to', eventDate: '2024-03-15' },
                     { _id: 'news-2', title: 'Đại hội họ Đặng Đà Nẵng lần thứ X', category: 'dai_hoi', eventDate: '2024-06-20' }
                 ]);
+            }
+
+            if (albumRes?.data?.data) {
+                setAlbums(albumRes.data.data);
+            } else {
                 setAlbums([
-                    { _id: 'album-1', title: 'Từ đường họ Đặng', category: 'tu_duong', photoCount: 15 },
-                    { _id: 'album-2', title: 'Họp mặt họ Đặng 2023', category: 'hop_mat', photoCount: 50 }
+                    { _id: 'album-1', title: 'Từ đường họ Đặng', category: 'tu_duong', photos: [] },
+                    { _id: 'album-2', title: 'Họp mặt họ Đặng 2023', category: 'hop_mat', photos: [] }
                 ]);
             }
         } catch (error) {

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Row, Col, Card, Tag, Empty, Spin, Button, Modal, Form, Input, Select, Upload, Image, message } from 'antd';
-import { PictureOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
+import { Row, Col, Card, Tag, Empty, Spin, Button, Modal, Form, Input, Select, Upload, Image, message, Alert } from 'antd';
+import { PictureOutlined, PlusOutlined, UploadOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useParams, Link } from 'react-router-dom';
-import { albumsAPI, demoAPI } from '../../api';
+import { albumsAPI } from '../../api';
 import { useAuth } from '../../context/AuthContext';
 
 const AlbumsPage = () => {
@@ -12,6 +12,7 @@ const AlbumsPage = () => {
     const [albums, setAlbums] = useState([]);
     const [selectedAlbum, setSelectedAlbum] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const [apiConnected, setApiConnected] = useState(false);
     const [form] = Form.useForm();
 
     useEffect(() => {
@@ -25,93 +26,96 @@ const AlbumsPage = () => {
     const loadAlbums = async () => {
         setLoading(true);
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            // Use API service with auth token
+            const response = await albumsAPI.getAll({ limit: 50 });
 
-            try {
-                const response = await fetch('http://localhost:5001/api/demo/albums', {
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-                const data = await response.json();
-                if (data.data) {
-                    setAlbums(data.data);
-                    return;
-                }
-            } catch (fetchError) {
-                clearTimeout(timeoutId);
+            if (response?.data?.data?.length > 0) {
+                setAlbums(response.data.data);
+                setApiConnected(true);
+                setLoading(false);
+                return;
             }
-
-            // Fallback demo data
-            setAlbums([
-                { _id: 'album-1', title: 'Từ đường họ Đặng', category: 'tu_duong', photoCount: 15, isFeatured: true },
-                { _id: 'album-2', title: 'Họp mặt họ Đặng 2023', category: 'hop_mat', photoCount: 50, isFeatured: true },
-                { _id: 'album-3', title: 'Mộ phần các cụ', category: 'mo_phan', photoCount: 20, isFeatured: false }
-            ]);
-        } finally {
-            setLoading(false);
+        } catch (error) {
+            console.log('API not available, using demo data');
+            setApiConnected(false);
         }
+
+        // Fallback demo data
+        setAlbums([
+            { _id: 'album-1', title: 'Từ đường họ Đặng', category: 'tu_duong', photos: [], isFeatured: true },
+            { _id: 'album-2', title: 'Họp mặt họ Đặng 2023', category: 'hop_mat', photos: [], isFeatured: true },
+            { _id: 'album-3', title: 'Mộ phần các cụ', category: 'mo_phan', photos: [], isFeatured: false }
+        ]);
+        setLoading(false);
     };
 
     const loadAlbumDetail = async () => {
         setLoading(true);
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            // Use API service
+            const response = await albumsAPI.getById(id);
 
-            try {
-                const response = await fetch(`http://localhost:5001/api/albums/${id}`, {
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-                const data = await response.json();
-                if (data.data) {
-                    setSelectedAlbum(data.data);
-                    return;
-                }
-            } catch (fetchError) {
-                clearTimeout(timeoutId);
+            if (response?.data?.data) {
+                setSelectedAlbum(response.data.data);
+                setApiConnected(true);
+                setLoading(false);
+                return;
             }
+        } catch (error) {
+            console.log('API not available, using demo data');
+            setApiConnected(false);
+        }
 
-            // Demo - use id to find matching demo data
-            const demoAlbumData = {
-                'album-1': {
-                    title: 'Từ đường họ Đặng',
-                    category: 'tu_duong',
-                    description: 'Hình ảnh Từ đường họ Đặng tại Đà Nẵng - nơi thờ cúng tổ tiên.',
-                    photos: [
-                        { url: 'https://via.placeholder.com/400x300/228B22/ffffff?text=Tu+Duong+1', caption: 'Mặt tiền Từ đường' },
-                        { url: 'https://via.placeholder.com/400x300/D4AF37/ffffff?text=Tu+Duong+2', caption: 'Bàn thờ chính điện' },
-                        { url: 'https://via.placeholder.com/400x300/1a6b1a/ffffff?text=Tu+Duong+3', caption: 'Khu vực sân trước' },
-                        { url: 'https://via.placeholder.com/400x300/b8962f/ffffff?text=Tu+Duong+4', caption: 'Bảng gia phả' }
-                    ]
-                },
-                'album-2': {
-                    title: 'Họp mặt họ Đặng 2023',
-                    category: 'hop_mat',
-                    description: 'Hình ảnh buổi họp mặt đại gia đình họ Đặng năm 2023 tại Từ đường.',
-                    photos: [
-                        { url: 'https://via.placeholder.com/400x300/228B22/ffffff?text=Hop+Mat+1', caption: 'Toàn cảnh buổi họp mặt' },
-                        { url: 'https://via.placeholder.com/400x300/D4AF37/ffffff?text=Hop+Mat+2', caption: 'Ban chấp hành họ' },
-                        { url: 'https://via.placeholder.com/400x300/1a6b1a/ffffff?text=Hop+Mat+3', caption: 'Tiệc họp mặt' },
-                        { url: 'https://via.placeholder.com/400x300/b8962f/ffffff?text=Hop+Mat+4', caption: 'Ảnh lưu niệm' }
-                    ]
-                },
-                'album-3': {
-                    title: 'Mộ phần các cụ',
-                    category: 'mo_phan',
-                    description: 'Hình ảnh mộ phần các cụ tổ tiên dòng họ Đặng.',
-                    photos: [
-                        { url: 'https://via.placeholder.com/400x300/333333/ffffff?text=Mo+Phan+1', caption: 'Khu mộ tổ' },
-                        { url: 'https://via.placeholder.com/400x300/444444/ffffff?text=Mo+Phan+2', caption: 'Bia đá ghi công' },
-                        { url: 'https://via.placeholder.com/400x300/555555/ffffff?text=Mo+Phan+3', caption: 'Toàn cảnh khu mộ' }
-                    ]
-                }
-            };
+        // Demo - use id to find matching demo data
+        const demoAlbumData = {
+            'album-1': {
+                title: 'Từ đường họ Đặng',
+                category: 'tu_duong',
+                description: 'Hình ảnh Từ đường họ Đặng tại Đà Nẵng - nơi thờ cúng tổ tiên.',
+                photos: [
+                    { url: 'https://via.placeholder.com/400x300/228B22/ffffff?text=Tu+Duong+1', caption: 'Mặt tiền Từ đường' },
+                    { url: 'https://via.placeholder.com/400x300/D4AF37/ffffff?text=Tu+Duong+2', caption: 'Bàn thờ chính điện' },
+                    { url: 'https://via.placeholder.com/400x300/1a6b1a/ffffff?text=Tu+Duong+3', caption: 'Khu vực sân trước' },
+                    { url: 'https://via.placeholder.com/400x300/b8962f/ffffff?text=Tu+Duong+4', caption: 'Bảng gia phả' }
+                ]
+            },
+            'album-2': {
+                title: 'Họp mặt họ Đặng 2023',
+                category: 'hop_mat',
+                description: 'Hình ảnh buổi họp mặt đại gia đình họ Đặng năm 2023 tại Từ đường.',
+                photos: [
+                    { url: 'https://via.placeholder.com/400x300/228B22/ffffff?text=Hop+Mat+1', caption: 'Toàn cảnh buổi họp mặt' },
+                    { url: 'https://via.placeholder.com/400x300/D4AF37/ffffff?text=Hop+Mat+2', caption: 'Ban chấp hành họ' },
+                    { url: 'https://via.placeholder.com/400x300/1a6b1a/ffffff?text=Hop+Mat+3', caption: 'Tiệc họp mặt' },
+                    { url: 'https://via.placeholder.com/400x300/b8962f/ffffff?text=Hop+Mat+4', caption: 'Ảnh lưu niệm' }
+                ]
+            },
+            'album-3': {
+                title: 'Mộ phần các cụ',
+                category: 'mo_phan',
+                description: 'Hình ảnh mộ phần các cụ tổ tiên dòng họ Đặng.',
+                photos: [
+                    { url: 'https://via.placeholder.com/400x300/333333/ffffff?text=Mo+Phan+1', caption: 'Khu mộ tổ' },
+                    { url: 'https://via.placeholder.com/400x300/444444/ffffff?text=Mo+Phan+2', caption: 'Bia đá ghi công' },
+                    { url: 'https://via.placeholder.com/400x300/555555/ffffff?text=Mo+Phan+3', caption: 'Toàn cảnh khu mộ' }
+                ]
+            }
+        };
 
-            setSelectedAlbum(demoAlbumData[id] || demoAlbumData['album-1']);
-        } finally {
-            setLoading(false);
+        setSelectedAlbum(demoAlbumData[id] || demoAlbumData['album-1']);
+        setLoading(false);
+    };
+
+    const handleCreateAlbum = async (values) => {
+        try {
+            await albumsAPI.create(values);
+            message.success('Đã tạo album');
+            setModalVisible(false);
+            form.resetFields();
+            loadAlbums();
+        } catch (error) {
+            console.error('Create album error:', error);
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra. Vui lòng kiểm tra quyền truy cập.');
         }
     };
 
@@ -153,6 +157,15 @@ const AlbumsPage = () => {
                 <Link to="/albums" style={{ display: 'inline-block', marginBottom: 16 }}>
                     ← Quay lại album
                 </Link>
+
+                {!apiConnected && (
+                    <Alert
+                        type="info"
+                        message="Đang hiển thị dữ liệu mẫu"
+                        style={{ marginBottom: 16 }}
+                        closable
+                    />
+                )}
 
                 <Card bordered={false}>
                     <Tag color={getCategoryColor(selectedAlbum.category)} style={{ marginBottom: 16 }}>
@@ -200,20 +213,34 @@ const AlbumsPage = () => {
     // Albums list
     return (
         <div className="page-container">
+            {!apiConnected && (
+                <Alert
+                    type="info"
+                    message="Đang hiển thị dữ liệu mẫu. Kết nối backend để xem dữ liệu thực."
+                    style={{ marginBottom: 16 }}
+                    closable
+                />
+            )}
+
             <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
                 <h1 className="page-title" style={{ margin: 0 }}>
                     <PictureOutlined style={{ color: '#D4AF37' }} /> Album Ảnh
                 </h1>
 
-                {canEdit() && (
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() => setModalVisible(true)}
-                    >
-                        Tạo album
+                <div style={{ display: 'flex', gap: 8 }}>
+                    <Button icon={<ReloadOutlined />} onClick={loadAlbums} loading={loading}>
+                        Tải lại
                     </Button>
-                )}
+                    {canEdit() && (
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={() => setModalVisible(true)}
+                        >
+                            Tạo album
+                        </Button>
+                    )}
+                </div>
             </div>
 
             {albums.length === 0 ? (
@@ -249,7 +276,7 @@ const AlbumsPage = () => {
                                     </Tag>
                                     <h3 style={{ margin: 0, fontSize: 16 }}>{album.title}</h3>
                                     <p style={{ margin: '8px 0 0', fontSize: 13, color: '#64748b' }}>
-                                        {album.photoCount || album.photos?.length || 0} ảnh
+                                        {album.photos?.length || 0} ảnh
                                     </p>
                                 </Card>
                             </Link>
@@ -266,22 +293,12 @@ const AlbumsPage = () => {
                 footer={null}
                 width={600}
             >
-                <Form form={form} layout="vertical" onFinish={async (values) => {
-                    try {
-                        await albumsAPI.create(values);
-                        message.success('Đã tạo album');
-                        setModalVisible(false);
-                        form.resetFields();
-                        loadAlbums();
-                    } catch (error) {
-                        message.error('Có lỗi xảy ra');
-                    }
-                }}>
-                    <Form.Item name="title" label="Tên album" rules={[{ required: true }]}>
+                <Form form={form} layout="vertical" onFinish={handleCreateAlbum}>
+                    <Form.Item name="title" label="Tên album" rules={[{ required: true, message: 'Vui lòng nhập tên album' }]}>
                         <Input placeholder="VD: Họp mặt họ Đặng 2024" />
                     </Form.Item>
 
-                    <Form.Item name="category" label="Danh mục" rules={[{ required: true }]}>
+                    <Form.Item name="category" label="Danh mục" rules={[{ required: true, message: 'Vui lòng chọn danh mục' }]}>
                         <Select placeholder="Chọn danh mục">
                             <Select.Option value="mo_phan">Mộ phần</Select.Option>
                             <Select.Option value="tu_duong">Từ đường</Select.Option>
@@ -296,7 +313,8 @@ const AlbumsPage = () => {
                         <Input.TextArea rows={3} placeholder="Mô tả ngắn về album..." />
                     </Form.Item>
 
-                    <Form.Item style={{ textAlign: 'right' }}>
+                    <Form.Item style={{ textAlign: 'right', marginBottom: 0 }}>
+                        <Button onClick={() => setModalVisible(false)} style={{ marginRight: 8 }}>Hủy</Button>
                         <Button type="primary" htmlType="submit">Tạo album</Button>
                     </Form.Item>
                 </Form>
