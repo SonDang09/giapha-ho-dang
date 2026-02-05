@@ -78,39 +78,25 @@ const AppLayout = ({ children }) => {
                 top: 0,
                 zIndex: 100
             }}>
-                {/* Mobile Logo - Đặng Đức Tộc */}
-                <Link to="/" className="mobile-logo" style={{
+                {/* Logo - Đặng Đức Tộc (Unified for all screens) */}
+                <Link to="/" className="site-logo" style={{
                     display: 'flex',
                     alignItems: 'center',
-                    textDecoration: 'none'
+                    textDecoration: 'none',
+                    flexShrink: 0
                 }}>
-                    <span style={{
+                    <span className="logo-text" style={{
                         fontFamily: "'Times New Roman', Georgia, serif",
-                        fontSize: 20,
                         fontWeight: 700,
                         background: 'linear-gradient(135deg, #D4AF37 0%, #F4E4A6 50%, #D4AF37 100%)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         backgroundClip: 'text',
-                        textShadow: '0 2px 4px rgba(0,0,0,0.3)',
                         letterSpacing: '2px',
-                        textTransform: 'uppercase'
+                        textTransform: 'uppercase',
+                        whiteSpace: 'nowrap'
                     }}>
                         Đặng Đức Tộc
-                    </span>
-                </Link>
-
-                {/* Desktop Logo */}
-                <Link to="/" className="logo-text-wrapper" style={{ display: 'flex', alignItems: 'center', gap: 12, overflow: 'hidden' }}>
-                    <span style={{
-                        color: 'white',
-                        fontSize: 18,
-                        fontWeight: 600,
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
-                    }} className="logo-text">
-                        Gia Phả Họ Đặng
                     </span>
                 </Link>
 
@@ -222,20 +208,30 @@ const AppLayout = ({ children }) => {
             </Footer>
 
             <style>{`
+        /* Mobile first - base styles */
+        .site-logo .logo-text {
+          font-size: 18px !important;
+        }
         .desktop-menu { display: none !important; }
         .mobile-menu-btn { display: block !important; }
-        .logo-text { display: none !important; }
-        .logo-text-wrapper { display: none !important; }
-        .mobile-logo { display: flex !important; }
         .user-name { display: none; }
         .header-search { display: none !important; }
         
+        /* Tablet - 768px+ */
         @media (min-width: 768px) {
-          .desktop-menu { display: flex !important; }
+          .site-logo .logo-text {
+            font-size: 20px !important;
+          }
+          .desktop-menu { 
+            display: flex !important;
+            flex: 1;
+            justify-content: center;
+          }
+          .desktop-menu .ant-menu-item {
+            padding: 0 12px !important;
+            font-size: 13px !important;
+          }
           .mobile-menu-btn { display: none !important; }
-          .logo-text { display: block !important; }
-          .logo-text-wrapper { display: flex !important; }
-          .mobile-logo { display: none !important; }
           .user-name { display: inline; }
           .header-search { 
             display: flex !important;
@@ -270,6 +266,28 @@ const AppLayout = ({ children }) => {
           }
           .header-search .ant-input-clear-icon {
             color: rgba(255,255,255,0.5) !important;
+          }
+        }
+        
+        /* Desktop medium - 1024px+ */
+        @media (min-width: 1024px) {
+          .site-logo .logo-text {
+            font-size: 22px !important;
+          }
+          .desktop-menu .ant-menu-item {
+            padding: 0 16px !important;
+            font-size: 14px !important;
+          }
+        }
+        
+        /* Desktop large - 1280px+ */
+        @media (min-width: 1280px) {
+          .site-logo .logo-text {
+            font-size: 24px !important;
+          }
+          .desktop-menu .ant-menu-item {
+            padding: 0 20px !important;
+            font-size: 15px !important;
           }
         }
       `}</style>
