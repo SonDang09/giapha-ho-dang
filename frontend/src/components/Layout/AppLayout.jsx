@@ -20,6 +20,7 @@ import {
 } from '@ant-design/icons';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useSiteSettings } from '../../context/SiteSettingsContext';
 
 const { Header, Content, Footer } = Layout;
 const { Search } = Input;
@@ -27,6 +28,7 @@ const { Search } = Input;
 const AppLayout = ({ children }) => {
     const { user, isAuthenticated, logout, canEdit, isAdmin } = useAuth();
     const { isDarkMode, toggleTheme } = useTheme();
+    const siteSettings = useSiteSettings();
     const location = useLocation();
     const navigate = useNavigate();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -96,7 +98,7 @@ const AppLayout = ({ children }) => {
                         textTransform: 'uppercase',
                         whiteSpace: 'nowrap'
                     }}>
-                        Đặng Đức Tộc
+                        {siteSettings.brandName}
                     </span>
                 </Link>
 
@@ -200,10 +202,10 @@ const AppLayout = ({ children }) => {
                 padding: '24px'
             }}>
                 <div style={{ marginBottom: 8 }}>
-                    <strong style={{ color: '#D4AF37' }}>Gia Phả Họ Đặng Đà Nẵng</strong>
+                    <strong style={{ color: '#D4AF37' }}>{siteSettings.siteTitle}</strong>
                 </div>
                 <div style={{ fontSize: 13 }}>
-                    © {new Date().getFullYear()} - Giữ gìn và phát huy truyền thống dòng họ
+                    © {new Date().getFullYear()} - {siteSettings.footerText}
                 </div>
             </Footer>
 

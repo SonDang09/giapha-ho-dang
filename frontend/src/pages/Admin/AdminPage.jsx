@@ -292,9 +292,14 @@ const AdminPage = () => {
             if (response.data?.data) {
                 setSiteSettings(response.data.data);
                 settingsForm.setFieldsValue({
+                    brandName: response.data.data.brandName,
+                    location: response.data.data.location,
                     siteTitle: response.data.data.siteTitle,
                     tagline: response.data.data.tagline,
                     heroDescription: response.data.data.heroDescription,
+                    treeHeader: response.data.data.treeHeader,
+                    treeSubtitle: response.data.data.treeSubtitle,
+                    treeFooter: response.data.data.treeFooter,
                     headerScripts: response.data.data.headerScripts,
                     footerText: response.data.data.footerText,
                     contactEmail: response.data.data.contactEmail,
@@ -315,9 +320,14 @@ const AdminPage = () => {
         setSettingsLoading(true);
         try {
             await settingsAPI.update({
+                brandName: values.brandName,
+                location: values.location,
                 siteTitle: values.siteTitle,
                 tagline: values.tagline,
                 heroDescription: values.heroDescription,
+                treeHeader: values.treeHeader,
+                treeSubtitle: values.treeSubtitle,
+                treeFooter: values.treeFooter,
                 headerScripts: values.headerScripts,
                 footerText: values.footerText,
                 contactEmail: values.contactEmail,
@@ -696,6 +706,51 @@ const AdminPage = () => {
                             style={{ maxWidth: 800 }}
                         >
                             <Row gutter={24}>
+                                <Col span={24}>
+                                    <Card type="inner" title="🏷️ Thương hiệu" style={{ marginBottom: 24 }}>
+                                        <Form.Item
+                                            name="brandName"
+                                            label="Tên thương hiệu (Header)"
+                                            tooltip="Hiển thị ở góc trái header"
+                                        >
+                                            <Input placeholder="Đặng Đức Tộc" />
+                                        </Form.Item>
+                                        <Form.Item
+                                            name="location"
+                                            label="Địa điểm"
+                                            tooltip="Địa điểm của dòng họ"
+                                        >
+                                            <Input placeholder="Đà Nẵng - Việt Nam" />
+                                        </Form.Item>
+                                    </Card>
+                                </Col>
+
+                                <Col span={24}>
+                                    <Card type="inner" title="🌳 Cây Gia Phả" style={{ marginBottom: 24 }}>
+                                        <Form.Item
+                                            name="treeHeader"
+                                            label="Tiêu đề cây gia phả"
+                                            tooltip="Hiển thị ở đầu trang cây"
+                                        >
+                                            <Input placeholder="GIA PHẢ HỌ ĐẶNG" />
+                                        </Form.Item>
+                                        <Form.Item
+                                            name="treeSubtitle"
+                                            label="Dòng phụ"
+                                            tooltip="Hiển thị dưới tiêu đề"
+                                        >
+                                            <Input placeholder="Đà Nẵng - Việt Nam" />
+                                        </Form.Item>
+                                        <Form.Item
+                                            name="treeFooter"
+                                            label="Footer cây gia phả"
+                                            tooltip="Hiển thị ở cuối trang cây"
+                                        >
+                                            <Input placeholder="Gia Phả Họ Đặng • Giữ gìn truyền thống" />
+                                        </Form.Item>
+                                    </Card>
+                                </Col>
+
                                 <Col span={24}>
                                     <Card type="inner" title="Nội dung Trang chủ" style={{ marginBottom: 24 }}>
                                         <Form.Item

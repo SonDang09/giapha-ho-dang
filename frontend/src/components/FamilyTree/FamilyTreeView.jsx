@@ -4,6 +4,7 @@ import { Modal, Descriptions, Avatar, Tag, Button, Spin, Form, Input, Select, In
 import { UserOutlined, ManOutlined, WomanOutlined, HeartOutlined, UserAddOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { membersAPI } from '../../api';
+import { useSiteSettings } from '../../context/SiteSettingsContext';
 
 // Traditional Vietnamese Gia Phả Colors
 const COLORS = {
@@ -18,6 +19,7 @@ const COLORS = {
 
 const FamilyTreeView = ({ data, loading, onRefresh }) => {
     const navigate = useNavigate();
+    const siteSettings = useSiteSettings();
     const [selectedMember, setSelectedMember] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [translate, setTranslate] = useState({ x: 0, y: 0 });
@@ -297,8 +299,8 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
             <div className="tree-header">
                 <div className="header-decoration">🐉</div>
                 <div className="header-content">
-                    <h1>GIA PHẢ HỌ ĐẶNG</h1>
-                    <p>Đà Nẵng - Việt Nam</p>
+                    <h1>{siteSettings.treeHeader}</h1>
+                    <p>{siteSettings.treeSubtitle}</p>
                 </div>
                 <div className="header-decoration flip">🐉</div>
             </div>
@@ -339,7 +341,7 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
 
             {/* Footer */}
             <div className="tree-footer">
-                Gia Phả Họ Đặng Đà Nẵng • Giữ gìn và phát huy truyền thống dòng họ
+                {siteSettings.treeFooter}
             </div>
 
             {/* Modal */}

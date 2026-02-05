@@ -1,6 +1,16 @@
 const mongoose = require('mongoose');
 
 const SiteSettingsSchema = new mongoose.Schema({
+    // Branding
+    brandName: {
+        type: String,
+        default: 'Đặng Đức Tộc'
+    },
+    location: {
+        type: String,
+        default: 'Đà Nẵng - Việt Nam'
+    },
+
     // Homepage content
     siteTitle: {
         type: String,
@@ -13,6 +23,20 @@ const SiteSettingsSchema = new mongoose.Schema({
     heroDescription: {
         type: String,
         default: 'Trang web lưu giữ và kết nối các thế hệ trong dòng họ Đặng Đà Nẵng'
+    },
+
+    // Tree page
+    treeHeader: {
+        type: String,
+        default: 'GIA PHẢ HỌ ĐẶNG'
+    },
+    treeSubtitle: {
+        type: String,
+        default: 'Đà Nẵng - Việt Nam'
+    },
+    treeFooter: {
+        type: String,
+        default: 'Gia Phả Họ Đặng Đà Nẵng • Giữ gìn và phát huy truyền thống dòng họ'
     },
 
     // Header scripts (Google Analytics, etc.)
