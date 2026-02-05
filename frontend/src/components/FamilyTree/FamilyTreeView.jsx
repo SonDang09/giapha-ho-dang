@@ -38,6 +38,7 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
     const [actionLoading, setActionLoading] = useState(false);
     const [addForm] = Form.useForm();
     const [editForm] = Form.useForm();
+    const [allMembers, setAllMembers] = useState([]);
 
     // Detect mobile on resize - MUST be useEffect not useState!
     useEffect(() => {
@@ -215,7 +216,8 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                 gender: values.gender,
                 birthYear: values.birthYear,
                 deathYear: values.deathYear || null,
-                isDeceased: !!values.deathYear
+                isDeceased: !!values.deathYear,
+                spouseId: values.spouseId || null
             });
             message.success('Đã cập nhật thông tin!');
             setEditVisible(false);
@@ -245,13 +247,23 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
     };
 
     // Open edit modal with pre-filled data
-    const openEditModal = () => {
+    const openEditModal = async () => {
         const attrs = selectedMember?.attributes || {};
+        // Fetch all members for spouse dropdown
+        try {
+            const res = await membersAPI.getAll({ limit: 500 });
+            // Filter out current member and set list
+            const otherMembers = res.data.data.filter(m => m._id !== attrs.id);
+            setAllMembers(otherMembers);
+        } catch (e) {
+            console.error('Failed to load members:', e);
+        }
         editForm.setFieldsValue({
             fullName: selectedMember?.name,
             gender: attrs.gender,
             birthYear: attrs.birthYear,
-            deathYear: attrs.deathYear
+            deathYear: attrs.deathYear,
+            spouseId: attrs.spouseId || undefined
         });
         setEditVisible(true);
     };
@@ -537,6 +549,24 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                             max={new Date().getFullYear()}
                             style={{ width: '100%' }}
                         />
+                    </Form.Item>
+
+                    <Form.Item name="spouseId" label="Vợ/Chồng">
+                        <Select
+                            allowClear
+                            showSearch
+                            placeholder="Chọn vợ/chồng"
+                            optionFilterProp="children"
+                            filterOption={(input, option) =>
+                                option.children.toLowerCase().includes(input.toLowerCase())
+                            }
+                        >
+                            {allMembers.map(m => (
+                                <Select.Option key={m._id} value={m._id}>
+                                    {m.fullName} {m.birthYear ? `(${m.birthYear})` : ''}
+                                </Select.Option>
+                            ))}
+                        </Select>
                     </Form.Item>
 
                     <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
