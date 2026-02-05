@@ -28,14 +28,25 @@ router.get('/', async (req, res) => {
 router.put('/', protect, authorize('admin_toc'), async (req, res) => {
     try {
         const {
+            // Branding
+            brandName,
+            location,
+            // Homepage
             siteTitle,
             tagline,
             heroDescription,
+            // Tree page
+            treeHeader,
+            treeSubtitle,
+            treeFooter,
+            // SEO & Scripts
             headerScripts,
+            // Footer & Contact
             footerText,
             socialLinks,
             contactEmail,
             contactPhone,
+            // Display options
             showMemberCount,
             memberCountDisplay
         } = req.body;
@@ -47,14 +58,25 @@ router.put('/', protect, authorize('admin_toc'), async (req, res) => {
         }
 
         // Update fields if provided
+        // Branding
+        if (brandName !== undefined) settings.brandName = brandName;
+        if (location !== undefined) settings.location = location;
+        // Homepage
         if (siteTitle !== undefined) settings.siteTitle = siteTitle;
         if (tagline !== undefined) settings.tagline = tagline;
         if (heroDescription !== undefined) settings.heroDescription = heroDescription;
+        // Tree page
+        if (treeHeader !== undefined) settings.treeHeader = treeHeader;
+        if (treeSubtitle !== undefined) settings.treeSubtitle = treeSubtitle;
+        if (treeFooter !== undefined) settings.treeFooter = treeFooter;
+        // SEO & Scripts
         if (headerScripts !== undefined) settings.headerScripts = headerScripts;
+        // Footer & Contact
         if (footerText !== undefined) settings.footerText = footerText;
         if (socialLinks !== undefined) settings.socialLinks = socialLinks;
         if (contactEmail !== undefined) settings.contactEmail = contactEmail;
         if (contactPhone !== undefined) settings.contactPhone = contactPhone;
+        // Display options
         if (showMemberCount !== undefined) settings.showMemberCount = showMemberCount;
         if (memberCountDisplay !== undefined) settings.memberCountDisplay = memberCountDisplay;
 

@@ -248,7 +248,7 @@ Location: `frontend/src/components/Layout/AppLayout.jsx`
 
 | Service | Username | Password/Notes |
 |---------|----------|----------------|
-| **Admin** | admin | Admin@123456 |
+| **Admin** | admin | admin123 |
 | **GitHub** | SonDang09 | - |
 | **Vercel** | sondangs-projects-2be2385f | Via GitHub OAuth |
 | **Render** | - | Via GitHub OAuth |
