@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Row, Col, Card, Calendar, Badge, List, Avatar, Tag, Spin, Empty, Tooltip, Button } from 'antd';
-import { CalendarOutlined, BellOutlined, HeartOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Row, Col, Card, Calendar, Badge, List, Avatar, Tag, Spin, Empty, Tooltip, Button, message } from 'antd';
+import { CalendarOutlined, BellOutlined, HeartOutlined, ReloadOutlined, DownloadOutlined, FieldTimeOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { membersAPI } from '../../api';
@@ -11,6 +11,72 @@ const LunarCalendarPage = () => {
     const [loading, setLoading] = useState(true);
     const [anniversaries, setAnniversaries] = useState([]);
     const [selectedDate, setSelectedDate] = useState(dayjs());
+
+    // Calculate days until anniversary (approximate using lunar day/month mapped to current year)
+    const calculateDaysUntil = (lunarDate) => {
+        if (!lunarDate) return null;
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        // Approximate: use lunar date as solar date for same year
+        const approxDate = new Date(currentYear, lunarDate.lunarMonth - 1, lunarDate.lunarDay);
+        // If already passed this year, calculate for next year
+        if (approxDate < today) {
+            approxDate.setFullYear(currentYear + 1);
+        }
+        const diffTime = approxDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    };
+
+    // Export to ICS format for Google Calendar / Apple Calendar
+    const exportToICS = (items) => {
+        const formatDate = (lunarDate) => {
+            const year = new Date().getFullYear();
+            const month = String(lunarDate.lunarMonth).padStart(2, '0');
+            const day = String(lunarDate.lunarDay).padStart(2, '0');
+            return `${year}${month}${day}`;
+        };
+
+        let icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Gia Pha Ho Dang//Anniversary Calendar//VI
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Lịch Giỗ Họ Đặng
+`;
+
+        items.forEach(item => {
+            if (!item.anniversaryDate) return;
+            const dateStr = formatDate(item.anniversaryDate);
+            const uid = `gio-${item._id}@giapha-hodang.com`;
+            icsContent += `BEGIN:VEVENT
+UID:${uid}
+DTSTART;VALUE=DATE:${dateStr}
+DTEND;VALUE=DATE:${dateStr}
+SUMMARY:🕯️ Giỗ ${item.fullName}
+DESCRIPTION:Ngày giỗ ${item.fullName} (Đời thứ ${item.generation})\\nNgày ${item.anniversaryDate.lunarDay} tháng ${item.anniversaryDate.lunarMonth} Âm lịch
+RRULE:FREQ=YEARLY
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:Nhắc nhở: Ngày mai là giỗ ${item.fullName}
+END:VALARM
+END:VEVENT
+`;
+        });
+
+        icsContent += 'END:VCALENDAR';
+
+        // Download file
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'lich-gio-ho-dang.ics';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        message.success('Đã tải file lịch! Mở file để thêm vào Google Calendar / Apple Calendar.');
+    };
 
     useEffect(() => {
         loadAnniversaries();
@@ -128,9 +194,18 @@ const LunarCalendarPage = () => {
                 <h1 className="page-title" style={{ margin: 0 }}>
                     <CalendarOutlined style={{ color: '#D4AF37' }} /> Lịch Ngày Giỗ Âm Lịch
                 </h1>
-                <Button icon={<ReloadOutlined />} onClick={loadAnniversaries} loading={loading}>
-                    Tải lại
-                </Button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                    <Button
+                        icon={<DownloadOutlined />}
+                        onClick={() => exportToICS(anniversaries)}
+                        disabled={anniversaries.length === 0}
+                    >
+                        Xuất lịch (.ics)
+                    </Button>
+                    <Button icon={<ReloadOutlined />} onClick={loadAnniversaries} loading={loading}>
+                        Tải lại
+                    </Button>
+                </div>
             </div>
 
             <Row gutter={[24, 24]}>
@@ -181,8 +256,18 @@ const LunarCalendarPage = () => {
                                                     <div style={{ color: '#D4AF37' }}>
                                                         🕯️ {formatLunarDate(item.anniversaryDate)}
                                                     </div>
-                                                    <div style={{ fontSize: 12, color: '#94a3b8' }}>
+                                                    <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>
                                                         Đời thứ {item.generation}
+                                                        {item.anniversaryDate && (() => {
+                                                            const daysUntil = calculateDaysUntil(item.anniversaryDate);
+                                                            if (daysUntil === null) return null;
+                                                            const color = daysUntil <= 7 ? 'red' : daysUntil <= 30 ? 'orange' : 'green';
+                                                            return (
+                                                                <Tag color={color} style={{ marginLeft: 8, fontSize: 11 }}>
+                                                                    <FieldTimeOutlined /> {daysUntil} ngày nữa
+                                                                </Tag>
+                                                            );
+                                                        })()}
                                                     </div>
                                                 </div>
                                             }

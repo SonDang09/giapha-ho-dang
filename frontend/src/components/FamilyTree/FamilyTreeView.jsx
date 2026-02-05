@@ -47,127 +47,187 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Custom node using foreignObject for crisp HTML rendering
-    const renderCustomNode = ({ nodeDatum }) => {
-        const attrs = nodeDatum.attributes || {};
+    // Render a single member card (reusable for main member and spouse)
+    const renderMemberCard = (name, attrs, onClick, isSpouse = false) => {
         const isMale = attrs.gender === 'male';
         const isDeceased = attrs.isDeceased;
         const borderColor = isMale ? COLORS.male : COLORS.female;
+        const cardWidth = isSpouse ? 140 : 180;
+        const cardHeight = isSpouse ? 85 : 105;
+
+        return (
+            <div
+                onClick={onClick}
+                style={{
+                    width: `${cardWidth}px`,
+                    height: `${cardHeight}px`,
+                    background: COLORS.ivory,
+                    border: `3px solid ${borderColor}`,
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(139, 69, 19, 0.2)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: isSpouse ? '8px' : '12px',
+                    boxSizing: 'border-box',
+                    position: 'relative',
+                    fontFamily: '"Times New Roman", Georgia, serif'
+                }}
+            >
+                {/* Top color bar */}
+                <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: isSpouse ? '6px' : '8px',
+                    background: borderColor,
+                    borderRadius: '5px 5px 0 0'
+                }} />
+
+                {/* Generation badge - only for main member */}
+                {!isSpouse && (
+                    <div style={{
+                        position: 'absolute',
+                        top: '-14px',
+                        right: '-14px',
+                        width: '32px',
+                        height: '32px',
+                        background: `linear-gradient(135deg, ${COLORS.gold} 0%, #b8962f 100%)`,
+                        border: `2px solid ${COLORS.brown}`,
+                        borderRadius: '4px',
+                        transform: 'rotate(45deg)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.25)'
+                    }}>
+                        <span style={{
+                            transform: 'rotate(-45deg)',
+                            color: 'white',
+                            fontSize: '14px',
+                            fontWeight: '700',
+                            textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                        }}>
+                            {attrs.generation || '?'}
+                        </span>
+                    </div>
+                )}
+
+                {/* Deceased icon */}
+                {isDeceased && (
+                    <div style={{
+                        position: 'absolute',
+                        top: isSpouse ? '8px' : '10px',
+                        left: isSpouse ? '6px' : '10px',
+                        fontSize: isSpouse ? '12px' : '16px'
+                    }}>🕯️</div>
+                )}
+
+                {/* Title prefix */}
+                <div style={{
+                    fontSize: isSpouse ? '9px' : '11px',
+                    color: borderColor,
+                    fontWeight: '600',
+                    marginTop: isSpouse ? '4px' : '6px',
+                    letterSpacing: '1px'
+                }}>
+                    {attrs.generation <= 2 ? 'CỤ' : (isMale ? 'ÔNG' : 'BÀ')}
+                </div>
+
+                {/* Name */}
+                <div style={{
+                    fontSize: isSpouse ? '12px' : '16px',
+                    fontWeight: '700',
+                    color: '#1a1a1a',
+                    textAlign: 'center',
+                    marginTop: '2px',
+                    lineHeight: '1.2'
+                }}>
+                    {name?.length > (isSpouse ? 12 : 16)
+                        ? name.substring(0, isSpouse ? 10 : 14) + '...'
+                        : name}
+                </div>
+
+                {/* Years */}
+                <div style={{
+                    fontSize: isSpouse ? '10px' : '12px',
+                    color: COLORS.brown,
+                    marginTop: '2px'
+                }}>
+                    {isDeceased && attrs.deathYear
+                        ? `(Mất ${attrs.deathYear})`
+                        : attrs.birthYear
+                            ? `(${attrs.birthYear} - ${attrs.deathYear || 'nay'})`
+                            : ''}
+                </div>
+            </div>
+        );
+    };
+
+    // Custom node using foreignObject for crisp HTML rendering
+    const renderCustomNode = ({ nodeDatum }) => {
+        const attrs = nodeDatum.attributes || {};
+        const hasSpouse = attrs.spouse; // spouse data populated from backend
+
+        // Calculate widths for spouse pair layout
+        const totalWidth = hasSpouse ? 360 : 180;
+        const offsetX = hasSpouse ? -180 : -90;
 
         return (
             <g>
                 <foreignObject
-                    width={180}
+                    width={totalWidth}
                     height={105}
-                    x={-90}
+                    x={offsetX}
                     y={-52}
                     style={{ overflow: 'visible' }}
                 >
-                    <div
-                        onClick={() => handleNodeClick(nodeDatum)}
-                        style={{
-                            width: '180px',
-                            height: '105px',
-                            background: COLORS.ivory,
-                            border: `3px solid ${borderColor}`,
-                            borderRadius: '8px',
-                            boxShadow: '0 4px 12px rgba(139, 69, 19, 0.2)',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: '12px',
-                            boxSizing: 'border-box',
-                            position: 'relative',
-                            fontFamily: '"Times New Roman", Georgia, serif'
-                        }}
-                    >
-                        {/* Top color bar */}
-                        <div style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            height: '8px',
-                            background: borderColor,
-                            borderRadius: '5px 5px 0 0'
-                        }} />
-
-                        {/* Generation badge - Gold diamond */}
-                        <div style={{
-                            position: 'absolute',
-                            top: '-14px',
-                            right: '-14px',
-                            width: '32px',
-                            height: '32px',
-                            background: `linear-gradient(135deg, ${COLORS.gold} 0%, #b8962f 100%)`,
-                            border: `2px solid ${COLORS.brown}`,
-                            borderRadius: '4px',
-                            transform: 'rotate(45deg)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            boxShadow: '0 2px 6px rgba(0,0,0,0.25)'
-                        }}>
-                            <span style={{
-                                transform: 'rotate(-45deg)',
-                                color: 'white',
-                                fontSize: '14px',
-                                fontWeight: '700',
-                                textShadow: '0 1px 2px rgba(0,0,0,0.3)'
-                            }}>
-                                {attrs.generation || '?'}
-                            </span>
-                        </div>
-
-                        {/* Deceased icon */}
-                        {isDeceased && (
-                            <div style={{
-                                position: 'absolute',
-                                top: '10px',
-                                left: '10px',
-                                fontSize: '16px'
-                            }}>🕯️</div>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        justifyContent: hasSpouse ? 'center' : 'flex-start'
+                    }}>
+                        {/* Main member card */}
+                        {renderMemberCard(
+                            nodeDatum.name,
+                            attrs,
+                            () => handleNodeClick(nodeDatum),
+                            false
                         )}
 
-                        {/* Title prefix */}
-                        <div style={{
-                            fontSize: '11px',
-                            color: borderColor,
-                            fontWeight: '600',
-                            marginTop: '6px',
-                            letterSpacing: '1px'
-                        }}>
-                            {attrs.generation <= 2 ? 'CỤ' : (isMale ? 'ÔNG' : 'BÀ')}
-                        </div>
-
-                        {/* Name */}
-                        <div style={{
-                            fontSize: '16px',
-                            fontWeight: '700',
-                            color: '#1a1a1a',
-                            textAlign: 'center',
-                            marginTop: '2px',
-                            lineHeight: '1.2'
-                        }}>
-                            {nodeDatum.name?.length > 16
-                                ? nodeDatum.name.substring(0, 14) + '...'
-                                : nodeDatum.name}
-                        </div>
-
-                        {/* Years */}
-                        <div style={{
-                            fontSize: '12px',
-                            color: COLORS.brown,
-                            marginTop: '4px'
-                        }}>
-                            {isDeceased && attrs.deathYear
-                                ? `(Mất ${attrs.deathYear})`
-                                : attrs.birthYear
-                                    ? `(${attrs.birthYear} - ${attrs.deathYear || 'nay'})`
-                                    : ''}
-                        </div>
+                        {/* Heart connector and spouse card if exists */}
+                        {hasSpouse && (
+                            <>
+                                <div style={{
+                                    fontSize: '18px',
+                                    color: COLORS.male,
+                                    textShadow: '0 1px 2px rgba(0,0,0,0.2)'
+                                }}>❤️</div>
+                                {renderMemberCard(
+                                    attrs.spouse.fullName,
+                                    {
+                                        gender: attrs.spouse.gender,
+                                        isDeceased: attrs.spouse.isDeceased,
+                                        birthYear: attrs.spouse.birthYear,
+                                        deathYear: attrs.spouse.deathYear,
+                                        generation: attrs.generation
+                                    },
+                                    () => handleNodeClick({
+                                        name: attrs.spouse.fullName,
+                                        attributes: {
+                                            id: attrs.spouse._id || attrs.spouseId,
+                                            ...attrs.spouse,
+                                            generation: attrs.generation
+                                        }
+                                    }),
+                                    true
+                                )}
+                            </>
+                        )}
                     </div>
                 </foreignObject>
             </g>

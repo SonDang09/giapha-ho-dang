@@ -58,8 +58,12 @@ router.get('/', async (req, res) => {
 router.get('/tree', async (req, res) => {
     try {
         const members = await Member.find()
-            .select('fullName gender birthDate deathDate generation parentId avatar isDeceased birthOrder anniversaryDate')
+            .select('fullName gender birthDate deathDate generation parentId avatar isDeceased birthOrder anniversaryDate spouseId')
             .sort({ generation: 1, birthOrder: 1 });
+
+        // Create a map for quick spouse lookup
+        const memberMap = new Map();
+        members.forEach(m => memberMap.set(m._id.toString(), m));
 
         // Build tree structure
         const buildTree = (parentId = null) => {
@@ -68,20 +72,36 @@ router.get('/tree', async (req, res) => {
                     if (parentId === null) return m.parentId === null;
                     return m.parentId && m.parentId.toString() === parentId;
                 })
-                .map(m => ({
-                    name: m.fullName,
-                    attributes: {
-                        id: m._id,
-                        gender: m.gender,
-                        generation: m.generation,
-                        birthYear: m.birthDate ? new Date(m.birthDate).getFullYear() : null,
-                        deathYear: m.deathDate ? new Date(m.deathDate).getFullYear() : null,
-                        isDeceased: m.isDeceased,
-                        avatar: m.avatar,
-                        anniversaryDate: m.anniversaryDate
-                    },
-                    children: buildTree(m._id.toString())
-                }));
+                .map(m => {
+                    // Find spouse data if exists
+                    const spouse = m.spouseId ? memberMap.get(m.spouseId.toString()) : null;
+
+                    return {
+                        name: m.fullName,
+                        attributes: {
+                            id: m._id,
+                            gender: m.gender,
+                            generation: m.generation,
+                            birthYear: m.birthDate ? new Date(m.birthDate).getFullYear() : null,
+                            deathYear: m.deathDate ? new Date(m.deathDate).getFullYear() : null,
+                            isDeceased: m.isDeceased,
+                            avatar: m.avatar,
+                            anniversaryDate: m.anniversaryDate,
+                            spouseId: m.spouseId,
+                            // Include populated spouse data for frontend rendering
+                            spouse: spouse ? {
+                                _id: spouse._id,
+                                fullName: spouse.fullName,
+                                gender: spouse.gender,
+                                birthYear: spouse.birthDate ? new Date(spouse.birthDate).getFullYear() : null,
+                                deathYear: spouse.deathDate ? new Date(spouse.deathDate).getFullYear() : null,
+                                isDeceased: spouse.isDeceased,
+                                avatar: spouse.avatar
+                            } : null
+                        },
+                        children: buildTree(m._id.toString())
+                    };
+                });
         };
 
         const treeData = buildTree();
