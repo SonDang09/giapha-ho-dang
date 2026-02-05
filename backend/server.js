@@ -13,6 +13,7 @@ const memorialRoutes = require('./routes/memorials');
 const uploadRoutes = require('./routes/upload');
 const transactionRoutes = require('./routes/transactions');
 const userRoutes = require('./routes/users');
+const settingsRoutes = require('./routes/settingsRoutes');
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use('/api/memorials', memorialRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

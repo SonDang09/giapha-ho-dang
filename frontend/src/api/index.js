@@ -105,6 +105,12 @@ export const usersAPI = {
     delete: (id) => api.delete(`/users/${id}`)
 };
 
+// Settings API (Site configuration)
+export const settingsAPI = {
+    get: () => api.get('/settings'),
+    update: (data) => api.put('/settings', data)
+};
+
 // Demo API (for testing without database)
 export const demoAPI = {
     getTree: () => api.get('/demo/tree'),

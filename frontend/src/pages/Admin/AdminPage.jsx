@@ -11,10 +11,11 @@ import {
     DeleteOutlined,
     ManOutlined,
     WomanOutlined,
-    ReloadOutlined
+    ReloadOutlined,
+    SettingOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { membersAPI, newsAPI, albumsAPI, authAPI, usersAPI } from '../../api';
+import { membersAPI, newsAPI, albumsAPI, authAPI, usersAPI, settingsAPI } from '../../api';
 import { useAuth } from '../../context/AuthContext';
 import useDocumentTitle from '../../hooks/useDocumentTitle';
 
@@ -34,6 +35,8 @@ const AdminPage = () => {
     const [albums, setAlbums] = useState([]);
     const [users, setUsers] = useState([]);
     const [stats, setStats] = useState({});
+    const [siteSettings, setSiteSettings] = useState({});
+    const [settingsLoading, setSettingsLoading] = useState(false);
 
     // Modal states
     const [memberModal, setMemberModal] = useState(false);
@@ -47,6 +50,7 @@ const AdminPage = () => {
     const [newsForm] = Form.useForm();
     const [albumForm] = Form.useForm();
     const [userForm] = Form.useForm();
+    const [settingsForm] = Form.useForm();
 
     useEffect(() => {
         loadAllData();
@@ -279,6 +283,67 @@ const AdminPage = () => {
             message.error(error.response?.data?.message || 'Có lỗi xảy ra!');
         }
     };
+
+    // Settings handlers
+    const loadSettings = async () => {
+        setSettingsLoading(true);
+        try {
+            const response = await settingsAPI.get();
+            if (response.data?.data) {
+                setSiteSettings(response.data.data);
+                settingsForm.setFieldsValue({
+                    siteTitle: response.data.data.siteTitle,
+                    tagline: response.data.data.tagline,
+                    heroDescription: response.data.data.heroDescription,
+                    headerScripts: response.data.data.headerScripts,
+                    footerText: response.data.data.footerText,
+                    contactEmail: response.data.data.contactEmail,
+                    contactPhone: response.data.data.contactPhone,
+                    facebookUrl: response.data.data.socialLinks?.facebook,
+                    zaloUrl: response.data.data.socialLinks?.zalo,
+                    youtubeUrl: response.data.data.socialLinks?.youtube
+                });
+            }
+        } catch (error) {
+            console.log('Settings not available yet');
+        } finally {
+            setSettingsLoading(false);
+        }
+    };
+
+    const handleSettingsSubmit = async (values) => {
+        setSettingsLoading(true);
+        try {
+            await settingsAPI.update({
+                siteTitle: values.siteTitle,
+                tagline: values.tagline,
+                heroDescription: values.heroDescription,
+                headerScripts: values.headerScripts,
+                footerText: values.footerText,
+                contactEmail: values.contactEmail,
+                contactPhone: values.contactPhone,
+                socialLinks: {
+                    facebook: values.facebookUrl,
+                    zalo: values.zaloUrl,
+                    youtube: values.youtubeUrl
+                }
+            });
+            message.success('Cập nhật cấu hình thành công!');
+            loadSettings();
+        } catch (error) {
+            console.error('Settings save error:', error);
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra!');
+        } finally {
+            setSettingsLoading(false);
+        }
+    };
+
+    // Load settings when tab changes to settings
+    useEffect(() => {
+        if (activeTab === 'settings') {
+            loadSettings();
+        }
+    }, [activeTab]);
 
     // Table columns
     const memberColumns = [
@@ -618,6 +683,133 @@ const AdminPage = () => {
                         }
                     >
                         <Table columns={userColumns} dataSource={users} rowKey="_id" loading={loading} scroll={{ x: 600 }} />
+                    </Card>
+                </TabPane>
+
+                {/* Settings Tab */}
+                <TabPane tab={<span><SettingOutlined /> Cấu hình</span>} key="settings">
+                    <Card title="Cấu hình Website" loading={settingsLoading}>
+                        <Form
+                            form={settingsForm}
+                            layout="vertical"
+                            onFinish={handleSettingsSubmit}
+                            style={{ maxWidth: 800 }}
+                        >
+                            <Row gutter={24}>
+                                <Col span={24}>
+                                    <Card type="inner" title="Nội dung Trang chủ" style={{ marginBottom: 24 }}>
+                                        <Form.Item
+                                            name="siteTitle"
+                                            label="Tiêu đề website"
+                                            tooltip="Tiêu đề hiển thị trên trang chủ"
+                                        >
+                                            <Input placeholder="Gia Phả Họ Đặng Đà Nẵng" />
+                                        </Form.Item>
+                                        <Form.Item
+                                            name="tagline"
+                                            label="Câu châm ngôn"
+                                            tooltip="Câu nói ý nghĩa hiển thị dưới tiêu đề"
+                                        >
+                                            <TextArea
+                                                rows={2}
+                                                placeholder="Uống nước nhớ nguồn - Ăn quả nhớ kẻ trồng cây"
+                                            />
+                                        </Form.Item>
+                                        <Form.Item
+                                            name="heroDescription"
+                                            label="Mô tả ngắn"
+                                        >
+                                            <TextArea
+                                                rows={2}
+                                                placeholder="Trang web lưu giữ và kết nối các thế hệ trong dòng họ"
+                                            />
+                                        </Form.Item>
+                                    </Card>
+                                </Col>
+
+                                <Col span={24}>
+                                    <Card type="inner" title="Mã nhúng Header (Scripts)" style={{ marginBottom: 24 }}>
+                                        <Alert
+                                            message="Nhúng Google Analytics, Facebook Pixel, v.v."
+                                            description="Mã sẽ được chèn vào thẻ <head> của trang web"
+                                            type="info"
+                                            showIcon
+                                            style={{ marginBottom: 16 }}
+                                        />
+                                        <Form.Item
+                                            name="headerScripts"
+                                            label="Mã nhúng (HTML/JavaScript)"
+                                        >
+                                            <TextArea
+                                                rows={6}
+                                                placeholder="<!-- Google Analytics -->
+<script async src='https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX'></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+</script>"
+                                                style={{ fontFamily: 'monospace', fontSize: 12 }}
+                                            />
+                                        </Form.Item>
+                                    </Card>
+                                </Col>
+
+                                <Col span={24}>
+                                    <Card type="inner" title="Thông tin liên hệ" style={{ marginBottom: 24 }}>
+                                        <Row gutter={16}>
+                                            <Col span={12}>
+                                                <Form.Item name="contactEmail" label="Email liên hệ">
+                                                    <Input placeholder="giapha@example.com" />
+                                                </Form.Item>
+                                            </Col>
+                                            <Col span={12}>
+                                                <Form.Item name="contactPhone" label="Số điện thoại">
+                                                    <Input placeholder="0905 xxx xxx" />
+                                                </Form.Item>
+                                            </Col>
+                                        </Row>
+                                    </Card>
+                                </Col>
+
+                                <Col span={24}>
+                                    <Card type="inner" title="Mạng xã hội" style={{ marginBottom: 24 }}>
+                                        <Row gutter={16}>
+                                            <Col span={8}>
+                                                <Form.Item name="facebookUrl" label="Facebook">
+                                                    <Input placeholder="https://facebook.com/..." />
+                                                </Form.Item>
+                                            </Col>
+                                            <Col span={8}>
+                                                <Form.Item name="zaloUrl" label="Zalo">
+                                                    <Input placeholder="https://zalo.me/..." />
+                                                </Form.Item>
+                                            </Col>
+                                            <Col span={8}>
+                                                <Form.Item name="youtubeUrl" label="YouTube">
+                                                    <Input placeholder="https://youtube.com/..." />
+                                                </Form.Item>
+                                            </Col>
+                                        </Row>
+                                    </Card>
+                                </Col>
+
+                                <Col span={24}>
+                                    <Card type="inner" title="Footer" style={{ marginBottom: 24 }}>
+                                        <Form.Item name="footerText" label="Nội dung Footer">
+                                            <Input placeholder="Giữ gìn và phát huy truyền thống dòng họ" />
+                                        </Form.Item>
+                                    </Card>
+                                </Col>
+                            </Row>
+
+                            <Form.Item style={{ textAlign: 'right', marginTop: 16 }}>
+                                <Button type="primary" htmlType="submit" loading={settingsLoading} size="large">
+                                    Lưu cấu hình
+                                </Button>
+                            </Form.Item>
+                        </Form>
                     </Card>
                 </TabPane>
             </Tabs>
