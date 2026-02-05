@@ -20,6 +20,14 @@ const FamilyTreeView = ({ data, loading }) => {
     const [selectedMember, setSelectedMember] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [translate, setTranslate] = useState({ x: 0, y: 0 });
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+    // Detect mobile on resize
+    useState(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Custom node using foreignObject for crisp HTML rendering
     const renderCustomNode = ({ nodeDatum }) => {
@@ -163,14 +171,14 @@ const FamilyTreeView = ({ data, loading }) => {
     const treeConfig = useMemo(() => ({
         orientation: 'vertical',
         pathFunc: 'step',
-        separation: { siblings: 1.4, nonSiblings: 2.0 },
-        nodeSize: { x: 220, y: 160 },
+        separation: { siblings: isMobile ? 1.2 : 1.4, nonSiblings: isMobile ? 1.5 : 2.0 },
+        nodeSize: { x: isMobile ? 160 : 220, y: isMobile ? 140 : 160 },
         translate,
-        zoom: 0.85,
-        scaleExtent: { min: 0.3, max: 2.5 },
+        zoom: isMobile ? 0.5 : 0.85,
+        scaleExtent: { min: 0.2, max: 2.5 },
         enableLegacyTransitions: true,
         transitionDuration: 400
-    }), [translate]);
+    }), [translate, isMobile]);
 
     if (loading) {
         return (
@@ -448,16 +456,50 @@ const FamilyTreeView = ({ data, loading }) => {
                 }
 
                 @media (max-width: 768px) {
+                    .family-tree-container {
+                        min-height: 500px;
+                    }
+                    .tree-header {
+                        padding: 12px 8px;
+                    }
+                    .header-content {
+                        padding: 0 8px;
+                    }
                     .header-content h1 {
-                        font-size: 20px;
-                        letter-spacing: 2px;
+                        font-size: 16px;
+                        letter-spacing: 1px;
+                    }
+                    .header-content p {
+                        font-size: 11px;
+                        letter-spacing: 1px;
                     }
                     .header-decoration {
-                        font-size: 24px;
+                        font-size: 20px;
+                    }
+                    .tree-instructions {
+                        font-size: 10px;
+                        padding: 6px;
                     }
                     .tree-legend {
-                        gap: 12px;
+                        gap: 8px;
                         flex-wrap: wrap;
+                        justify-content: center;
+                        padding: 8px;
+                    }
+                    .legend-item {
+                        font-size: 11px;
+                    }
+                    .legend-box {
+                        width: 14px;
+                        height: 14px;
+                    }
+                    .tree-wrapper {
+                        overflow: auto;
+                        -webkit-overflow-scrolling: touch;
+                    }
+                    .tree-footer {
+                        font-size: 10px;
+                        padding: 8px;
                     }
                 }
             `}</style>
