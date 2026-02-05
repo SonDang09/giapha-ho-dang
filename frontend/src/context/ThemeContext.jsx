@@ -20,22 +20,25 @@ export const ThemeProvider = ({ children }) => {
     const antDesignTheme = {
         algorithm: isDarkMode ? antTheme.darkAlgorithm : antTheme.defaultAlgorithm,
         token: {
-            colorPrimary: '#228B22',
-            colorSuccess: '#10b981',
-            colorWarning: '#f59e0b',
-            colorError: '#ef4444',
-            colorInfo: '#3b82f6',
+            colorPrimary: '#C41E3A',
+            colorSuccess: '#b8962f',
+            colorWarning: '#D4AF37',
+            colorError: '#9a1830',
+            colorInfo: '#4169E1',
             borderRadius: 8,
             fontFamily: "'Roboto', 'Noto Sans', -apple-system, BlinkMacSystemFont, sans-serif"
         },
         components: {
             Layout: {
-                headerBg: isDarkMode ? '#0f0f1a' : '#1a3d1a',
-                siderBg: isDarkMode ? '#16213e' : '#f8f9fa'
+                headerBg: isDarkMode ? '#1a0f0a' : '#8B0000',
+                siderBg: isDarkMode ? '#3d2416' : '#FDF8E8',
+                footerBg: isDarkMode ? '#1a0f0a' : '#8B0000'
             },
             Menu: {
                 darkItemBg: 'transparent',
-                darkSubMenuItemBg: 'transparent'
+                darkSubMenuItemBg: 'transparent',
+                darkItemSelectedBg: '#9a1830',
+                darkItemHoverBg: 'rgba(196, 30, 58, 0.2)'
             },
             Card: {
                 borderRadiusLG: 12
@@ -45,6 +48,9 @@ export const ThemeProvider = ({ children }) => {
             },
             Input: {
                 borderRadius: 8
+            },
+            Progress: {
+                defaultColor: '#C41E3A'
             }
         }
     };

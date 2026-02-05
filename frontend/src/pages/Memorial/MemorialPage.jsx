@@ -5,10 +5,12 @@ import { UserOutlined, HeartOutlined, CalendarOutlined, ArrowLeftOutlined } from
 import MemorialCandle from '../../components/Memorial/MemorialCandle';
 import { memorialsAPI, membersAPI } from '../../api';
 import dayjs from 'dayjs';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const { TextArea } = Input;
 
 const MemorialPage = () => {
+    useDocumentTitle('Nghĩa Trang Trực Tuyến');
     const { memberId } = useParams();
     const [loading, setLoading] = useState(true);
     const [member, setMember] = useState(null);

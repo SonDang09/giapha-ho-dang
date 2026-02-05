@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Card, Spin, Button, Space } from 'antd';
-import { FullscreenOutlined, ReloadOutlined, ZoomInOutlined, ZoomOutOutlined } from '@ant-design/icons';
+import { Spin, Button, Space, FloatButton } from 'antd';
+import { ReloadOutlined, FullscreenOutlined, FullscreenExitOutlined, ZoomInOutlined, ZoomOutOutlined } from '@ant-design/icons';
 import FamilyTreeView from '../../components/FamilyTree/FamilyTreeView';
 import { membersAPI } from '../../api';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const TreePage = () => {
+    useDocumentTitle('Cây Gia Phả');
     const [treeData, setTreeData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isFullscreen, setIsFullscreen] = useState(false);
 
     useEffect(() => {
         loadTreeData();
@@ -15,9 +18,7 @@ const TreePage = () => {
     const loadTreeData = async () => {
         setLoading(true);
         try {
-            // Use API service
             const response = await membersAPI.getTree();
-
             if (response?.data?.data) {
                 setTreeData(response.data.data);
                 setLoading(false);
@@ -27,12 +28,20 @@ const TreePage = () => {
             console.log('API not available, using demo data');
         }
 
-        // Fallback to demo data
         setTreeData(getDemoTreeData());
         setLoading(false);
     };
 
-    // Fallback demo data
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            setIsFullscreen(true);
+        } else {
+            document.exitFullscreen();
+            setIsFullscreen(false);
+        }
+    };
+
     const getDemoTreeData = () => ({
         name: 'Đặng Văn Tổ',
         attributes: {
@@ -83,53 +92,28 @@ const TreePage = () => {
 
     return (
         <div className="tree-page">
-            <Card
-                title={
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <span style={{
-                            fontSize: 24,
-                            color: '#D4AF37',
-                            fontFamily: 'serif'
-                        }}>
-                            🌳
-                        </span>
-                        <div>
-                            <h1 style={{
-                                margin: 0,
-                                fontSize: 22,
-                                color: '#228B22',
-                                fontWeight: 700
-                            }}>
-                                Cây Gia Phả Họ Đặng
-                            </h1>
-                            <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>
-                                Click vào thành viên để xem chi tiết
-                            </p>
-                        </div>
-                    </div>
+            <FamilyTreeView data={treeData} loading={loading} />
+
+            {/* Float Action Buttons */}
+            <FloatButton.Group shape="square" style={{ right: 24, bottom: 24 }}>
+                <FloatButton
+                    icon={<ReloadOutlined />}
+                    tooltip="Tải lại"
+                    onClick={loadTreeData}
+                />
+                <FloatButton
+                    icon={isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+                    tooltip={isFullscreen ? 'Thoát toàn màn hình' : 'Toàn màn hình'}
+                    onClick={toggleFullscreen}
+                />
+            </FloatButton.Group>
+
+            <style>{`
+                .tree-page {
+                    margin: -16px;
+                    position: relative;
                 }
-                extra={
-                    <Space>
-                        <Button
-                            icon={<ReloadOutlined />}
-                            onClick={loadTreeData}
-                            loading={loading}
-                        >
-                            Tải lại
-                        </Button>
-                    </Space>
-                }
-                bordered={false}
-                bodyStyle={{ padding: 0, height: 'calc(100vh - 250px)', minHeight: 500 }}
-            >
-                {loading ? (
-                    <div className="flex-center" style={{ height: '100%' }}>
-                        <Spin size="large" tip="Đang tải cây gia phả..." />
-                    </div>
-                ) : (
-                    <FamilyTreeView data={treeData} loading={loading} />
-                )}
-            </Card>
+            `}</style>
         </div>
     );
 };

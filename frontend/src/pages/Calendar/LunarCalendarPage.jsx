@@ -4,8 +4,10 @@ import { CalendarOutlined, BellOutlined, HeartOutlined, ReloadOutlined } from '@
 import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { membersAPI } from '../../api';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const LunarCalendarPage = () => {
+    useDocumentTitle('Lịch Ngày Giỗ');
     const [loading, setLoading] = useState(true);
     const [anniversaries, setAnniversaries] = useState([]);
     const [selectedDate, setSelectedDate] = useState(dayjs());

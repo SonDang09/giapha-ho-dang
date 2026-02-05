@@ -11,8 +11,10 @@ import {
     ReloadOutlined
 } from '@ant-design/icons';
 import { membersAPI } from '../../api';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const DashboardPage = () => {
+    useDocumentTitle('Thống Kê Dòng Họ');
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
         totalMembers: 0,
@@ -139,8 +141,8 @@ const DashboardPage = () => {
                         <Statistic
                             title="Tổng thành viên"
                             value={stats.totalMembers}
-                            prefix={<TeamOutlined style={{ color: '#228B22' }} />}
-                            valueStyle={{ color: '#228B22' }}
+                            prefix={<TeamOutlined style={{ color: '#C41E3A' }} />}
+                            valueStyle={{ color: '#C41E3A' }}
                         />
                     </Card>
                 </Col>
@@ -149,8 +151,8 @@ const DashboardPage = () => {
                         <Statistic
                             title="Còn sống"
                             value={stats.livingMembers}
-                            prefix={<HeartOutlined style={{ color: '#52c41a' }} />}
-                            valueStyle={{ color: '#52c41a' }}
+                            prefix={<HeartOutlined style={{ color: '#D4AF37' }} />}
+                            valueStyle={{ color: '#D4AF37' }}
                         />
                     </Card>
                 </Col>
@@ -182,17 +184,17 @@ const DashboardPage = () => {
                     <Card title="Phân bố giới tính" bordered={false}>
                         <div style={{ marginBottom: 16 }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <span><ManOutlined style={{ color: '#3b82f6' }} /> Nam</span>
+                                <span><ManOutlined style={{ color: '#C41E3A' }} /> Nam</span>
                                 <span>{stats.maleCount} ({malePercent}%)</span>
                             </div>
-                            <Progress percent={malePercent} strokeColor="#3b82f6" showInfo={false} />
+                            <Progress percent={malePercent} strokeColor="#C41E3A" showInfo={false} />
                         </div>
                         <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <span><WomanOutlined style={{ color: '#ec4899' }} /> Nữ</span>
+                                <span><WomanOutlined style={{ color: '#228B22' }} /> Nữ</span>
                                 <span>{stats.femaleCount} ({femalePercent}%)</span>
                             </div>
-                            <Progress percent={femalePercent} strokeColor="#ec4899" showInfo={false} />
+                            <Progress percent={femalePercent} strokeColor="#228B22" showInfo={false} />
                         </div>
                     </Card>
                 </Col>
@@ -220,7 +222,7 @@ const DashboardPage = () => {
                                         <Progress
                                             percent={Math.round((c / stats.totalMembers) * 100)}
                                             size="small"
-                                            strokeColor="#228B22"
+                                            strokeColor="#D4AF37"
                                         />
                                     )
                                 }
@@ -236,8 +238,8 @@ const DashboardPage = () => {
                 <Col xs={24} md={12}>
                     <Card title="Thành viên nổi bật" bordered={false}>
                         {stats.oldestMember && (
-                            <div style={{ marginBottom: 16, padding: 16, background: '#f6ffed', borderRadius: 8 }}>
-                                <div style={{ color: '#52c41a', fontWeight: 600, marginBottom: 4 }}>
+                            <div style={{ marginBottom: 16, padding: 16, background: '#fef3cd', borderRadius: 8 }}>
+                                <div style={{ color: '#b8962f', fontWeight: 600, marginBottom: 4 }}>
                                     👴 Cao tuổi nhất (còn sống)
                                 </div>
                                 <div style={{ fontSize: 18, fontWeight: 700 }}>
@@ -269,7 +271,7 @@ const DashboardPage = () => {
                     <Card title="Tóm tắt" bordered={false} style={{ height: '100%' }}>
                         <div style={{ lineHeight: 2.5 }}>
                             <p>
-                                <strong>📊 Dòng họ Đặng</strong> hiện có <Tag color="green">{stats.totalMembers}</Tag>
+                                <strong>📊 Dòng họ Đặng</strong> hiện có <Tag color="gold">{stats.totalMembers}</Tag>
                                 thành viên được ghi nhận trong gia phả.
                             </p>
                             <p>
@@ -278,7 +280,7 @@ const DashboardPage = () => {
                                 <Tag color="magenta">{stats.femaleCount} nữ</Tag>.
                             </p>
                             <p>
-                                Hiện có <Tag color="green">{stats.livingMembers}</Tag> thành viên còn sống và
+                                Hiện có <Tag color="gold">{stats.livingMembers}</Tag> thành viên còn sống và
                                 <Tag>{stats.deceasedMembers}</Tag> người đã về với tổ tiên.
                             </p>
                         </div>

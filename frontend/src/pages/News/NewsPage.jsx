@@ -5,10 +5,12 @@ import { Link, useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { newsAPI } from '../../api';
 import { useAuth } from '../../context/AuthContext';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const { TextArea } = Input;
 
 const NewsPage = () => {
+    useDocumentTitle('Tin Tức & Sự Kiện');
     const { slug } = useParams();
     const { canEdit } = useAuth();
     const [loading, setLoading] = useState(true);

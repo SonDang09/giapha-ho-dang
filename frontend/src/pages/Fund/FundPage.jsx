@@ -15,8 +15,10 @@ import {
 import dayjs from 'dayjs';
 import { useAuth } from '../../context/AuthContext';
 import { transactionsAPI } from '../../api';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const FundPage = () => {
+    useDocumentTitle('Quỹ Dòng Họ');
     const { canEdit, isAdmin } = useAuth();
     const [loading, setLoading] = useState(true);
     const [transactions, setTransactions] = useState([]);

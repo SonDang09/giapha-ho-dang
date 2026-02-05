@@ -3,8 +3,10 @@ import { Card, Form, Input, Button, Avatar, Row, Col, Divider, message, Tag } fr
 import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined, SaveOutlined } from '@ant-design/icons';
 import { useAuth } from '../../context/AuthContext';
 import { authAPI } from '../../api';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const ProfilePage = () => {
+    useDocumentTitle('Thông Tin Tài Khoản');
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
     const [passwordLoading, setPasswordLoading] = useState(false);

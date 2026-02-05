@@ -5,11 +5,13 @@ import { membersAPI } from '../../api';
 import { useAuth } from '../../context/AuthContext';
 import { exportToPDF, exportToExcel, exportToWord } from '../../utils/export';
 import dayjs from 'dayjs';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const { Search } = Input;
 const { TextArea } = Input;
 
 const MembersPage = () => {
+    useDocumentTitle('Thành Viên');
     const { canEdit, isAdmin } = useAuth();
     const [loading, setLoading] = useState(true);
     const [members, setMembers] = useState([]);

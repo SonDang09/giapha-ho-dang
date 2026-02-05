@@ -12,8 +12,10 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { membersAPI, newsAPI, albumsAPI } from '../../api';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const HomePage = () => {
+    useDocumentTitle('Trang chủ');
     const [loading, setLoading] = useState(true);
     const [anniversaries, setAnniversaries] = useState([]);
     const [news, setNews] = useState([]);

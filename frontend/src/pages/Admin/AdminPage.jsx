@@ -16,11 +16,13 @@ import {
 import dayjs from 'dayjs';
 import { membersAPI, newsAPI, albumsAPI, authAPI, usersAPI } from '../../api';
 import { useAuth } from '../../context/AuthContext';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const { TabPane } = Tabs;
 const { TextArea } = Input;
 
 const AdminPage = () => {
+    useDocumentTitle('Trang Quản Trị');
     const { user, isAuthenticated } = useAuth();
     const [activeTab, setActiveTab] = useState('overview');
     const [loading, setLoading] = useState(false);

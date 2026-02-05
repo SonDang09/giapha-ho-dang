@@ -4,8 +4,10 @@ import { PictureOutlined, PlusOutlined, UploadOutlined, ReloadOutlined } from '@
 import { useParams, Link } from 'react-router-dom';
 import { albumsAPI } from '../../api';
 import { useAuth } from '../../context/AuthContext';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const AlbumsPage = () => {
+    useDocumentTitle('Album Ảnh');
     const { id } = useParams();
     const { canEdit } = useAuth();
     const [loading, setLoading] = useState(true);

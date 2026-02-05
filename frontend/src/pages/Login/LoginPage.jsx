@@ -3,8 +3,10 @@ import { Form, Input, Button, Card, message, Alert } from 'antd';
 import { UserOutlined, LockOutlined, LoginOutlined } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const LoginPage = () => {
+    useDocumentTitle('Đăng Nhập');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const { login } = useAuth();

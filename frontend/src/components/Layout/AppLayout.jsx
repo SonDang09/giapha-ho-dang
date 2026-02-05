@@ -79,27 +79,14 @@ const AppLayout = ({ children }) => {
                 zIndex: 100
             }}>
                 {/* Logo */}
-                <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{
-                        width: 40,
-                        height: 40,
-                        background: 'linear-gradient(135deg, #D4AF37 0%, #b8962f 100%)',
-                        borderRadius: 8,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 20,
-                        fontWeight: 'bold',
-                        color: 'white'
-                    }}>
-                        Đ
-                    </div>
+                <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 12, overflow: 'hidden' }}>
                     <span style={{
                         color: 'white',
                         fontSize: 18,
                         fontWeight: 600,
-                        display: 'none',
-                        '@media (min-width: 768px)': { display: 'block' }
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
                     }} className="logo-text">
                         Gia Phả Họ Đặng
                     </span>
@@ -200,8 +187,8 @@ const AppLayout = ({ children }) => {
 
             <Footer style={{
                 textAlign: 'center',
-                background: isDarkMode ? '#0f0f1a' : '#1a3d1a',
-                color: 'rgba(255,255,255,0.7)',
+                background: isDarkMode ? '#1a0f0a' : '#8B0000',
+                color: 'rgba(255,255,255,0.85)',
                 padding: '24px'
             }}>
                 <div style={{ marginBottom: 8 }}>

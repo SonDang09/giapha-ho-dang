@@ -1,40 +1,57 @@
 /* ===================================
-   GIA PHẢ HỌ ĐẶNG - CSS Variables & Theme
+   GIA PHẢ HỌ ĐẶNG - Traditional Vietnamese Theme
    =================================== */
 
 :root {
-  /* Primary Colors */
-  --color-primary: #228B22;
-  --color-primary-dark: #1a6b1a;
-  --color-primary-light: #2aa52a;
-  --color-primary-bg: rgba(34, 139, 34, 0.1);
-  
-  /* Accent Colors */
+  /* Primary Colors - Traditional Red */
+  --color-primary: #C41E3A;
+  --color-primary-dark: #9a1830;
+  --color-primary-light: #d63c55;
+  --color-primary-bg: rgba(196, 30, 58, 0.1);
+
+  /* Secondary Colors - Burgundy */
+  --color-secondary: #8B2942;
+  --color-secondary-dark: #6d1f33;
+  --color-secondary-light: #a83d58;
+
+  /* Gender Colors */
+  --color-male: #C41E3A;
+  --color-female: #228B22;
+
+  /* Accent Colors - Gold */
   --color-gold: #D4AF37;
   --color-gold-dark: #b8962f;
   --color-gold-light: #e5c654;
-  
-  /* Neutral Colors */
-  --color-bg: #f8f9fa;
-  --color-bg-card: #ffffff;
-  --color-bg-header: #1a3d1a;
-  --color-text: #2c3e50;
-  --color-text-secondary: #64748b;
-  --color-text-light: #94a3b8;
-  --color-border: #e2e8f0;
-  
+
+  /* Traditional Neutral Colors */
+  --color-brown: #8B4513;
+  --color-brown-light: #a0522d;
+  --color-cream: #FDF8E8;
+  --color-ivory: #FFFEF5;
+
+  /* Background Colors */
+  --color-bg: #FDF8E8;
+  --color-bg-card: #FFFEF5;
+  --color-bg-header: #8B0000;
+
+  /* Text Colors */
+  --color-text: #3d2914;
+  --color-text-secondary: #8B4513;
+  --color-text-light: #a0522d;
+  --color-border: #D4AF37;
+
   /* Status Colors */
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-info: #3b82f6;
-  
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  
+  --color-success: #b8962f;
+  --color-warning: #D4AF37;
+  --color-error: #C41E3A;
+  --color-info: #4169E1;
+
+  /* Shadows - Warm brown tones */
+  --shadow-sm: 0 1px 2px rgba(139, 69, 19, 0.08);
+  --shadow-md: 0 4px 6px -1px rgba(139, 69, 19, 0.12);
+  --shadow-lg: 0 10px 15px -3px rgba(139, 69, 19, 0.15);
+  --shadow-xl: 0 20px 25px -5px rgba(139, 69, 19, 0.2);
+
   /* Spacing */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -42,16 +59,17 @@
   --spacing-lg: 24px;
   --spacing-xl: 32px;
   --spacing-2xl: 48px;
-  
+
   /* Border Radius */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-full: 9999px;
-  
-  /* Typography */
+
+  /* Typography - Traditional with Serif */
   --font-family: 'Roboto', 'Noto Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-serif: 'Times New Roman', Georgia, 'Noto Serif', serif;
   --font-size-xs: 12px;
   --font-size-sm: 14px;
   --font-size-base: 16px;
@@ -60,35 +78,37 @@
   --font-size-2xl: 24px;
   --font-size-3xl: 30px;
   --font-size-4xl: 36px;
-  
+
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
   --transition-slow: 350ms ease;
-  
+
   /* Layout */
   --header-height: 64px;
   --sidebar-width: 260px;
   --content-max-width: 1200px;
 }
 
-/* Dark Mode */
+/* Dark Mode - Traditional Warm */
 [data-theme="dark"] {
-  --color-bg: #1a1a2e;
-  --color-bg-card: #16213e;
-  --color-bg-header: #0f0f1a;
-  --color-text: #e2e8f0;
-  --color-text-secondary: #94a3b8;
-  --color-text-light: #64748b;
-  --color-border: #334155;
-  --color-primary-bg: rgba(34, 139, 34, 0.2);
+  --color-bg: #2d1810;
+  --color-bg-card: #3d2416;
+  --color-bg-header: #1a0f0a;
+  --color-text: #f5edd6;
+  --color-text-secondary: #d4c4a8;
+  --color-text-light: #a89070;
+  --color-border: #5c3d2e;
+  --color-primary-bg: rgba(196, 30, 58, 0.3);
 }
 
 /* ===================================
    Reset & Base Styles
    =================================== */
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -319,11 +339,11 @@ img {
 }
 
 .tree-node-content.male {
-  border-top: 3px solid #3b82f6;
+  border-top: 3px solid var(--color-primary);
 }
 
 .tree-node-content.female {
-  border-top: 3px solid #ec4899;
+  border-top: 3px solid var(--color-female);
 }
 
 .tree-node-content.deceased {
@@ -383,7 +403,7 @@ img {
 .memorial-header {
   text-align: center;
   padding: var(--spacing-2xl) var(--spacing-lg);
-  background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, transparent 100%);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, transparent 100%);
 }
 
 .memorial-avatar {
@@ -470,6 +490,7 @@ img {
   from {
     box-shadow: 0 0 10px #ff4500, 0 0 20px #ff6600, 0 0 30px #ff8800;
   }
+
   to {
     box-shadow: 0 0 15px #ff4500, 0 0 30px #ff6600, 0 0 45px #ff8800;
   }
@@ -480,6 +501,7 @@ img {
     opacity: 0.6;
     transform: translateY(0) scale(1);
   }
+
   100% {
     opacity: 0;
     transform: translateY(-60px) scale(2);
@@ -528,24 +550,24 @@ img {
     --font-size-3xl: 24px;
     --header-height: 56px;
   }
-  
+
   .main-content {
     padding: var(--spacing-md);
   }
-  
+
   .page-container {
     padding: var(--spacing-md);
   }
-  
+
   .page-title {
     font-size: var(--font-size-2xl);
   }
-  
+
   .tree-container {
     height: calc(100vh - 150px);
     min-height: 400px;
   }
-  
+
   .memorial-avatar {
     width: 120px;
     height: 120px;
@@ -556,15 +578,15 @@ img {
   .widget-header {
     padding: var(--spacing-sm) var(--spacing-md);
   }
-  
+
   .widget-body {
     padding: var(--spacing-md);
   }
-  
+
   .anniversary-item {
     flex-wrap: wrap;
   }
-  
+
   .anniversary-countdown {
     margin-top: var(--spacing-sm);
     width: 100%;
@@ -576,23 +598,69 @@ img {
    Utility Classes
    =================================== */
 
-.text-center { text-align: center; }
-.text-primary { color: var(--color-primary); }
-.text-gold { color: var(--color-gold); }
-.text-secondary { color: var(--color-text-secondary); }
+.text-center {
+  text-align: center;
+}
 
-.mt-sm { margin-top: var(--spacing-sm); }
-.mt-md { margin-top: var(--spacing-md); }
-.mt-lg { margin-top: var(--spacing-lg); }
-.mb-sm { margin-bottom: var(--spacing-sm); }
-.mb-md { margin-bottom: var(--spacing-md); }
-.mb-lg { margin-bottom: var(--spacing-lg); }
+.text-primary {
+  color: var(--color-primary);
+}
 
-.flex { display: flex; }
-.flex-center { display: flex; align-items: center; justify-content: center; }
-.flex-between { display: flex; align-items: center; justify-content: space-between; }
-.gap-sm { gap: var(--spacing-sm); }
-.gap-md { gap: var(--spacing-md); }
+.text-gold {
+  color: var(--color-gold);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.mt-sm {
+  margin-top: var(--spacing-sm);
+}
+
+.mt-md {
+  margin-top: var(--spacing-md);
+}
+
+.mt-lg {
+  margin-top: var(--spacing-lg);
+}
+
+.mb-sm {
+  margin-bottom: var(--spacing-sm);
+}
+
+.mb-md {
+  margin-bottom: var(--spacing-md);
+}
+
+.mb-lg {
+  margin-bottom: var(--spacing-lg);
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gap-sm {
+  gap: var(--spacing-sm);
+}
+
+.gap-md {
+  gap: var(--spacing-md);
+}
 
 /* ===================================
    Ant Design Overrides
@@ -628,7 +696,8 @@ img {
   border-color: var(--color-primary-dark) !important;
 }
 
-.ant-input, .ant-select-selector {
+.ant-input,
+.ant-select-selector {
   border-radius: var(--radius-md) !important;
 }
 
