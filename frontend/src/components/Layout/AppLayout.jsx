@@ -122,15 +122,16 @@ const AppLayout = ({ children }) => {
                 />
 
                 {/* Right Section */}
-                <Space size="middle" style={{ flexShrink: 0 }}>
+                <Space size="middle" style={{ flexShrink: 0, alignItems: 'center' }}>
                     {/* Search */}
-                    <Search
-                        placeholder="Tìm kiếm..."
-                        onSearch={handleSearch}
-                        style={{ width: 180, minWidth: 120 }}
-                        className="header-search"
-                        allowClear
-                    />
+                    <div className="header-search" style={{ display: 'flex', alignItems: 'center' }}>
+                        <Search
+                            placeholder="Tìm kiếm..."
+                            onSearch={handleSearch}
+                            style={{ width: 180 }}
+                            allowClear
+                        />
+                    </div>
 
                     {/* Theme Toggle */}
                     <Button
@@ -224,34 +225,38 @@ const AppLayout = ({ children }) => {
           .logo-text { display: block !important; }
           .user-name { display: inline; }
           .header-search { 
-            display: inline-flex !important; 
+            display: flex !important;
+            align-items: center;
           }
-          .header-search .ant-input-search {
-            border-radius: 6px;
-            overflow: hidden;
+          .header-search .ant-input-group-wrapper,
+          .header-search .ant-input-search,
+          .header-search .ant-input-wrapper {
+            display: flex !important;
+            align-items: center;
+          }
+          .header-search .ant-input-affix-wrapper {
+            background: rgba(255,255,255,0.1) !important;
+            border-color: rgba(255,255,255,0.2) !important;
+            border-radius: 6px 0 0 6px !important;
           }
           .header-search .ant-input {
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(255,255,255,0.2);
-            color: white;
+            background: transparent !important;
+            color: white !important;
           }
           .header-search .ant-input::placeholder {
-            color: rgba(255,255,255,0.5);
-          }
-          .header-search .ant-input:focus,
-          .header-search .ant-input:hover {
-            background: rgba(255,255,255,0.15);
-            border-color: rgba(255,255,255,0.3);
+            color: rgba(255,255,255,0.5) !important;
           }
           .header-search .ant-input-search-button {
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.15) !important;
+            border-color: rgba(255,255,255,0.2) !important;
+            border-radius: 0 6px 6px 0 !important;
+            height: 32px !important;
           }
-        }
-        
-        @media (min-width: 1024px) {
-          .header-search {
-            width: 200px !important;
+          .header-search .ant-input-search-button .anticon {
+            color: white !important;
+          }
+          .header-search .ant-input-clear-icon {
+            color: rgba(255,255,255,0.5) !important;
           }
         }
       `}</style>
