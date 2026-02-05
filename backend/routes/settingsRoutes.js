@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const SiteSettings = require('../models/SiteSettings');
-const { protect, admin } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 
 // @route   GET /api/settings
 // @desc    Get site settings (public)
@@ -25,7 +25,7 @@ router.get('/', async (req, res) => {
 // @route   PUT /api/settings
 // @desc    Update site settings
 // @access  Admin only
-router.put('/', protect, admin, async (req, res) => {
+router.put('/', protect, authorize('admin_toc'), async (req, res) => {
     try {
         const {
             siteTitle,
