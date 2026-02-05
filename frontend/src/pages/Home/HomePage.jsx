@@ -11,7 +11,7 @@ import {
     TeamOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { membersAPI, newsAPI, albumsAPI } from '../../api';
+import { membersAPI, newsAPI, albumsAPI, settingsAPI } from '../../api';
 import useDocumentTitle from '../../hooks/useDocumentTitle';
 
 const HomePage = () => {
@@ -20,6 +20,11 @@ const HomePage = () => {
     const [anniversaries, setAnniversaries] = useState([]);
     const [news, setNews] = useState([]);
     const [albums, setAlbums] = useState([]);
+    const [siteSettings, setSiteSettings] = useState({
+        siteTitle: 'Gia Phả Họ Đặng Đà Nẵng',
+        tagline: 'Uống nước nhớ nguồn - Ăn quả nhớ kẻ trồng cây',
+        heroDescription: 'Trang web lưu giữ và kết nối các thế hệ trong dòng họ'
+    });
 
     useEffect(() => {
         loadData();
@@ -31,12 +36,24 @@ const HomePage = () => {
             const loadAnniversaries = membersAPI.getAnniversaries().catch(() => null);
             const loadNews = newsAPI.getLatest().catch(() => null);
             const loadAlbums = albumsAPI.getFeatured().catch(() => null);
+            const loadSettings = settingsAPI.get().catch(() => null);
 
-            const [annRes, newsRes, albumRes] = await Promise.all([
+            const [annRes, newsRes, albumRes, settingsRes] = await Promise.all([
                 loadAnniversaries,
                 loadNews,
-                loadAlbums
+                loadAlbums,
+                loadSettings
             ]);
+
+            // Load site settings
+            if (settingsRes?.data?.data) {
+                setSiteSettings(prev => ({
+                    ...prev,
+                    siteTitle: settingsRes.data.data.siteTitle || prev.siteTitle,
+                    tagline: settingsRes.data.data.tagline || prev.tagline,
+                    heroDescription: settingsRes.data.data.heroDescription || prev.heroDescription
+                }));
+            }
 
             if (annRes?.data?.data) {
                 setAnniversaries(annRes.data.data);
@@ -149,7 +166,7 @@ const HomePage = () => {
                         marginBottom: 12,
                         textShadow: '0 2px 4px rgba(0,0,0,0.2)'
                     }}>
-                        Gia Phả Họ Đặng Đà Nẵng
+                        {siteSettings.siteTitle}
                     </h1>
 
                     <p style={{
@@ -158,7 +175,7 @@ const HomePage = () => {
                         maxWidth: 500,
                         margin: '0 auto 24px'
                     }}>
-                        "Uống nước nhớ nguồn - Ăn quả nhớ kẻ trồng cây"
+                        "{siteSettings.tagline}"
                     </p>
 
                     <Link to="/tree">
