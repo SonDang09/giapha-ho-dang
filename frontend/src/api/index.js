@@ -84,6 +84,27 @@ export const memorialsAPI = {
     update: (memberId, data) => api.put(`/memorials/${memberId}`, data)
 };
 
+// Transactions API (Fund management)
+export const transactionsAPI = {
+    getAll: (params) => api.get('/transactions', { params }),
+    getStats: () => api.get('/transactions/stats'),
+    getById: (id) => api.get(`/transactions/${id}`),
+    create: (data) => api.post('/transactions', data),
+    update: (id, data) => api.put(`/transactions/${id}`, data),
+    delete: (id) => api.delete(`/transactions/${id}`)
+};
+
+// Users API (Admin management)
+export const usersAPI = {
+    getAll: (params) => api.get('/users', { params }),
+    getById: (id) => api.get(`/users/${id}`),
+    create: (data) => api.post('/users', data),
+    update: (id, data) => api.put(`/users/${id}`, data),
+    resetPassword: (id, newPassword) => api.put(`/users/${id}/password`, { newPassword }),
+    toggleStatus: (id) => api.put(`/users/${id}/toggle-status`),
+    delete: (id) => api.delete(`/users/${id}`)
+};
+
 // Demo API (for testing without database)
 export const demoAPI = {
     getTree: () => api.get('/demo/tree'),
@@ -111,3 +132,4 @@ export const uploadAPI = {
 };
 
 export default api;
+

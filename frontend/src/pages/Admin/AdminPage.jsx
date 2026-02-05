@@ -14,7 +14,7 @@ import {
     ReloadOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { membersAPI, newsAPI, albumsAPI, authAPI } from '../../api';
+import { membersAPI, newsAPI, albumsAPI, authAPI, usersAPI } from '../../api';
 import { useAuth } from '../../context/AuthContext';
 
 const { TabPane } = Tabs;
@@ -95,16 +95,32 @@ const AdminPage = () => {
             }
 
             // Demo users (no API for users list yet)
-            setUsers([
-                { _id: '1', username: 'admin', email: 'admin@giapha.vn', fullName: 'Quản trị viên', role: 'admin_toc', isActive: true },
-            ]);
+            try {
+                const usersRes = await usersAPI.getAll();
+                if (usersRes?.data?.data?.length > 0) {
+                    setUsers(usersRes.data.data);
+                } else {
+                    setUsers([
+                        { _id: 'demo1', username: 'admin', fullName: 'Quản trị viên', role: 'admin_toc', isActive: true },
+                    ]);
+                }
+            } catch (e) {
+                // Fallback for non-admin users who can't access users API
+                setUsers([
+                    { _id: 'demo1', username: 'admin', fullName: 'Quản trị viên', role: 'admin_toc', isActive: true },
+                ]);
+            }
 
             // Calculate stats
+            const membersCount = membersRes?.data?.data?.length || 0;
+            const newsCount = newsRes?.data?.data?.length || 0;
+            const albumsCount = albumsRes?.data?.data?.length || 0;
+
             setStats({
-                totalMembers: membersRes?.data?.data?.length || members.length || 4,
-                totalNews: newsRes?.data?.data?.length || news.length || 2,
-                totalAlbums: albumsRes?.data?.data?.length || albums.length || 2,
-                totalUsers: 1
+                totalMembers: membersCount || 4,
+                totalNews: newsCount || 2,
+                totalAlbums: albumsCount || 2,
+                totalUsers: users.length || 1
             });
 
         } catch (error) {
@@ -224,9 +240,10 @@ const AdminPage = () => {
     const handleUserSubmit = async (values) => {
         try {
             if (editingItem) {
-                message.info('Chức năng cập nhật người dùng đang được phát triển');
+                await usersAPI.update(editingItem._id, values);
+                message.success('Cập nhật người dùng thành công!');
             } else {
-                await authAPI.register(values);
+                await usersAPI.create(values);
                 message.success('Thêm người dùng thành công!');
             }
             setUserModal(false);
@@ -235,6 +252,28 @@ const AdminPage = () => {
             loadAllData();
         } catch (error) {
             console.error('User submit error:', error);
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra!');
+        }
+    };
+
+    const handleDeleteUser = async (id) => {
+        try {
+            await usersAPI.delete(id);
+            message.success('Xóa người dùng thành công!');
+            loadAllData();
+        } catch (error) {
+            console.error('Delete user error:', error);
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra khi xóa!');
+        }
+    };
+
+    const handleToggleUserStatus = async (id) => {
+        try {
+            const res = await usersAPI.toggleStatus(id);
+            message.success(res.data.message);
+            loadAllData();
+        } catch (error) {
+            console.error('Toggle user status error:', error);
             message.error(error.response?.data?.message || 'Có lỗi xảy ra!');
         }
     };
@@ -389,7 +428,7 @@ const AdminPage = () => {
             key: 'role',
             width: 120,
             render: (r) => {
-                const roles = { admin_toc: 'Admin', chi_ho: 'Trưởng chi', thanh_vien: 'Thành viên' };
+                const roles = { admin_toc: 'Admin', chi_ho: 'Trưởng chi', member: 'Thành viên' };
                 return <Tag color={r === 'admin_toc' ? 'red' : r === 'chi_ho' ? 'blue' : 'default'}>{roles[r] || r}</Tag>;
             }
         },
@@ -398,18 +437,35 @@ const AdminPage = () => {
             dataIndex: 'isActive',
             key: 'isActive',
             width: 100,
-            render: (a) => <Tag color={a ? 'green' : 'red'}>{a ? 'Hoạt động' : 'Khóa'}</Tag>
+            render: (a, record) => (
+                <Switch
+                    checked={a}
+                    onChange={() => handleToggleUserStatus(record._id)}
+                    disabled={record._id?.startsWith('demo')}
+                    checkedChildren="Hoạt động"
+                    unCheckedChildren="Khóa"
+                />
+            )
         },
         {
             title: 'Thao tác',
             key: 'actions',
-            width: 80,
+            width: 120,
             render: (_, record) => (
-                <Button size="small" icon={<EditOutlined />} onClick={() => {
-                    setEditingItem(record);
-                    userForm.setFieldsValue(record);
-                    setUserModal(true);
-                }} />
+                <Space size="small">
+                    <Button size="small" icon={<EditOutlined />} onClick={() => {
+                        setEditingItem(record);
+                        userForm.setFieldsValue(record);
+                        setUserModal(true);
+                    }} disabled={record._id?.startsWith('demo')} />
+                    <Popconfirm
+                        title="Xóa người dùng này?"
+                        onConfirm={() => handleDeleteUser(record._id)}
+                        disabled={record._id?.startsWith('demo')}
+                    >
+                        <Button size="small" danger icon={<DeleteOutlined />} disabled={record._id?.startsWith('demo')} />
+                    </Popconfirm>
+                </Space>
             )
         }
     ];

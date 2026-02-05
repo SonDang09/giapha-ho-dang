@@ -11,6 +11,8 @@ const newsRoutes = require('./routes/news');
 const albumRoutes = require('./routes/albums');
 const memorialRoutes = require('./routes/memorials');
 const uploadRoutes = require('./routes/upload');
+const transactionRoutes = require('./routes/transactions');
+const userRoutes = require('./routes/users');
 
 const app = express();
 
@@ -35,6 +37,8 @@ app.use('/api/news', newsRoutes);
 app.use('/api/albums', albumRoutes);
 app.use('/api/memorials', memorialRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/api/users', userRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

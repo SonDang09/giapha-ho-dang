@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Row, Col, Card, Table, Button, Modal, Form, Input, InputNumber, Select, DatePicker, Statistic, Tag, Space, message, Spin, Empty } from 'antd';
+import { Row, Col, Card, Table, Button, Modal, Form, Input, InputNumber, Select, DatePicker, Statistic, Tag, Space, message, Spin, Empty, Popconfirm, Alert } from 'antd';
 import {
     DollarOutlined,
     PlusOutlined,
@@ -7,21 +7,27 @@ import {
     ArrowDownOutlined,
     BankOutlined,
     WalletOutlined,
-    HistoryOutlined
+    HistoryOutlined,
+    EditOutlined,
+    DeleteOutlined,
+    ReloadOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useAuth } from '../../context/AuthContext';
+import { transactionsAPI } from '../../api';
 
 const FundPage = () => {
-    const { canEdit } = useAuth();
+    const { canEdit, isAdmin } = useAuth();
     const [loading, setLoading] = useState(true);
     const [transactions, setTransactions] = useState([]);
     const [stats, setStats] = useState({
         balance: 0,
-        totalIn: 0,
-        totalOut: 0
+        totalIncome: 0,
+        totalExpense: 0
     });
     const [modalVisible, setModalVisible] = useState(false);
+    const [editingItem, setEditingItem] = useState(null);
+    const [apiConnected, setApiConnected] = useState(true);
     const [form] = Form.useForm();
 
     useEffect(() => {
@@ -31,18 +37,23 @@ const FundPage = () => {
     const loadTransactions = async () => {
         setLoading(true);
         try {
-            // Demo transactions
-            const demoTransactions = [
-                { _id: '1', type: 'income', amount: 5000000, description: 'Đóng góp quỹ họ - Đặng Văn Minh', category: 'dong_gop', date: '2024-01-15', contributor: 'Đặng Văn Minh' },
-                { _id: '2', type: 'income', amount: 3000000, description: 'Đóng góp quỹ họ - Đặng Thị Hương', category: 'dong_gop', date: '2024-01-20', contributor: 'Đặng Thị Hương' },
-                { _id: '3', type: 'expense', amount: 2000000, description: 'Chi phí tổ chức giỗ tổ', category: 'gio_to', date: '2024-02-01' },
-                { _id: '4', type: 'income', amount: 10000000, description: 'Quyên góp xây từ đường', category: 'xay_dung', date: '2024-02-05', contributor: 'Nhiều thành viên' },
-                { _id: '5', type: 'expense', amount: 5000000, description: 'Mua vật tư sửa chữa từ đường', category: 'xay_dung', date: '2024-02-10' },
-                { _id: '6', type: 'income', amount: 2000000, description: 'Đóng góp quỹ họ - Đặng Văn Đức', category: 'dong_gop', date: '2024-02-15', contributor: 'Đặng Văn Đức' },
-                { _id: '7', type: 'expense', amount: 1500000, description: 'Chi phí họp mặt đầu năm', category: 'sinh_hoat', date: '2024-02-18' },
-                { _id: '8', type: 'income', amount: 1000000, description: 'Lãi tiết kiệm ngân hàng', category: 'khac', date: '2024-02-20' }
-            ];
+            const [transRes, statsRes] = await Promise.all([
+                transactionsAPI.getAll(),
+                transactionsAPI.getStats()
+            ]);
 
+            setTransactions(transRes.data.data || []);
+            setStats(statsRes.data.data || { balance: 0, totalIncome: 0, totalExpense: 0 });
+            setApiConnected(true);
+        } catch (error) {
+            console.error('Load transactions error:', error);
+            setApiConnected(false);
+            // Fallback to demo data
+            const demoTransactions = [
+                { _id: 'demo1', type: 'income', amount: 5000000, description: 'Đóng góp quỹ họ - Đặng Văn Minh', category: 'dong_gop', date: '2024-01-15', contributor: 'Đặng Văn Minh' },
+                { _id: 'demo2', type: 'income', amount: 3000000, description: 'Đóng góp quỹ họ - Đặng Thị Hương', category: 'dong_gop', date: '2024-01-20', contributor: 'Đặng Thị Hương' },
+                { _id: 'demo3', type: 'expense', amount: 2000000, description: 'Chi phí tổ chức giỗ tổ', category: 'gio_to', date: '2024-02-01' }
+            ];
             setTransactions(demoTransactions);
             calculateStats(demoTransactions);
         } finally {
@@ -51,12 +62,12 @@ const FundPage = () => {
     };
 
     const calculateStats = (trans) => {
-        const totalIn = trans.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-        const totalOut = trans.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+        const totalIncome = trans.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+        const totalExpense = trans.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
         setStats({
-            balance: totalIn - totalOut,
-            totalIn,
-            totalOut
+            balance: totalIncome - totalExpense,
+            totalIncome,
+            totalExpense
         });
     };
 
@@ -67,20 +78,49 @@ const FundPage = () => {
         }).format(amount);
     };
 
-    const handleAddTransaction = async (values) => {
-        const newTransaction = {
-            _id: Date.now().toString(),
-            ...values,
-            date: values.date.format('YYYY-MM-DD')
-        };
+    const handleSubmit = async (values) => {
+        try {
+            const data = {
+                ...values,
+                date: values.date ? values.date.format('YYYY-MM-DD') : new Date().toISOString()
+            };
 
-        const updated = [newTransaction, ...transactions];
-        setTransactions(updated);
-        calculateStats(updated);
+            if (editingItem) {
+                await transactionsAPI.update(editingItem._id, data);
+                message.success('Cập nhật giao dịch thành công!');
+            } else {
+                await transactionsAPI.create(data);
+                message.success('Thêm giao dịch thành công!');
+            }
 
-        message.success('Đã thêm giao dịch');
-        setModalVisible(false);
-        form.resetFields();
+            setModalVisible(false);
+            setEditingItem(null);
+            form.resetFields();
+            loadTransactions();
+        } catch (error) {
+            console.error('Submit error:', error);
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra! Vui lòng thử lại.');
+        }
+    };
+
+    const handleEdit = (record) => {
+        setEditingItem(record);
+        form.setFieldsValue({
+            ...record,
+            date: record.date ? dayjs(record.date) : null
+        });
+        setModalVisible(true);
+    };
+
+    const handleDelete = async (id) => {
+        try {
+            await transactionsAPI.delete(id);
+            message.success('Xóa giao dịch thành công!');
+            loadTransactions();
+        } catch (error) {
+            console.error('Delete error:', error);
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra khi xóa!');
+        }
     };
 
     const getCategoryLabel = (cat) => {
@@ -90,6 +130,7 @@ const FundPage = () => {
             xay_dung: 'Xây dựng',
             sinh_hoat: 'Sinh hoạt',
             tu_thien: 'Từ thiện',
+            hoc_bong: 'Học bổng',
             khac: 'Khác'
         };
         return labels[cat] || cat;
@@ -102,6 +143,7 @@ const FundPage = () => {
             xay_dung: 'blue',
             sinh_hoat: 'purple',
             tu_thien: 'cyan',
+            hoc_bong: 'magenta',
             khac: 'default'
         };
         return colors[cat] || 'default';
@@ -156,7 +198,36 @@ const FundPage = () => {
             ),
             width: 150,
             align: 'right'
-        }
+        },
+        ...(canEdit() ? [{
+            title: 'Thao tác',
+            key: 'actions',
+            width: 100,
+            render: (_, record) => (
+                <Space size="small">
+                    <Button
+                        type="text"
+                        icon={<EditOutlined />}
+                        onClick={() => handleEdit(record)}
+                        disabled={record._id?.startsWith('demo')}
+                    />
+                    {isAdmin() && (
+                        <Popconfirm
+                            title="Xóa giao dịch này?"
+                            onConfirm={() => handleDelete(record._id)}
+                            disabled={record._id?.startsWith('demo')}
+                        >
+                            <Button
+                                type="text"
+                                danger
+                                icon={<DeleteOutlined />}
+                                disabled={record._id?.startsWith('demo')}
+                            />
+                        </Popconfirm>
+                    )}
+                </Space>
+            )
+        }] : [])
     ];
 
     if (loading) {
@@ -174,16 +245,35 @@ const FundPage = () => {
                     <WalletOutlined style={{ color: '#D4AF37' }} /> Quỹ Dòng Họ
                 </h1>
 
-                {canEdit() && (
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() => setModalVisible(true)}
-                    >
-                        Thêm giao dịch
+                <Space>
+                    <Button icon={<ReloadOutlined />} onClick={loadTransactions}>
+                        Tải lại
                     </Button>
-                )}
+                    {canEdit() && (
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={() => {
+                                setEditingItem(null);
+                                form.resetFields();
+                                setModalVisible(true);
+                            }}
+                        >
+                            Thêm giao dịch
+                        </Button>
+                    )}
+                </Space>
             </div>
+
+            {!apiConnected && (
+                <Alert
+                    message="Đang sử dụng dữ liệu demo"
+                    description="Không thể kết nối API. Các thay đổi sẽ không được lưu."
+                    type="warning"
+                    showIcon
+                    style={{ marginBottom: 16 }}
+                />
+            )}
 
             {/* Stats Cards */}
             <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
@@ -202,7 +292,7 @@ const FundPage = () => {
                     <Card bordered={false}>
                         <Statistic
                             title="Tổng thu"
-                            value={stats.totalIn}
+                            value={stats.totalIncome}
                             prefix={<ArrowUpOutlined style={{ color: '#52c41a' }} />}
                             valueStyle={{ color: '#52c41a' }}
                             formatter={(value) => formatCurrency(value)}
@@ -213,7 +303,7 @@ const FundPage = () => {
                     <Card bordered={false}>
                         <Statistic
                             title="Tổng chi"
-                            value={stats.totalOut}
+                            value={stats.totalExpense}
                             prefix={<ArrowDownOutlined style={{ color: '#f5222d' }} />}
                             valueStyle={{ color: '#f5222d' }}
                             formatter={(value) => formatCurrency(value)}
@@ -236,24 +326,29 @@ const FundPage = () => {
 
             {/* Transactions Table */}
             <Card
-                title={<span><HistoryOutlined /> Lịch sử giao dịch</span>}
+                title={<span><HistoryOutlined /> Lịch sử giao dịch ({transactions.length})</span>}
                 bordered={false}
             >
-                <Table
-                    columns={columns}
-                    dataSource={transactions}
-                    rowKey="_id"
-                    pagination={{ pageSize: 10 }}
-                    scroll={{ x: 600 }}
-                />
+                {transactions.length === 0 ? (
+                    <Empty description="Chưa có giao dịch nào" />
+                ) : (
+                    <Table
+                        columns={columns}
+                        dataSource={transactions}
+                        rowKey="_id"
+                        pagination={{ pageSize: 10 }}
+                        scroll={{ x: 600 }}
+                    />
+                )}
             </Card>
 
-            {/* Add Transaction Modal */}
+            {/* Add/Edit Transaction Modal */}
             <Modal
-                title="Thêm giao dịch mới"
+                title={editingItem ? 'Sửa giao dịch' : 'Thêm giao dịch mới'}
                 open={modalVisible}
                 onCancel={() => {
                     setModalVisible(false);
+                    setEditingItem(null);
                     form.resetFields();
                 }}
                 footer={null}
@@ -262,8 +357,8 @@ const FundPage = () => {
                 <Form
                     form={form}
                     layout="vertical"
-                    onFinish={handleAddTransaction}
-                    initialValues={{ type: 'income', date: dayjs() }}
+                    onFinish={handleSubmit}
+                    initialValues={{ type: 'income', date: dayjs(), category: 'dong_gop' }}
                 >
                     <Form.Item
                         name="type"
@@ -306,6 +401,7 @@ const FundPage = () => {
                             <Select.Option value="xay_dung">Xây dựng</Select.Option>
                             <Select.Option value="sinh_hoat">Sinh hoạt</Select.Option>
                             <Select.Option value="tu_thien">Từ thiện</Select.Option>
+                            <Select.Option value="hoc_bong">Học bổng</Select.Option>
                             <Select.Option value="khac">Khác</Select.Option>
                         </Select>
                     </Form.Item>
@@ -319,6 +415,13 @@ const FundPage = () => {
                     </Form.Item>
 
                     <Form.Item
+                        name="contributor"
+                        label="Người đóng góp (nếu có)"
+                    >
+                        <Input placeholder="VD: Đặng Văn Minh" />
+                    </Form.Item>
+
+                    <Form.Item
                         name="date"
                         label="Ngày"
                         rules={[{ required: true }]}
@@ -329,7 +432,9 @@ const FundPage = () => {
                     <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
                         <Space>
                             <Button onClick={() => setModalVisible(false)}>Hủy</Button>
-                            <Button type="primary" htmlType="submit">Thêm giao dịch</Button>
+                            <Button type="primary" htmlType="submit">
+                                {editingItem ? 'Cập nhật' : 'Thêm giao dịch'}
+                            </Button>
                         </Space>
                     </Form.Item>
                 </Form>
