@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/db');
 
 // Import routes
@@ -20,7 +22,41 @@ const app = express();
 // Connect to database
 connectDB();
 
-// Middleware
+// ===================
+// SECURITY MIDDLEWARE
+// ===================
+
+// Helmet - Set security HTTP headers
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow images from uploads
+    contentSecurityPolicy: false // Disable CSP for simpler setup
+}));
+
+// Rate limiting - General API (100 requests per 15 minutes)
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100,
+    message: {
+        success: false,
+        message: 'Quá nhiều yêu cầu. Vui lòng thử lại sau 15 phút.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+// Rate limiting - Auth endpoints (stricter: 10 attempts per 15 minutes)
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10,
+    message: {
+        success: false,
+        message: 'Quá nhiều lần đăng nhập thất bại. Vui lòng thử lại sau 15 phút.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+// CORS
 app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     credentials: true
@@ -31,16 +67,16 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/members', memberRoutes);
-app.use('/api/news', newsRoutes);
-app.use('/api/albums', albumRoutes);
-app.use('/api/memorials', memorialRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/transactions', transactionRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/settings', settingsRoutes);
+// API Routes with Rate Limiting
+app.use('/api/auth', authLimiter, authRoutes);           // Strict: 10 requests/15min
+app.use('/api/members', apiLimiter, memberRoutes);       // General: 100 requests/15min
+app.use('/api/news', apiLimiter, newsRoutes);
+app.use('/api/albums', apiLimiter, albumRoutes);
+app.use('/api/memorials', apiLimiter, memorialRoutes);
+app.use('/api/upload', apiLimiter, uploadRoutes);
+app.use('/api/transactions', apiLimiter, transactionRoutes);
+app.use('/api/users', authLimiter, userRoutes);          // Strict: sensitive user management
+app.use('/api/settings', authLimiter, settingsRoutes);   // Strict: site config
 
 // Health check
 app.get('/api/health', (req, res) => {

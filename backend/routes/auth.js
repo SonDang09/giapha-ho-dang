@@ -83,8 +83,8 @@ router.post('/login', [
 
         const { username, password } = req.body;
 
-        // Find user with password
-        const user = await User.findOne({ username }).select('+password');
+        // Find user with password and login tracking fields
+        const user = await User.findOne({ username }).select('+password +loginAttempts +lockUntil');
         if (!user) {
             return res.status(401).json({
                 success: false,
@@ -92,12 +92,32 @@ router.post('/login', [
             });
         }
 
+        // Check if account is locked
+        if (user.isLocked) {
+            const lockTimeRemaining = Math.ceil((user.lockUntil - Date.now()) / 60000);
+            return res.status(423).json({
+                success: false,
+                message: `Tài khoản bị khóa. Vui lòng thử lại sau ${lockTimeRemaining} phút.`
+            });
+        }
+
         // Check password
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
+            // Increment failed login attempts
+            await user.incLoginAttempts();
+
+            const attemptsLeft = 5 - (user.loginAttempts + 1);
+            let message = 'Tên đăng nhập hoặc mật khẩu không đúng';
+            if (attemptsLeft > 0 && attemptsLeft <= 3) {
+                message += `. Còn ${attemptsLeft} lần thử.`;
+            } else if (attemptsLeft <= 0) {
+                message = 'Quá nhiều lần đăng nhập thất bại. Tài khoản bị khóa 30 phút.';
+            }
+
             return res.status(401).json({
                 success: false,
-                message: 'Tên đăng nhập hoặc mật khẩu không đúng'
+                message
             });
         }
 
@@ -107,6 +127,9 @@ router.post('/login', [
                 message: 'Tài khoản đã bị vô hiệu hóa'
             });
         }
+
+        // Reset login attempts on successful login
+        await user.resetLoginAttempts();
 
         const token = generateToken(user._id);
 
