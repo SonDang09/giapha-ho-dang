@@ -43,6 +43,7 @@ const MembersPage = () => {
                     total: response.data.pagination?.total || response.data.data.length
                 }));
                 setApiConnected(true);
+                setLoading(false);
                 return;
             }
         } catch (error) {
