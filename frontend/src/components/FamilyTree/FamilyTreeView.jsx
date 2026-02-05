@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import Tree from 'react-d3-tree';
 import { Modal, Descriptions, Avatar, Tag, Button, Spin } from 'antd';
 import { UserOutlined, ManOutlined, WomanOutlined, HeartOutlined } from '@ant-design/icons';
@@ -22,8 +22,8 @@ const FamilyTreeView = ({ data, loading }) => {
     const [translate, setTranslate] = useState({ x: 0, y: 0 });
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-    // Detect mobile on resize
-    useState(() => {
+    // Detect mobile on resize - MUST be useEffect not useState!
+    useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 768);
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
@@ -171,11 +171,11 @@ const FamilyTreeView = ({ data, loading }) => {
     const treeConfig = useMemo(() => ({
         orientation: 'vertical',
         pathFunc: 'step',
-        separation: { siblings: isMobile ? 1.2 : 1.4, nonSiblings: isMobile ? 1.5 : 2.0 },
-        nodeSize: { x: isMobile ? 160 : 220, y: isMobile ? 140 : 160 },
+        separation: { siblings: isMobile ? 1.3 : 1.4, nonSiblings: isMobile ? 1.8 : 2.0 },
+        nodeSize: { x: isMobile ? 200 : 220, y: isMobile ? 140 : 160 },
         translate,
-        zoom: isMobile ? 0.5 : 0.85,
-        scaleExtent: { min: 0.2, max: 2.5 },
+        zoom: isMobile ? 0.45 : 0.85,
+        scaleExtent: { min: 0.15, max: 2.5 },
         enableLegacyTransitions: true,
         transitionDuration: 400
     }), [translate, isMobile]);
