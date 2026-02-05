@@ -219,8 +219,8 @@ const AppLayout = ({ children }) => {
         .user-name { display: none; }
         .header-search { display: none !important; }
         
-        /* Tablet - 768px+ */
-        @media (min-width: 768px) {
+        /* Desktop - 1024px+ (shows horizontal menu) */
+        @media (min-width: 1024px) {
           .site-logo .logo-text {
             font-size: 20px !important;
           }
@@ -268,17 +268,6 @@ const AppLayout = ({ children }) => {
           }
           .header-search .ant-input-clear-icon {
             color: rgba(255,255,255,0.5) !important;
-          }
-        }
-        
-        /* Desktop medium - 1024px+ */
-        @media (min-width: 1024px) {
-          .site-logo .logo-text {
-            font-size: 22px !important;
-          }
-          .desktop-menu .ant-menu-item {
-            padding: 0 16px !important;
-            font-size: 14px !important;
           }
         }
         
