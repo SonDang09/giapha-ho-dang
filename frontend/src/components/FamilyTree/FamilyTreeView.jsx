@@ -674,7 +674,11 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                             </Select>
                             <Button
                                 type="primary"
-                                ghost
+                                style={{
+                                    background: '#52c41a',
+                                    borderColor: '#52c41a',
+                                    fontWeight: 600
+                                }}
                                 onClick={() => {
                                     setEditVisible(false);
                                     setAddSpouseVisible(true);
