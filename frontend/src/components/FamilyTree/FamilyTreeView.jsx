@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Tree from 'react-d3-tree';
-import { Modal, Descriptions, Avatar, Tag, Button, Spin } from 'antd';
-import { UserOutlined, ManOutlined, WomanOutlined, HeartOutlined } from '@ant-design/icons';
+import { Modal, Descriptions, Avatar, Tag, Button, Spin, Form, Input, Select, InputNumber, Space, message, Popconfirm } from 'antd';
+import { UserOutlined, ManOutlined, WomanOutlined, HeartOutlined, UserAddOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { membersAPI } from '../../api';
 
 // Traditional Vietnamese Gia Phả Colors
 const COLORS = {
@@ -15,12 +16,26 @@ const COLORS = {
     darkRed: '#8B0000'    // Đỏ đậm cho header
 };
 
-const FamilyTreeView = ({ data, loading }) => {
+const FamilyTreeView = ({ data, loading, onRefresh }) => {
     const navigate = useNavigate();
     const [selectedMember, setSelectedMember] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [translate, setTranslate] = useState({ x: 0, y: 0 });
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+    // Admin check
+    const [isAdmin, setIsAdmin] = useState(false);
+    useEffect(() => {
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        setIsAdmin(user?.role === 'admin_toc' || user?.role === 'admin');
+    }, []);
+
+    // Action modals
+    const [addChildVisible, setAddChildVisible] = useState(false);
+    const [editVisible, setEditVisible] = useState(false);
+    const [actionLoading, setActionLoading] = useState(false);
+    const [addForm] = Form.useForm();
+    const [editForm] = Form.useForm();
 
     // Detect mobile on resize - MUST be useEffect not useState!
     useEffect(() => {
@@ -161,6 +176,84 @@ const FamilyTreeView = ({ data, loading }) => {
         setModalVisible(true);
     };
 
+    // Add child handler
+    const handleAddChild = async (values) => {
+        const attrs = selectedMember?.attributes || {};
+        setActionLoading(true);
+        try {
+            const childData = {
+                fullName: values.fullName,
+                gender: values.gender,
+                birthYear: values.birthYear,
+                father: attrs.gender === 'male' ? attrs.id : null,
+                mother: attrs.gender === 'female' ? attrs.id : null,
+                generation: (attrs.generation || 1) + 1,
+                isDeceased: false
+            };
+            await membersAPI.create(childData);
+            message.success(`Đã thêm con: ${values.fullName}`);
+            setAddChildVisible(false);
+            setModalVisible(false);
+            addForm.resetFields();
+            onRefresh?.();
+        } catch (error) {
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra!');
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    // Edit handler
+    const handleEditMember = async (values) => {
+        const attrs = selectedMember?.attributes || {};
+        setActionLoading(true);
+        try {
+            await membersAPI.update(attrs.id, {
+                fullName: values.fullName,
+                gender: values.gender,
+                birthYear: values.birthYear,
+                deathYear: values.deathYear || null,
+                isDeceased: !!values.deathYear
+            });
+            message.success('Đã cập nhật thông tin!');
+            setEditVisible(false);
+            setModalVisible(false);
+            onRefresh?.();
+        } catch (error) {
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra!');
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    // Delete handler
+    const handleDeleteMember = async () => {
+        const attrs = selectedMember?.attributes || {};
+        setActionLoading(true);
+        try {
+            await membersAPI.delete(attrs.id);
+            message.success('Đã xóa thành viên!');
+            setModalVisible(false);
+            onRefresh?.();
+        } catch (error) {
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra!');
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    // Open edit modal with pre-filled data
+    const openEditModal = () => {
+        const attrs = selectedMember?.attributes || {};
+        editForm.setFieldsValue({
+            fullName: selectedMember?.name,
+            gender: attrs.gender,
+            birthYear: attrs.birthYear,
+            deathYear: attrs.deathYear
+        });
+        setEditVisible(true);
+    };
+
     const containerRef = useCallback((containerElem) => {
         if (containerElem !== null) {
             const { width } = containerElem.getBoundingClientRect();
@@ -264,25 +357,54 @@ const FamilyTreeView = ({ data, loading }) => {
                 }
                 open={modalVisible}
                 onCancel={() => setModalVisible(false)}
-                footer={[
-                    attrs.isDeceased && (
-                        <Button
-                            key="memorial"
-                            type="primary"
-                            icon={<HeartOutlined />}
-                            style={{ background: COLORS.male }}
-                            onClick={() => {
-                                setModalVisible(false);
-                                navigate(`/memorial/${attrs.id}`);
-                            }}
-                        >
-                            Trang tưởng niệm
-                        </Button>
-                    ),
-                    <Button key="close" onClick={() => setModalVisible(false)}>
-                        Đóng
-                    </Button>
-                ].filter(Boolean)}
+                footer={
+                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                        {/* Admin actions - left side */}
+                        {isAdmin && (
+                            <Space>
+                                <Button
+                                    type="primary"
+                                    icon={<UserAddOutlined />}
+                                    onClick={() => setAddChildVisible(true)}
+                                    style={{ background: '#52c41a', borderColor: '#52c41a' }}
+                                >
+                                    Thêm con
+                                </Button>
+                                <Button icon={<EditOutlined />} onClick={openEditModal}>
+                                    Sửa
+                                </Button>
+                                <Popconfirm
+                                    title="Xóa thành viên?"
+                                    description={`Bạn có chắc muốn xóa ${selectedMember?.name}?`}
+                                    onConfirm={handleDeleteMember}
+                                    okText="Xóa"
+                                    cancelText="Hủy"
+                                    okButtonProps={{ danger: true, loading: actionLoading }}
+                                >
+                                    <Button danger icon={<DeleteOutlined />}>Xóa</Button>
+                                </Popconfirm>
+                            </Space>
+                        )}
+                        {!isAdmin && <div />}
+                        {/* Right side buttons */}
+                        <Space>
+                            {attrs.isDeceased && (
+                                <Button
+                                    type="primary"
+                                    icon={<HeartOutlined />}
+                                    style={{ background: COLORS.male }}
+                                    onClick={() => {
+                                        setModalVisible(false);
+                                        navigate(`/memorial/${attrs.id}`);
+                                    }}
+                                >
+                                    Trang tưởng niệm
+                                </Button>
+                            )}
+                            <Button onClick={() => setModalVisible(false)}>Đóng</Button>
+                        </Space>
+                    </div>
+                }
                 width={480}
             >
                 <div style={{ textAlign: 'center', marginBottom: 24 }}>
@@ -318,6 +440,112 @@ const FamilyTreeView = ({ data, loading }) => {
                         </Descriptions.Item>
                     )}
                 </Descriptions>
+            </Modal>
+
+            {/* Add Child Modal */}
+            <Modal
+                title={`Thêm con của ${selectedMember?.name}`}
+                open={addChildVisible}
+                onCancel={() => setAddChildVisible(false)}
+                footer={null}
+                width={400}
+            >
+                <Form
+                    form={addForm}
+                    layout="vertical"
+                    onFinish={handleAddChild}
+                    initialValues={{ gender: 'male' }}
+                >
+                    <Form.Item
+                        name="fullName"
+                        label="Họ tên"
+                        rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
+                    >
+                        <Input placeholder="Nhập họ tên" autoFocus />
+                    </Form.Item>
+
+                    <Form.Item name="gender" label="Giới tính">
+                        <Select>
+                            <Select.Option value="male">Nam</Select.Option>
+                            <Select.Option value="female">Nữ</Select.Option>
+                        </Select>
+                    </Form.Item>
+
+                    <Form.Item name="birthYear" label="Năm sinh">
+                        <InputNumber
+                            placeholder="VD: 1990"
+                            min={1800}
+                            max={new Date().getFullYear()}
+                            style={{ width: '100%' }}
+                        />
+                    </Form.Item>
+
+                    <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+                        <Space>
+                            <Button onClick={() => setAddChildVisible(false)}>Hủy</Button>
+                            <Button type="primary" htmlType="submit" loading={actionLoading}>
+                                Thêm
+                            </Button>
+                        </Space>
+                    </Form.Item>
+                </Form>
+            </Modal>
+
+            {/* Edit Member Modal */}
+            <Modal
+                title={`Sửa thông tin: ${selectedMember?.name}`}
+                open={editVisible}
+                onCancel={() => setEditVisible(false)}
+                footer={null}
+                width={400}
+            >
+                <Form
+                    form={editForm}
+                    layout="vertical"
+                    onFinish={handleEditMember}
+                >
+                    <Form.Item
+                        name="fullName"
+                        label="Họ tên"
+                        rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
+                    >
+                        <Input placeholder="Nhập họ tên" />
+                    </Form.Item>
+
+                    <Form.Item name="gender" label="Giới tính">
+                        <Select>
+                            <Select.Option value="male">Nam</Select.Option>
+                            <Select.Option value="female">Nữ</Select.Option>
+                        </Select>
+                    </Form.Item>
+
+                    <Form.Item name="birthYear" label="Năm sinh">
+                        <InputNumber
+                            placeholder="VD: 1990"
+                            min={1800}
+                            max={new Date().getFullYear()}
+                            style={{ width: '100%' }}
+                        />
+                    </Form.Item>
+
+                    <Form.Item name="deathYear" label="Năm mất (nếu có)">
+                        <InputNumber
+                            placeholder="Để trống nếu còn sống"
+                            min={1800}
+                            max={new Date().getFullYear()}
+                            style={{ width: '100%' }}
+                        />
+                    </Form.Item>
+
+                    <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+                        <Space>
+                            <Button onClick={() => setEditVisible(false)}>Hủy</Button>
+                            <Button type="primary" htmlType="submit" loading={actionLoading}>
+                                Lưu
+                            </Button>
+                        </Space>
+                    </Form.Item>
+                </Form>
             </Modal>
 
             <style>{`

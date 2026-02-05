@@ -92,7 +92,7 @@ const TreePage = () => {
 
     return (
         <div className="tree-page">
-            <FamilyTreeView data={treeData} loading={loading} />
+            <FamilyTreeView data={treeData} loading={loading} onRefresh={loadTreeData} />
 
             {/* Float Action Buttons */}
             <FloatButton.Group shape="square" style={{ right: 24, bottom: 24 }}>
