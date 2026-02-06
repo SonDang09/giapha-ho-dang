@@ -483,10 +483,10 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                 open={modalVisible}
                 onCancel={() => setModalVisible(false)}
                 footer={
-                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '8px 0' }}>
-                        {/* Admin actions - left side */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', padding: '8px 0' }}>
+                        {/* Admin actions - top row */}
                         {isAdmin && (
-                            <Space>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                 <Button
                                     type="primary"
                                     icon={<UserAddOutlined />}
@@ -517,11 +517,10 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                                 >
                                     <Button danger icon={<DeleteOutlined />} style={{ borderRadius: '6px' }}>Xóa</Button>
                                 </Popconfirm>
-                            </Space>
+                            </div>
                         )}
-                        {!isAdmin && <div />}
-                        {/* Right side buttons */}
-                        <Space>
+                        {/* Action buttons - bottom row */}
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
                             {attrs.isDeceased && (
                                 <Button
                                     type="primary"
@@ -540,7 +539,7 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                                 </Button>
                             )}
                             <Button onClick={() => setModalVisible(false)} style={{ borderRadius: '6px' }}>Đóng</Button>
-                        </Space>
+                        </div>
                     </div>
                 }
                 width={420}
@@ -702,6 +701,15 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                     <Form.Item name="birthYear" label="Năm sinh">
                         <InputNumber
                             placeholder="VD: 1990"
+                            min={1800}
+                            max={new Date().getFullYear()}
+                            style={{ width: '100%' }}
+                        />
+                    </Form.Item>
+
+                    <Form.Item name="deathYear" label="Năm mất (nếu đã mất)">
+                        <InputNumber
+                            placeholder="VD: 2020"
                             min={1800}
                             max={new Date().getFullYear()}
                             style={{ width: '100%' }}
