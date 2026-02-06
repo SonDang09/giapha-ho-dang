@@ -19,7 +19,7 @@ Hướng dẫn toàn diện về dự án website Gia Phả Họ Đặng.
 
 ### Folder Structure
 ```
-/Users/sondang/Downloads/GiaPha/
+/Users/sondang/My Drive/1. GENPLUS MEDIA/2. Code/GiaPha/
 ├── frontend/
 │   ├── src/
 │   │   ├── api/              # API calls (axios instances)
@@ -139,6 +139,36 @@ GET /api/members/tree → { name, children: [...] }
 
 ---
 
+## 🎨 Tree Page UI Styling
+
+### Card Colors & Borders
+```javascript
+const COLORS = {
+  male: '#8B0000',      // Dark red for male cards
+  female: '#1B5E20',    // Dark green for female cards
+  gold: '#DAA520',      // Gold for generation badges
+  brown: '#8B4513'      // Brown for connector lines
+};
+```
+
+### Card Styling
+- **Size**: 165x95px for all cards (main + spouse)
+- **Border**: 3px solid (red for male, green for female)
+- **Badge**: Diamond-shaped generation badge at top-right
+- **Title**: CỤ (Gen 1-2), ÔNG/BÀ (Gen 3), VỢ for spouses
+
+### Spouse Display
+- Spouses rendered next to main member with brown connector line
+- Same card size and styling as main member
+- Title shows "VỢ" instead of ÔNG/BÀ
+
+### Year Format
+- `(YYYY-YYYY)` for deceased
+- `(YYYY-nay)` for living
+- `(?-YYYY)` if birth year unknown
+
+---
+
 ## 🐛 Common Issues & Solutions
 
 ### 1. Menu overflow on medium screens
@@ -177,6 +207,13 @@ console.log('Tree data:', response.data);
 - Check CORS settings on backend
 - Verify multer middleware configured
 
+### 6. Login rate limiting
+**Problem:** "Quá nhiều lần đăng nhập thất bại" sau vài lần thử
+**Solution:**
+- Backend có rate limit cho login attempts (bảo mật)
+- Đợi 15 phút hoặc clear localStorage và thử lại
+- Credentials đúng: `admin` / `admin123`
+
 ---
 
 ## 🔧 Development Commands
@@ -184,15 +221,15 @@ console.log('Tree data:', response.data);
 ### Start local development
 ```bash
 # Terminal 1: Backend
-cd /Users/sondang/Downloads/GiaPha/backend && npm run dev
+cd "/Users/sondang/My Drive/1. GENPLUS MEDIA/2. Code/GiaPha/backend" && npm start
 
 # Terminal 2: Frontend  
-cd /Users/sondang/Downloads/GiaPha/frontend && npm run dev
+cd "/Users/sondang/My Drive/1. GENPLUS MEDIA/2. Code/GiaPha/frontend" && npm run dev
 ```
 
 ### Deploy to production
 ```bash
-cd /Users/sondang/Downloads/GiaPha
+cd "/Users/sondang/My Drive/1. GENPLUS MEDIA/2. Code/GiaPha"
 git add .
 git commit -m "Your message"
 git push origin main
@@ -248,6 +285,7 @@ Location: `frontend/src/components/Layout/AppLayout.jsx`
 
 | Service | Username | Password/Notes |
 |---------|----------|----------------|
+| **Admin** | admin | admin123 |
 | **Admin** | admin | admin123 |
 | **GitHub** | SonDang09 | - |
 | **Vercel** | sondangs-projects-2be2385f | Via GitHub OAuth |

@@ -19,9 +19,7 @@ description: Quy trình deploy website Gia Phả lên production
 ### Tài khoản đăng nhập
 | Vai trò | Username | Password |
 |---------|----------|----------|
-| Quản trị viên | admin | Admin@123456 |
-| Chi họ | chinho | chi123 |
-| Thành viên | member | member123 |
+| Quản trị viên | admin | admin123 |
 
 ---
 
@@ -38,7 +36,7 @@ description: Quy trình deploy website Gia Phả lên production
 ## 📁 Cấu trúc Project
 
 ```
-/Users/sondang/Downloads/GiaPha/
+/Users/sondang/My Drive/1. GENPLUS MEDIA/2. Code/GiaPha/
 ├── frontend/                 # React + Vite + Ant Design
 │   ├── src/
 │   │   ├── api/             # API calls (membersAPI, newsAPI, settingsAPI...)
@@ -123,12 +121,12 @@ Sửa code trong thư mục `/Users/sondang/Downloads/GiaPha`
 
 // turbo
 ```bash
-cd /Users/sondang/Downloads/GiaPha/frontend && npm run dev
+cd "/Users/sondang/My Drive/1. GENPLUS MEDIA/2. Code/GiaPha/frontend" && npm run dev
 ```
 
 // turbo
 ```bash
-cd /Users/sondang/Downloads/GiaPha/backend && npm run dev
+cd "/Users/sondang/My Drive/1. GENPLUS MEDIA/2. Code/GiaPha/backend" && npm start
 ```
 
 Mở http://localhost:5173 để test
@@ -136,7 +134,7 @@ Mở http://localhost:5173 để test
 ### 3. Commit thay đổi
 
 ```bash
-cd /Users/sondang/Downloads/GiaPha
+cd "/Users/sondang/My Drive/1. GENPLUS MEDIA/2. Code/GiaPha"
 git add .
 git commit -m "Mô tả thay đổi của bạn"
 ```
@@ -180,8 +178,10 @@ Mở https://giapha-ho-dang.vercel.app và kiểm tra thay đổi
 
 🔄 **Rollback**: Nếu có lỗi, vào dashboard Vercel/Render để rollback về version trước.
 
-🔒 **Admin Password**: `Admin@123456` (đã cập nhật từ admin123)
+🔒 **Admin Password**: `admin123`
 
 📱 **Mobile**: Đã tối ưu cho màn hình mobile, tree view auto-adjust nodeSize và zoom.
 
 🎨 **Theme**: Support dark mode via ThemeContext.
+
+🎨 **Tree UI**: Card styling với viền màu (đỏ cho nam, xanh cho nữ), connector lines giữa vợ chồng.

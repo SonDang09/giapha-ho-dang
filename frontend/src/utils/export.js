@@ -1,115 +1,73 @@
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import html2pdf from 'html2pdf.js';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, AlignmentType } from 'docx';
 
-// Helper function to convert Vietnamese to ASCII-safe characters for PDF
-const sanitizeVietnamese = (str) => {
-    if (!str) return '';
-    // Map Vietnamese characters to ASCII equivalents
-    const map = {
-        'à': 'a', 'á': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
-        'ă': 'a', 'ằ': 'a', 'ắ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
-        'â': 'a', 'ầ': 'a', 'ấ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
-        'đ': 'd', 'Đ': 'D',
-        'è': 'e', 'é': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
-        'ê': 'e', 'ề': 'e', 'ế': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
-        'ì': 'i', 'í': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
-        'ò': 'o', 'ó': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
-        'ô': 'o', 'ồ': 'o', 'ố': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
-        'ơ': 'o', 'ờ': 'o', 'ớ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
-        'ù': 'u', 'ú': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
-        'ư': 'u', 'ừ': 'u', 'ứ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
-        'ỳ': 'y', 'ý': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
-        'À': 'A', 'Á': 'A', 'Ả': 'A', 'Ã': 'A', 'Ạ': 'A',
-        'Ă': 'A', 'Ằ': 'A', 'Ắ': 'A', 'Ẳ': 'A', 'Ẵ': 'A', 'Ặ': 'A',
-        'Â': 'A', 'Ầ': 'A', 'Ấ': 'A', 'Ẩ': 'A', 'Ẫ': 'A', 'Ậ': 'A',
-        'È': 'E', 'É': 'E', 'Ẻ': 'E', 'Ẽ': 'E', 'Ẹ': 'E',
-        'Ê': 'E', 'Ề': 'E', 'Ế': 'E', 'Ể': 'E', 'Ễ': 'E', 'Ệ': 'E',
-        'Ì': 'I', 'Í': 'I', 'Ỉ': 'I', 'Ĩ': 'I', 'Ị': 'I',
-        'Ò': 'O', 'Ó': 'O', 'Ỏ': 'O', 'Õ': 'O', 'Ọ': 'O',
-        'Ô': 'O', 'Ồ': 'O', 'Ố': 'O', 'Ổ': 'O', 'Ỗ': 'O', 'Ộ': 'O',
-        'Ơ': 'O', 'Ờ': 'O', 'Ớ': 'O', 'Ở': 'O', 'Ỡ': 'O', 'Ợ': 'O',
-        'Ù': 'U', 'Ú': 'U', 'Ủ': 'U', 'Ũ': 'U', 'Ụ': 'U',
-        'Ư': 'U', 'Ừ': 'U', 'Ứ': 'U', 'Ử': 'U', 'Ữ': 'U', 'Ự': 'U',
-        'Ỳ': 'Y', 'Ý': 'Y', 'Ỷ': 'Y', 'Ỹ': 'Y', 'Ỵ': 'Y'
-    };
-    return str.split('').map(char => map[char] || char).join('');
-};
-
-// Export to PDF (ASCII-safe for compatibility)
+// Export to PDF with Vietnamese font support using html2pdf
 export const exportToPDF = async (members, fileName = 'gia-pha-ho-dang') => {
-    const doc = new jsPDF();
+    // Create HTML content for PDF
+    const html = `
+        <div style="font-family: 'Times New Roman', serif; padding: 20px;">
+            <h1 style="color: #228B22; text-align: center; margin-bottom: 10px;">
+                GIA PHẢ HỌ ĐẶNG ĐÀ NẴNG
+            </h1>
+            <p style="text-align: center; color: #666; font-style: italic; margin-bottom: 10px;">
+                "Uống nước nhớ nguồn - Ăn quả nhớ kẻ trồng cây"
+            </p>
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}
+            </p>
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                <thead>
+                    <tr style="background: #228B22; color: white;">
+                        <th style="border: 1px solid #ddd; padding: 8px;">STT</th>
+                        <th style="border: 1px solid #ddd; padding: 8px;">Họ tên</th>
+                        <th style="border: 1px solid #ddd; padding: 8px;">Giới tính</th>
+                        <th style="border: 1px solid #ddd; padding: 8px;">Đời</th>
+                        <th style="border: 1px solid #ddd; padding: 8px;">Năm sinh</th>
+                        <th style="border: 1px solid #ddd; padding: 8px;">Năm mất</th>
+                        <th style="border: 1px solid #ddd; padding: 8px;">Ghi chú</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${members.map((m, i) => `
+                        <tr style="background: ${i % 2 === 0 ? '#fff' : '#f5f5f5'};">
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${i + 1}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${m.fullName || ''}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${m.gender === 'male' ? 'Nam' : 'Nữ'}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">Đời ${m.generation || '-'}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${m.birthDate ? new Date(m.birthDate).getFullYear() : '-'}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${m.deathDate ? new Date(m.deathDate).getFullYear() : (m.isDeceased ? '-' : 'Còn sống')}</td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">${(m.biography || '').substring(0, 50)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            <p style="text-align: center; color: #999; margin-top: 20px; font-size: 10px;">
+                Gia Phả Họ Đặng Đà Nẵng - Tổng số: ${members.length} thành viên
+            </p>
+        </div>
+    `;
 
-    // Title
-    doc.setFontSize(20);
-    doc.setTextColor(34, 139, 34); // Green
-    doc.text('GIA PHA HO DANG DA NANG', 105, 20, { align: 'center' });
+    // Create temporary element
+    const element = document.createElement('div');
+    element.innerHTML = html;
+    document.body.appendChild(element);
 
-    // Subtitle
-    doc.setFontSize(12);
-    doc.setTextColor(100);
-    doc.text('"Uong nuoc nho nguon - An qua nho ke trong cay"', 105, 30, { align: 'center' });
+    // PDF options
+    const opt = {
+        margin: 10,
+        filename: `${fileName}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
 
-    // Date
-    doc.setFontSize(10);
-    doc.text(`Ngay xuat: ${new Date().toLocaleDateString('vi-VN')}`, 105, 40, { align: 'center' });
+    // Generate PDF
+    await html2pdf().set(opt).from(element).save();
 
-    // Table data - sanitize Vietnamese characters
-    const tableData = members.map((m, i) => [
-        i + 1,
-        sanitizeVietnamese(m.fullName),
-        m.gender === 'male' ? 'Nam' : 'Nu',
-        `Doi ${m.generation}`,
-        m.birthDate ? new Date(m.birthDate).getFullYear() : '-',
-        m.deathDate ? new Date(m.deathDate).getFullYear() : (m.isDeceased ? '-' : 'Con song'),
-        sanitizeVietnamese(m.biography?.substring(0, 50) || '')
-    ]);
-
-    // Add table
-    autoTable(doc, {
-        startY: 50,
-        head: [['STT', 'Ho ten', 'Gioi tinh', 'Doi', 'Nam sinh', 'Nam mat', 'Ghi chu']],
-        body: tableData,
-        styles: {
-            fontSize: 9,
-            cellPadding: 3
-        },
-        headStyles: {
-            fillColor: [34, 139, 34],
-            textColor: 255,
-            fontStyle: 'bold'
-        },
-        alternateRowStyles: {
-            fillColor: [245, 245, 245]
-        },
-        columnStyles: {
-            0: { cellWidth: 10 },
-            1: { cellWidth: 40 },
-            2: { cellWidth: 20 },
-            3: { cellWidth: 15 },
-            4: { cellWidth: 20 },
-            5: { cellWidth: 25 },
-            6: { cellWidth: 'auto' }
-        }
-    });
-
-    // Footer
-    const pageCount = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(150);
-        doc.text(
-            `Trang ${i} / ${pageCount} - Gia Pha Ho Dang Da Nang`,
-            105,
-            doc.internal.pageSize.height - 10,
-            { align: 'center' }
-        );
-    }
-
-    doc.save(`${fileName}.pdf`);
+    // Clean up
+    document.body.removeChild(element);
 };
 
 // Export to Excel
