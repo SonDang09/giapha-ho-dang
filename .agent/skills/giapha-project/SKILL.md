@@ -210,9 +210,10 @@ console.log('Tree data:', response.data);
 ### 6. Login rate limiting
 **Problem:** "Quá nhiều lần đăng nhập thất bại" sau vài lần thử
 **Solution:**
-- Backend có rate limit cho login attempts (bảo mật)
-- Đợi 15 phút hoặc clear localStorage và thử lại
-- Credentials đúng: `admin` / `admin123`
+- Backend có rate limit cho login attempts (10 requests/15 phút)
+- Đợi 15 phút hoặc restart backend trên Render Dashboard
+- Mở Render Dashboard → giapha-backend → Manual Deploy → Restart service
+- Credentials đúng: `admin` / `Admin@2024`
 
 ---
 
@@ -281,16 +282,28 @@ Location: `frontend/src/components/Layout/AppLayout.jsx`
 
 ---
 
-## 🔐 Credentials
+## 🔐 Credentials & Access
 
 | Service | Username | Password/Notes |
 |---------|----------|----------------|
-| **Admin** | admin | admin123 |
-| **Admin** | admin | admin123 |
+| **Admin Login** | admin | Admin@2024 |
 | **GitHub** | SonDang09 | - |
 | **Vercel** | sondangs-projects-2be2385f | Via GitHub OAuth |
 | **Render** | - | Via GitHub OAuth |
 | **MongoDB** | ducsonseo_db_user | In Render env vars |
+
+### URLs
+| Environment | Frontend | Backend |
+|-------------|----------|--------|
+| **Production** | https://giapha-ho-dang.vercel.app | https://giapha-backend.onrender.com |
+| **Localhost** | http://localhost:5173 hoặc 5174 | http://localhost:5001 |
+
+### CORS Allowed Origins
+Backend cho phép requests từ:
+- `https://giapha-ho-dang.vercel.app`
+- `http://localhost:5173`
+- `http://localhost:5174`
+- `http://localhost:3000`
 
 ---
 
