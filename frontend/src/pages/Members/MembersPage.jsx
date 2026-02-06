@@ -17,6 +17,8 @@ const MembersPage = () => {
     const [members, setMembers] = useState([]);
     const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0 });
     const [searchText, setSearchText] = useState('');
+    const [filterGeneration, setFilterGeneration] = useState(null);
+    const [filterStatus, setFilterStatus] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [editingMember, setEditingMember] = useState(null);
     const [apiConnected, setApiConnected] = useState(false);
@@ -24,7 +26,7 @@ const MembersPage = () => {
 
     useEffect(() => {
         loadMembers();
-    }, [pagination.page, searchText]);
+    }, [pagination.page, searchText, filterGeneration, filterStatus]);
 
     const loadMembers = async () => {
         setLoading(true);
@@ -33,7 +35,9 @@ const MembersPage = () => {
             const response = await membersAPI.getAll({
                 page: pagination.page,
                 limit: pagination.limit,
-                search: searchText || undefined
+                search: searchText || undefined,
+                generation: filterGeneration || undefined,
+                deceased: filterStatus === 'deceased' ? 'true' : filterStatus === 'alive' ? 'false' : undefined
             });
 
             if (response?.data?.data?.length > 0) {
@@ -69,6 +73,7 @@ const MembersPage = () => {
         { _id: '10', fullName: 'Đặng Văn Em', gender: 'male', generation: 5, birthDate: '1980-02-14', isDeceased: false },
     ];
 
+    // Only show action column if user can edit
     const columns = [
         {
             title: 'Thành viên',
@@ -120,30 +125,29 @@ const MembersPage = () => {
                     <Tag color="green">Còn sống</Tag>
             )
         },
-        {
+        // Only include action column if user can edit
+        ...(canEdit() ? [{
             title: 'Hành động',
             key: 'actions',
             width: 120,
             render: (_, record) => (
-                canEdit() && (
-                    <Space>
-                        <Button
-                            size="small"
-                            icon={<EditOutlined />}
-                            onClick={() => handleEdit(record)}
-                        />
-                        {isAdmin() && (
-                            <Popconfirm
-                                title="Xác nhận xóa thành viên này?"
-                                onConfirm={() => handleDelete(record._id)}
-                            >
-                                <Button size="small" danger icon={<DeleteOutlined />} />
-                            </Popconfirm>
-                        )}
-                    </Space>
-                )
+                <Space>
+                    <Button
+                        size="small"
+                        icon={<EditOutlined />}
+                        onClick={() => handleEdit(record)}
+                    />
+                    {isAdmin() && (
+                        <Popconfirm
+                            title="Xác nhận xóa thành viên này?"
+                            onConfirm={() => handleDelete(record._id)}
+                        >
+                            <Button size="small" danger icon={<DeleteOutlined />} />
+                        </Popconfirm>
+                    )}
+                </Space>
             )
-        }
+        }] : [])
     ];
 
     const handleEdit = (member) => {
@@ -210,6 +214,27 @@ const MembersPage = () => {
                 </h1>
 
                 <Space wrap>
+                    <Select
+                        placeholder="Lọc theo đời"
+                        allowClear
+                        style={{ width: 130 }}
+                        value={filterGeneration}
+                        onChange={setFilterGeneration}
+                    >
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
+                            <Select.Option key={i} value={i}>Đời {i}</Select.Option>
+                        ))}
+                    </Select>
+                    <Select
+                        placeholder="Trạng thái"
+                        allowClear
+                        style={{ width: 130 }}
+                        value={filterStatus}
+                        onChange={setFilterStatus}
+                    >
+                        <Select.Option value="alive">Còn sống</Select.Option>
+                        <Select.Option value="deceased">Đã mất</Select.Option>
+                    </Select>
                     <Button icon={<ReloadOutlined />} onClick={loadMembers} loading={loading}>
                         Tải lại
                     </Button>
