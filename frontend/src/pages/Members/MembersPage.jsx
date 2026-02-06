@@ -19,6 +19,7 @@ const MembersPage = () => {
     const [searchText, setSearchText] = useState('');
     const [filterGeneration, setFilterGeneration] = useState(null);
     const [filterStatus, setFilterStatus] = useState(null);
+    const [availableGenerations, setAvailableGenerations] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [editingMember, setEditingMember] = useState(null);
     const [apiConnected, setApiConnected] = useState(false);
@@ -46,6 +47,9 @@ const MembersPage = () => {
                     ...prev,
                     total: response.data.pagination?.total || response.data.data.length
                 }));
+                // Extract unique generations from all members (not just current page)
+                const gens = [...new Set(response.data.data.map(m => m.generation))].filter(Boolean).sort((a, b) => a - b);
+                if (gens.length > 0) setAvailableGenerations(gens);
                 setApiConnected(true);
                 setLoading(false);
                 return;
@@ -221,7 +225,7 @@ const MembersPage = () => {
                         value={filterGeneration}
                         onChange={setFilterGeneration}
                     >
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
+                        {availableGenerations.map(i => (
                             <Select.Option key={i} value={i}>Đời {i}</Select.Option>
                         ))}
                     </Select>
