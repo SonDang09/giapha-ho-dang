@@ -142,6 +142,13 @@ const MembersPage = () => {
                     <Tag color="green">Còn sống</Tag>
             )
         },
+        {
+            title: 'Nơi sống',
+            dataIndex: 'currentResidence',
+            key: 'currentResidence',
+            width: 150,
+            render: (residence) => residence || '-'
+        },
         // Only include action column if user can edit
         ...(canEdit() ? [{
             title: 'Hành động',
