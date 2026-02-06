@@ -4,39 +4,73 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, AlignmentType } from 'docx';
 
-// Export to PDF
+// Helper function to convert Vietnamese to ASCII-safe characters for PDF
+const sanitizeVietnamese = (str) => {
+    if (!str) return '';
+    // Map Vietnamese characters to ASCII equivalents
+    const map = {
+        'à': 'a', 'á': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
+        'ă': 'a', 'ằ': 'a', 'ắ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
+        'â': 'a', 'ầ': 'a', 'ấ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
+        'đ': 'd', 'Đ': 'D',
+        'è': 'e', 'é': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
+        'ê': 'e', 'ề': 'e', 'ế': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
+        'ì': 'i', 'í': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+        'ò': 'o', 'ó': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
+        'ô': 'o', 'ồ': 'o', 'ố': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
+        'ơ': 'o', 'ờ': 'o', 'ớ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
+        'ù': 'u', 'ú': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
+        'ư': 'u', 'ừ': 'u', 'ứ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
+        'ỳ': 'y', 'ý': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+        'À': 'A', 'Á': 'A', 'Ả': 'A', 'Ã': 'A', 'Ạ': 'A',
+        'Ă': 'A', 'Ằ': 'A', 'Ắ': 'A', 'Ẳ': 'A', 'Ẵ': 'A', 'Ặ': 'A',
+        'Â': 'A', 'Ầ': 'A', 'Ấ': 'A', 'Ẩ': 'A', 'Ẫ': 'A', 'Ậ': 'A',
+        'È': 'E', 'É': 'E', 'Ẻ': 'E', 'Ẽ': 'E', 'Ẹ': 'E',
+        'Ê': 'E', 'Ề': 'E', 'Ế': 'E', 'Ể': 'E', 'Ễ': 'E', 'Ệ': 'E',
+        'Ì': 'I', 'Í': 'I', 'Ỉ': 'I', 'Ĩ': 'I', 'Ị': 'I',
+        'Ò': 'O', 'Ó': 'O', 'Ỏ': 'O', 'Õ': 'O', 'Ọ': 'O',
+        'Ô': 'O', 'Ồ': 'O', 'Ố': 'O', 'Ổ': 'O', 'Ỗ': 'O', 'Ộ': 'O',
+        'Ơ': 'O', 'Ờ': 'O', 'Ớ': 'O', 'Ở': 'O', 'Ỡ': 'O', 'Ợ': 'O',
+        'Ù': 'U', 'Ú': 'U', 'Ủ': 'U', 'Ũ': 'U', 'Ụ': 'U',
+        'Ư': 'U', 'Ừ': 'U', 'Ứ': 'U', 'Ử': 'U', 'Ữ': 'U', 'Ự': 'U',
+        'Ỳ': 'Y', 'Ý': 'Y', 'Ỷ': 'Y', 'Ỹ': 'Y', 'Ỵ': 'Y'
+    };
+    return str.split('').map(char => map[char] || char).join('');
+};
+
+// Export to PDF (ASCII-safe for compatibility)
 export const exportToPDF = async (members, fileName = 'gia-pha-ho-dang') => {
     const doc = new jsPDF();
 
     // Title
     doc.setFontSize(20);
     doc.setTextColor(34, 139, 34); // Green
-    doc.text('GIA PHẢ HỌ ĐẶNG ĐÀ NẴNG', 105, 20, { align: 'center' });
+    doc.text('GIA PHA HO DANG DA NANG', 105, 20, { align: 'center' });
 
     // Subtitle
     doc.setFontSize(12);
     doc.setTextColor(100);
-    doc.text('"Uống nước nhớ nguồn - Ăn quả nhớ kẻ trồng cây"', 105, 30, { align: 'center' });
+    doc.text('"Uong nuoc nho nguon - An qua nho ke trong cay"', 105, 30, { align: 'center' });
 
     // Date
     doc.setFontSize(10);
-    doc.text(`Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`, 105, 40, { align: 'center' });
+    doc.text(`Ngay xuat: ${new Date().toLocaleDateString('vi-VN')}`, 105, 40, { align: 'center' });
 
-    // Table data
+    // Table data - sanitize Vietnamese characters
     const tableData = members.map((m, i) => [
         i + 1,
-        m.fullName,
-        m.gender === 'male' ? 'Nam' : 'Nữ',
-        `Đời ${m.generation}`,
+        sanitizeVietnamese(m.fullName),
+        m.gender === 'male' ? 'Nam' : 'Nu',
+        `Doi ${m.generation}`,
         m.birthDate ? new Date(m.birthDate).getFullYear() : '-',
-        m.deathDate ? new Date(m.deathDate).getFullYear() : (m.isDeceased ? '-' : 'Còn sống'),
-        m.biography?.substring(0, 50) || ''
+        m.deathDate ? new Date(m.deathDate).getFullYear() : (m.isDeceased ? '-' : 'Con song'),
+        sanitizeVietnamese(m.biography?.substring(0, 50) || '')
     ]);
 
     // Add table
     autoTable(doc, {
         startY: 50,
-        head: [['STT', 'Họ tên', 'Giới tính', 'Đời', 'Năm sinh', 'Năm mất', 'Ghi chú']],
+        head: [['STT', 'Ho ten', 'Gioi tinh', 'Doi', 'Nam sinh', 'Nam mat', 'Ghi chu']],
         body: tableData,
         styles: {
             fontSize: 9,
@@ -68,7 +102,7 @@ export const exportToPDF = async (members, fileName = 'gia-pha-ho-dang') => {
         doc.setFontSize(8);
         doc.setTextColor(150);
         doc.text(
-            `Trang ${i} / ${pageCount} - Gia Phả Họ Đặng Đà Nẵng`,
+            `Trang ${i} / ${pageCount} - Gia Pha Ho Dang Da Nang`,
             105,
             doc.internal.pageSize.height - 10,
             { align: 'center' }
