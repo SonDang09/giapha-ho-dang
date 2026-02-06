@@ -378,6 +378,11 @@ const MembersPage = () => {
                                         {member.birthDate && dayjs(member.birthDate).format('YYYY')}
                                         {member.deathDate ? ` - ${dayjs(member.deathDate).format('YYYY')}` : ' - nay'}
                                     </div>
+                                    {member.currentResidence && (
+                                        <div style={{ color: '#888', fontSize: 12, marginBottom: 6 }}>
+                                            📍 {member.currentResidence}
+                                        </div>
+                                    )}
                                     <Tag color={member.isDeceased ? 'default' : 'green'}>
                                         {member.isDeceased ? 'Đã mất' : 'Còn sống'}
                                     </Tag>
@@ -462,6 +467,10 @@ const MembersPage = () => {
                             <DatePicker style={{ width: '100%' }} placeholder="Chọn ngày mất (nếu có)" format="DD/MM/YYYY" />
                         </Form.Item>
                     </Space>
+
+                    <Form.Item name="currentResidence" label="Nơi sống hiện tại">
+                        <Input placeholder="VD: Quận Hải Châu, Đà Nẵng" />
+                    </Form.Item>
 
                     <Form.Item name="biography" label="Tiểu sử">
                         <TextArea rows={4} placeholder="Giới thiệu ngắn về thành viên..." />

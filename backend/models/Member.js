@@ -63,6 +63,10 @@ const memberSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    currentResidence: {
+        type: String,
+        trim: true
+    },
     phone: {
         type: String,
         trim: true
