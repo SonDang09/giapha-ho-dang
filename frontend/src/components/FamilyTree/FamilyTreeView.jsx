@@ -55,8 +55,18 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
         const isMale = attrs.gender === 'male';
         const isDeceased = attrs.isDeceased;
         const borderColor = isMale ? COLORS.male : COLORS.female;
-        const cardWidth = isSpouse ? 140 : 180;
-        const cardHeight = isSpouse ? 85 : 105;
+        const cardWidth = isSpouse ? 140 : 165;
+        const cardHeight = isSpouse ? 85 : 95;
+
+        // Format years display like "(1800-1890)" or "(1980-nay)"
+        const getYearsDisplay = () => {
+            if (attrs.birthYear) {
+                return `(${attrs.birthYear}-${attrs.deathYear || 'nay'})`;
+            } else if (attrs.deathYear) {
+                return `(?-${attrs.deathYear})`;
+            }
+            return '';
+        };
 
         return (
             <div
@@ -64,107 +74,107 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                 style={{
                     width: `${cardWidth}px`,
                     height: `${cardHeight}px`,
-                    background: COLORS.ivory,
+                    background: '#FFFFF8',
                     border: `3px solid ${borderColor}`,
                     borderRadius: '8px',
-                    boxShadow: '0 4px 12px rgba(139, 69, 19, 0.2)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1)',
                     cursor: 'pointer',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    padding: isSpouse ? '8px' : '12px',
+                    padding: '8px 10px',
                     boxSizing: 'border-box',
                     position: 'relative',
-                    fontFamily: '"Times New Roman", Georgia, serif'
+                    fontFamily: '"Playfair Display", "Times New Roman", Georgia, serif',
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2), 0 3px 6px rgba(0,0,0,0.12)';
+                }}
+                onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1)';
                 }}
             >
-                {/* Top color bar */}
+                {/* Generation badge - diamond shape at top right */}
                 <div style={{
                     position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: isSpouse ? '6px' : '8px',
-                    background: borderColor,
-                    borderRadius: '5px 5px 0 0'
-                }} />
-
-                {/* Generation badge - only for main member */}
-                {!isSpouse && (
-                    <div style={{
-                        position: 'absolute',
-                        top: '-14px',
-                        right: '-14px',
-                        width: '32px',
-                        height: '32px',
-                        background: `linear-gradient(135deg, ${COLORS.gold} 0%, #b8962f 100%)`,
-                        border: `2px solid ${COLORS.brown}`,
-                        borderRadius: '4px',
-                        transform: 'rotate(45deg)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: '0 2px 6px rgba(0,0,0,0.25)'
+                    top: '-12px',
+                    right: '-12px',
+                    width: '26px',
+                    height: '26px',
+                    background: `linear-gradient(135deg, ${COLORS.gold} 0%, #D4A520 100%)`,
+                    border: `2px solid ${COLORS.brown}`,
+                    borderRadius: '3px',
+                    transform: 'rotate(45deg)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.25)'
+                }}>
+                    <span style={{
+                        transform: 'rotate(-45deg)',
+                        color: 'white',
+                        fontSize: '12px',
+                        fontWeight: '800',
+                        textShadow: '0 1px 2px rgba(0,0,0,0.4)'
                     }}>
-                        <span style={{
-                            transform: 'rotate(-45deg)',
-                            color: 'white',
-                            fontSize: '14px',
-                            fontWeight: '700',
-                            textShadow: '0 1px 2px rgba(0,0,0,0.3)'
-                        }}>
-                            {attrs.generation || '?'}
-                        </span>
-                    </div>
-                )}
+                        {attrs.generation || '?'}
+                    </span>
+                </div>
 
-                {/* Deceased icon */}
+                {/* Deceased icon - candle at left */}
                 {isDeceased && (
                     <div style={{
                         position: 'absolute',
-                        top: isSpouse ? '8px' : '10px',
-                        left: isSpouse ? '6px' : '10px',
-                        fontSize: isSpouse ? '12px' : '16px'
+                        top: '8px',
+                        left: '8px',
+                        fontSize: '13px'
                     }}>🕯️</div>
                 )}
 
-                {/* Title prefix */}
+                {/* Title - ÔNG/BÀ or VỢ/CHỒNG */}
                 <div style={{
-                    fontSize: isSpouse ? '9px' : '11px',
+                    fontSize: isSpouse ? '10px' : '11px',
                     color: borderColor,
-                    fontWeight: '600',
-                    marginTop: isSpouse ? '4px' : '6px',
-                    letterSpacing: '1px'
+                    fontWeight: '700',
+                    marginTop: '4px',
+                    letterSpacing: '1px',
+                    textTransform: 'uppercase'
                 }}>
-                    {attrs.generation <= 2 ? 'CỤ' : (isMale ? 'ÔNG' : 'BÀ')}
+                    {isSpouse
+                        ? (isMale ? 'CHỒNG' : 'VỢ')
+                        : (attrs.generation <= 2 ? 'CỤ' : (isMale ? 'ÔNG' : 'BÀ'))}
                 </div>
 
-                {/* Name */}
+                {/* Name - bold black */}
                 <div style={{
-                    fontSize: isSpouse ? '12px' : '16px',
+                    fontSize: isSpouse ? '14px' : '16px',
                     fontWeight: '700',
                     color: '#1a1a1a',
                     textAlign: 'center',
                     marginTop: '2px',
-                    lineHeight: '1.2'
+                    lineHeight: '1.2',
+                    maxWidth: '95%',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
                 }}>
-                    {name?.length > (isSpouse ? 12 : 16)
-                        ? name.substring(0, isSpouse ? 10 : 14) + '...'
+                    {name?.length > (isSpouse ? 12 : 14)
+                        ? name.substring(0, isSpouse ? 10 : 12) + '...'
                         : name}
                 </div>
 
-                {/* Years */}
+                {/* Years - gray italic */}
                 <div style={{
-                    fontSize: isSpouse ? '10px' : '12px',
-                    color: COLORS.brown,
-                    marginTop: '2px'
+                    fontSize: isSpouse ? '11px' : '12px',
+                    color: '#666666',
+                    marginTop: '3px',
+                    fontStyle: 'italic'
                 }}>
-                    {isDeceased && attrs.deathYear
-                        ? `(Mất ${attrs.deathYear})`
-                        : attrs.birthYear
-                            ? `(${attrs.birthYear} - ${attrs.deathYear || 'nay'})`
-                            : ''}
+                    {getYearsDisplay()}
                 </div>
             </div>
         );
@@ -197,7 +207,7 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: '4px'
+                        gap: '8px'
                     }}>
                         {/* Main member card */}
                         {renderMemberCard(
@@ -207,20 +217,9 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                             false
                         )}
 
-                        {/* Heart connectors and spouse cards */}
+                        {/* Spouse cards */}
                         {hasSpouses && spouses.map((spouse, index) => (
-                            <div key={spouse._id || index} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                {/* Spouse separator (no heart, just small label if multiple) */}
-                                {spouses.length > 1 && (
-                                    <div style={{
-                                        fontSize: '10px',
-                                        color: '#888',
-                                        padding: '0 2px',
-                                        fontWeight: 'bold'
-                                    }}>
-                                        {index === 0 ? 'Cả' : index + 1}
-                                    </div>
-                                )}
+                            <div key={spouse._id || index} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 {/* Spouse card */}
                                 {renderMemberCard(
                                     spouse.fullName,
@@ -472,21 +471,11 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
 
             {/* Modal */}
             <Modal
-                title={
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        {attrs.gender === 'male' ? (
-                            <ManOutlined style={{ color: COLORS.male, fontSize: 20 }} />
-                        ) : (
-                            <WomanOutlined style={{ color: COLORS.female, fontSize: 20 }} />
-                        )}
-                        <span style={{ fontSize: 18, fontFamily: 'Georgia, serif' }}>{selectedMember?.name}</span>
-                        {attrs.isDeceased && <Tag color="default">Đã mất</Tag>}
-                    </div>
-                }
+                title={null}
                 open={modalVisible}
                 onCancel={() => setModalVisible(false)}
                 footer={
-                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '8px 0' }}>
                         {/* Admin actions - left side */}
                         {isAdmin && (
                             <Space>
@@ -494,11 +483,20 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                                     type="primary"
                                     icon={<UserAddOutlined />}
                                     onClick={() => setAddChildVisible(true)}
-                                    style={{ background: '#52c41a', borderColor: '#52c41a' }}
+                                    style={{
+                                        background: 'linear-gradient(135deg, #52c41a 0%, #389e0d 100%)',
+                                        borderColor: '#52c41a',
+                                        borderRadius: '6px',
+                                        fontWeight: '600'
+                                    }}
                                 >
                                     Thêm con
                                 </Button>
-                                <Button icon={<EditOutlined />} onClick={openEditModal}>
+                                <Button
+                                    icon={<EditOutlined />}
+                                    onClick={openEditModal}
+                                    style={{ borderRadius: '6px' }}
+                                >
                                     Sửa
                                 </Button>
                                 <Popconfirm
@@ -509,7 +507,7 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                                     cancelText="Hủy"
                                     okButtonProps={{ danger: true, loading: actionLoading }}
                                 >
-                                    <Button danger icon={<DeleteOutlined />}>Xóa</Button>
+                                    <Button danger icon={<DeleteOutlined />} style={{ borderRadius: '6px' }}>Xóa</Button>
                                 </Popconfirm>
                             </Space>
                         )}
@@ -520,7 +518,11 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                                 <Button
                                     type="primary"
                                     icon={<HeartOutlined />}
-                                    style={{ background: COLORS.male }}
+                                    style={{
+                                        background: `linear-gradient(135deg, ${COLORS.male} 0%, #a01830 100%)`,
+                                        borderRadius: '6px',
+                                        fontWeight: '600'
+                                    }}
                                     onClick={() => {
                                         setModalVisible(false);
                                         navigate(`/memorial/${attrs.id}`);
@@ -529,45 +531,135 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                                     Trang tưởng niệm
                                 </Button>
                             )}
-                            <Button onClick={() => setModalVisible(false)}>Đóng</Button>
+                            <Button onClick={() => setModalVisible(false)} style={{ borderRadius: '6px' }}>Đóng</Button>
                         </Space>
                     </div>
                 }
-                width={480}
+                width={420}
+                styles={{
+                    header: { display: 'none' },
+                    body: { padding: 0 },
+                    content: { borderRadius: '16px', overflow: 'hidden' }
+                }}
             >
-                <div style={{ textAlign: 'center', marginBottom: 24 }}>
-                    <Avatar
-                        size={100}
-                        src={attrs.avatar}
-                        icon={<UserOutlined />}
-                        style={{
-                            backgroundColor: COLORS.gold,
-                            border: `4px solid ${attrs.gender === 'male' ? COLORS.male : COLORS.female}`
-                        }}
-                    />
+                {/* Custom Header with Gradient */}
+                <div style={{
+                    background: attrs.gender === 'male'
+                        ? 'linear-gradient(135deg, #8B0000 0%, #C41E3A 50%, #8B0000 100%)'
+                        : 'linear-gradient(135deg, #1B5E20 0%, #228B22 50%, #1B5E20 100%)',
+                    padding: '24px 20px 60px 20px',
+                    textAlign: 'center',
+                    position: 'relative'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                        <span style={{
+                            fontSize: 20,
+                            fontFamily: '"Playfair Display", Georgia, serif',
+                            color: 'white',
+                            fontWeight: '700',
+                            textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                        }}>
+                            {selectedMember?.name}
+                        </span>
+                        {attrs.isDeceased && (
+                            <Tag color="rgba(255,255,255,0.25)" style={{
+                                border: '1px solid rgba(255,255,255,0.4)',
+                                color: 'white',
+                                fontWeight: '500'
+                            }}>
+                                Đã mất 🕯️
+                            </Tag>
+                        )}
+                    </div>
                 </div>
 
-                <Descriptions column={1} bordered size="middle">
-                    <Descriptions.Item label="Họ tên">
-                        <strong style={{ fontSize: 16 }}>{selectedMember?.name}</strong>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Giới tính">
-                        <Tag color={attrs.gender === 'male' ? 'red' : 'green'}>
-                            {attrs.gender === 'male' ? '♂ Nam' : '♀ Nữ'}
-                        </Tag>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Đời thứ">
-                        <Tag color="gold" style={{ fontSize: 14 }}>Đời {attrs.generation}</Tag>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Năm sinh">
-                        {attrs.birthYear || 'Không rõ'}
-                    </Descriptions.Item>
-                    {(attrs.isDeceased || attrs.deathYear) && (
-                        <Descriptions.Item label="Năm mất">
-                            {attrs.deathYear || 'Không rõ'}
+                {/* Avatar positioned over header/body boundary */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    marginTop: '-50px',
+                    marginBottom: '16px',
+                    position: 'relative',
+                    zIndex: 1
+                }}>
+                    <div style={{
+                        width: 100,
+                        height: 100,
+                        borderRadius: '50%',
+                        border: `4px solid white`,
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.15)',
+                        overflow: 'hidden',
+                        background: '#E8E8E8'
+                    }}>
+                        <img
+                            src={attrs.avatar || (attrs.gender === 'male' ? '/avatar-male.png' : '/avatar-female.png')}
+                            alt={selectedMember?.name}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover'
+                            }}
+                        />
+                    </div>
+                </div>
+
+                {/* Info Section */}
+                <div style={{ padding: '0 24px 20px 24px' }}>
+                    <Descriptions
+                        column={1}
+                        size="middle"
+                        labelStyle={{
+                            color: '#666',
+                            fontWeight: '500',
+                            width: '100px'
+                        }}
+                        contentStyle={{
+                            fontWeight: '600',
+                            color: '#2C1810'
+                        }}
+                    >
+                        <Descriptions.Item label="Họ tên">
+                            <span style={{ fontSize: 16, fontFamily: '"Playfair Display", Georgia, serif' }}>
+                                {selectedMember?.name}
+                            </span>
                         </Descriptions.Item>
-                    )}
-                </Descriptions>
+                        <Descriptions.Item label="Giới tính">
+                            <Tag
+                                color={attrs.gender === 'male' ? 'red' : 'green'}
+                                style={{
+                                    borderRadius: '12px',
+                                    padding: '2px 12px',
+                                    fontWeight: '600'
+                                }}
+                            >
+                                {attrs.gender === 'male' ? 'Nam' : 'Nữ'}
+                            </Tag>
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Đời thứ">
+                            <Tag
+                                style={{
+                                    background: `linear-gradient(135deg, ${COLORS.gold} 0%, #C9A227 100%)`,
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    padding: '2px 12px',
+                                    fontWeight: '700',
+                                    fontSize: 14
+                                }}
+                            >
+                                Đời {attrs.generation}
+                            </Tag>
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Năm sinh">
+                            {attrs.birthYear || <span style={{ color: '#999' }}>Không rõ</span>}
+                        </Descriptions.Item>
+                        {(attrs.isDeceased || attrs.deathYear) && (
+                            <Descriptions.Item label="Năm mất">
+                                {attrs.deathYear || <span style={{ color: '#999' }}>Không rõ</span>}
+                            </Descriptions.Item>
+                        )}
+                    </Descriptions>
+                </div>
             </Modal>
 
             {/* Add Child Modal */}
