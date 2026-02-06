@@ -144,7 +144,7 @@ const AppLayout = ({ children }) => {
                         >
                             <Space style={{ cursor: 'pointer', color: 'white' }}>
                                 <Avatar
-                                    src={user?.avatar}
+                                    src={user?.avatar || '/avatar-male.png'}
                                     icon={<UserOutlined />}
                                     style={{ backgroundColor: '#228B22' }}
                                 />

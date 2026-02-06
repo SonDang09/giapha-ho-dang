@@ -217,4 +217,53 @@ router.put('/password', protect, [
     }
 });
 
+// @route   PUT /api/auth/avatar
+// @desc    Update user avatar
+// @access  Private
+router.put('/avatar', protect, async (req, res) => {
+    try {
+        const { avatar } = req.body;
+
+        if (!avatar) {
+            return res.status(400).json({
+                success: false,
+                message: 'Vui lòng chọn ảnh avatar'
+            });
+        }
+
+        // Upload to Cloudinary if it's a base64 image
+        let avatarUrl = avatar;
+        if (avatar.startsWith('data:image')) {
+            const cloudinary = require('cloudinary').v2;
+            const result = await cloudinary.uploader.upload(avatar, {
+                folder: 'giapha/avatars',
+                public_id: `user_${req.user._id}`,
+                overwrite: true,
+                transformation: [
+                    { width: 200, height: 200, crop: 'fill', gravity: 'face' }
+                ]
+            });
+            avatarUrl = result.secure_url;
+        }
+
+        const user = await User.findByIdAndUpdate(
+            req.user._id,
+            { avatar: avatarUrl },
+            { new: true }
+        );
+
+        res.json({
+            success: true,
+            message: 'Cập nhật avatar thành công',
+            avatar: user.avatar
+        });
+    } catch (error) {
+        console.error('Avatar upload error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi upload avatar: ' + error.message
+        });
+    }
+});
+
 module.exports = router;

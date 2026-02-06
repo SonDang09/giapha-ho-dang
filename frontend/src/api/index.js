@@ -39,7 +39,8 @@ export const authAPI = {
     login: (data) => api.post('/auth/login', data),
     register: (data) => api.post('/auth/register', data),
     getMe: () => api.get('/auth/me'),
-    updatePassword: (data) => api.put('/auth/password', data)
+    updatePassword: (data) => api.put('/auth/password', data),
+    updateAvatar: (avatar) => api.put('/auth/avatar', { avatar })
 };
 
 // Members API

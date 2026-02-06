@@ -69,6 +69,16 @@ export const AuthProvider = ({ children }) => {
     const canEdit = () => hasRole(['admin_toc', 'chi_ho']);
     const isAdmin = () => hasRole('admin_toc');
 
+    const refreshUser = async () => {
+        try {
+            const response = await authAPI.getMe();
+            setUser(response.data.user);
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+        } catch (error) {
+            console.error('Error refreshing user:', error);
+        }
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -79,7 +89,8 @@ export const AuthProvider = ({ children }) => {
                 logout,
                 hasRole,
                 canEdit,
-                isAdmin
+                isAdmin,
+                refreshUser
             }}
         >
             {children}
