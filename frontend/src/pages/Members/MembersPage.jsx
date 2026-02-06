@@ -319,97 +319,107 @@ const MembersPage = () => {
                     scroll={{ x: 600 }}
                 />
             ) : (
-                <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-                    {members.map(member => (
-                        <Col xs={24} sm={12} md={8} lg={6} key={member._id}>
-                            <Card
-                                hoverable
-                                style={{
-                                    borderRadius: 12,
-                                    overflow: 'hidden',
-                                    border: `2px solid ${member.gender === 'male' ? '#8B0000' : '#1B5E20'}`
-                                }}
-                                bodyStyle={{ padding: 0 }}
-                            >
-                                {/* Header with gradient */}
-                                <div style={{
-                                    background: member.gender === 'male'
-                                        ? 'linear-gradient(135deg, #8B0000 0%, #CD5C5C 100%)'
-                                        : 'linear-gradient(135deg, #1B5E20 0%, #4CAF50 100%)',
-                                    height: 60,
-                                    position: 'relative'
-                                }}>
-                                    {/* Generation badge */}
-                                    <div style={{
-                                        position: 'absolute',
-                                        top: 8,
-                                        right: 8,
-                                        background: 'linear-gradient(135deg, #DAA520 0%, #B8860B 100%)',
-                                        color: 'white',
-                                        padding: '2px 8px',
-                                        borderRadius: 12,
-                                        fontSize: 11,
-                                        fontWeight: 'bold'
-                                    }}>
-                                        Đời {member.generation}
-                                    </div>
-                                </div>
+                <div style={{ marginTop: 16 }}>
+                    {/* Group members by generation */}
+                    {[...new Set(members.map(m => m.generation))].sort((a, b) => a - b).map(gen => (
+                        <div key={gen} style={{ marginBottom: 24 }}>
+                            {/* Generation Header */}
+                            <div style={{
+                                background: 'linear-gradient(135deg, #DAA520 0%, #B8860B 100%)',
+                                color: 'white',
+                                padding: '8px 16px',
+                                borderRadius: 8,
+                                marginBottom: 16,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 8
+                            }}>
+                                <span style={{ fontSize: 18, fontWeight: 'bold' }}>Đời {gen}</span>
+                                <Tag color="white" style={{ color: '#B8860B', marginLeft: 8 }}>
+                                    {members.filter(m => m.generation === gen).length} người
+                                </Tag>
+                            </div>
 
-                                {/* Avatar */}
-                                <div style={{
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    marginTop: -35
-                                }}>
-                                    <div style={{
-                                        width: 70,
-                                        height: 70,
-                                        borderRadius: '50%',
-                                        border: '3px solid white',
-                                        overflow: 'hidden',
-                                        background: '#E8E8E8',
-                                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                                    }}>
-                                        <img
-                                            src={member.avatar || (member.gender === 'male' ? '/avatar-male.png' : '/avatar-female.png')}
-                                            alt={member.fullName}
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                        />
-                                    </div>
-                                </div>
+                            {/* Members in this generation */}
+                            <Row gutter={[16, 16]}>
+                                {members.filter(m => m.generation === gen).map(member => (
+                                    <Col xs={24} sm={12} md={8} lg={6} key={member._id}>
+                                        <Card
+                                            hoverable
+                                            style={{
+                                                borderRadius: 12,
+                                                overflow: 'hidden',
+                                                border: `2px solid ${member.gender === 'male' ? '#8B0000' : '#1B5E20'}`
+                                            }}
+                                            styles={{ body: { padding: 0 } }}
+                                        >
+                                            {/* Header with gradient */}
+                                            <div style={{
+                                                background: member.gender === 'male'
+                                                    ? 'linear-gradient(135deg, #8B0000 0%, #CD5C5C 100%)'
+                                                    : 'linear-gradient(135deg, #1B5E20 0%, #4CAF50 100%)',
+                                                height: 50,
+                                                position: 'relative'
+                                            }} />
 
-                                {/* Info */}
-                                <div style={{ padding: '12px 16px', textAlign: 'center' }}>
-                                    <h3 style={{ margin: '0 0 4px', fontSize: 16 }}>{member.fullName}</h3>
-                                    <div style={{ color: '#666', fontSize: 13, marginBottom: 8 }}>
-                                        {member.birthDate && dayjs(member.birthDate).format('YYYY')}
-                                        {member.deathDate ? ` - ${dayjs(member.deathDate).format('YYYY')}` : ' - nay'}
-                                    </div>
-                                    {member.currentResidence && (
-                                        <div style={{ color: '#888', fontSize: 12, marginBottom: 6 }}>
-                                            📍 {member.currentResidence}
-                                        </div>
-                                    )}
-                                    <Tag color={member.isDeceased ? 'default' : 'green'}>
-                                        {member.isDeceased ? 'Đã mất' : 'Còn sống'}
-                                    </Tag>
+                                            {/* Avatar */}
+                                            <div style={{
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                marginTop: -30
+                                            }}>
+                                                <div style={{
+                                                    width: 60,
+                                                    height: 60,
+                                                    borderRadius: '50%',
+                                                    border: '3px solid white',
+                                                    overflow: 'hidden',
+                                                    background: '#E8E8E8',
+                                                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                                                }}>
+                                                    <img
+                                                        src={member.avatar || (member.gender === 'male' ? '/avatar-male.png' : '/avatar-female.png')}
+                                                        alt={member.fullName}
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                    />
+                                                </div>
+                                            </div>
 
-                                    {/* Action buttons */}
-                                    {canEdit() && (
-                                        <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 8 }}>
-                                            <Button size="small" icon={<EditOutlined />} onClick={() => handleEdit(member)}>Sửa</Button>
-                                            {isAdmin() && (
-                                                <Popconfirm title="Xác nhận xóa?" onConfirm={() => handleDelete(member._id)}>
-                                                    <Button size="small" danger icon={<DeleteOutlined />}>Xóa</Button>
-                                                </Popconfirm>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            </Card>
-                        </Col>
+                                            {/* Info */}
+                                            <div style={{ padding: '10px 12px', textAlign: 'center' }}>
+                                                <h4 style={{ margin: '0 0 4px', fontSize: 14 }}>{member.fullName}</h4>
+                                                <div style={{ color: '#666', fontSize: 12, marginBottom: 6 }}>
+                                                    {member.birthDate && dayjs(member.birthDate).format('YYYY')}
+                                                    {member.deathDate ? ` - ${dayjs(member.deathDate).format('YYYY')}` : ' - nay'}
+                                                </div>
+                                                {member.currentResidence && (
+                                                    <div style={{ color: '#888', fontSize: 11, marginBottom: 4 }}>
+                                                        📍 {member.currentResidence}
+                                                    </div>
+                                                )}
+                                                <Tag color={member.isDeceased ? 'default' : 'green'} style={{ fontSize: 11 }}>
+                                                    {member.isDeceased ? 'Đã mất' : 'Còn sống'}
+                                                </Tag>
+
+                                                {/* Action buttons */}
+                                                {canEdit() && (
+                                                    <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center', gap: 4 }}>
+                                                        <Button size="small" icon={<EditOutlined />} onClick={() => handleEdit(member)} />
+                                                        {isAdmin() && (
+                                                            <Popconfirm title="Xác nhận xóa?" onConfirm={() => handleDelete(member._id)}>
+                                                                <Button size="small" danger icon={<DeleteOutlined />} />
+                                                            </Popconfirm>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </Card>
+                                    </Col>
+                                ))}
+                            </Row>
+                        </div>
                     ))}
-                </Row>
+                </div>
             )}
 
             {/* Add/Edit Modal */}
