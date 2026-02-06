@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Table, Card, Button, Space, Input, Tag, Avatar, Modal, Form, Select, DatePicker, message, Popconfirm, Alert } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, UserOutlined, ManOutlined, WomanOutlined, FilePdfOutlined } from '@ant-design/icons';
+import { Table, Card, Button, Space, Input, Tag, Avatar, Modal, Form, Select, DatePicker, message, Popconfirm, Alert, Row, Col, Segmented } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, UserOutlined, ManOutlined, WomanOutlined, FilePdfOutlined, TableOutlined, AppstoreOutlined } from '@ant-design/icons';
 import { membersAPI } from '../../api';
 import { useAuth } from '../../context/AuthContext';
 import { exportToPDF } from '../../utils/export';
@@ -20,6 +20,7 @@ const MembersPage = () => {
     const [filterGeneration, setFilterGeneration] = useState(null);
     const [filterStatus, setFilterStatus] = useState(null);
     const [availableGenerations, setAvailableGenerations] = useState([]);
+    const [viewMode, setViewMode] = useState('table'); // 'table' or 'card'
     const [modalVisible, setModalVisible] = useState(false);
     const [editingMember, setEditingMember] = useState(null);
     const [apiConnected, setApiConnected] = useState(false);
@@ -257,6 +258,14 @@ const MembersPage = () => {
                         onSearch={setSearchText}
                         style={{ width: 200 }}
                     />
+                    <Segmented
+                        value={viewMode}
+                        onChange={setViewMode}
+                        options={[
+                            { value: 'table', icon: <TableOutlined /> },
+                            { value: 'card', icon: <AppstoreOutlined /> }
+                        ]}
+                    />
                     <Button
                         icon={<FilePdfOutlined />}
                         onClick={async () => {
@@ -288,19 +297,108 @@ const MembersPage = () => {
                 </Space>
             </div>
 
-            <Table
-                columns={columns}
-                dataSource={members}
-                rowKey="_id"
-                loading={loading}
-                pagination={{
-                    current: pagination.page,
-                    pageSize: pagination.limit,
-                    total: pagination.total,
-                    onChange: (page) => setPagination(prev => ({ ...prev, page }))
-                }}
-                scroll={{ x: 600 }}
-            />
+            {viewMode === 'table' ? (
+                <Table
+                    columns={columns}
+                    dataSource={members}
+                    rowKey="_id"
+                    loading={loading}
+                    pagination={{
+                        current: pagination.page,
+                        pageSize: pagination.limit,
+                        total: pagination.total,
+                        onChange: (page) => setPagination(prev => ({ ...prev, page }))
+                    }}
+                    scroll={{ x: 600 }}
+                />
+            ) : (
+                <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+                    {members.map(member => (
+                        <Col xs={24} sm={12} md={8} lg={6} key={member._id}>
+                            <Card
+                                hoverable
+                                style={{
+                                    borderRadius: 12,
+                                    overflow: 'hidden',
+                                    border: `2px solid ${member.gender === 'male' ? '#8B0000' : '#1B5E20'}`
+                                }}
+                                bodyStyle={{ padding: 0 }}
+                            >
+                                {/* Header with gradient */}
+                                <div style={{
+                                    background: member.gender === 'male'
+                                        ? 'linear-gradient(135deg, #8B0000 0%, #CD5C5C 100%)'
+                                        : 'linear-gradient(135deg, #1B5E20 0%, #4CAF50 100%)',
+                                    height: 60,
+                                    position: 'relative'
+                                }}>
+                                    {/* Generation badge */}
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: 8,
+                                        right: 8,
+                                        background: 'linear-gradient(135deg, #DAA520 0%, #B8860B 100%)',
+                                        color: 'white',
+                                        padding: '2px 8px',
+                                        borderRadius: 12,
+                                        fontSize: 11,
+                                        fontWeight: 'bold'
+                                    }}>
+                                        Đời {member.generation}
+                                    </div>
+                                </div>
+
+                                {/* Avatar */}
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    marginTop: -35
+                                }}>
+                                    <div style={{
+                                        width: 70,
+                                        height: 70,
+                                        borderRadius: '50%',
+                                        border: '3px solid white',
+                                        overflow: 'hidden',
+                                        background: '#E8E8E8',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                                    }}>
+                                        <img
+                                            src={member.avatar || (member.gender === 'male' ? '/avatar-male.png' : '/avatar-female.png')}
+                                            alt={member.fullName}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Info */}
+                                <div style={{ padding: '12px 16px', textAlign: 'center' }}>
+                                    <h3 style={{ margin: '0 0 4px', fontSize: 16 }}>{member.fullName}</h3>
+                                    <div style={{ color: '#666', fontSize: 13, marginBottom: 8 }}>
+                                        {member.birthDate && dayjs(member.birthDate).format('YYYY')}
+                                        {member.deathDate ? ` - ${dayjs(member.deathDate).format('YYYY')}` : ' - nay'}
+                                    </div>
+                                    <Tag color={member.isDeceased ? 'default' : 'green'}>
+                                        {member.isDeceased ? 'Đã mất' : 'Còn sống'}
+                                    </Tag>
+
+                                    {/* Action buttons */}
+                                    {canEdit() && (
+                                        <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 8 }}>
+                                            <Button size="small" icon={<EditOutlined />} onClick={() => handleEdit(member)}>Sửa</Button>
+                                            {isAdmin() && (
+                                                <Popconfirm title="Xác nhận xóa?" onConfirm={() => handleDelete(member._id)}>
+                                                    <Button size="small" danger icon={<DeleteOutlined />}>Xóa</Button>
+                                                </Popconfirm>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </Card>
+                        </Col>
+                    ))}
+                </Row>
+            )}
 
             {/* Add/Edit Modal */}
             <Modal
