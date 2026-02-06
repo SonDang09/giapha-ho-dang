@@ -269,11 +269,11 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
             const childData = {
                 fullName: values.fullName,
                 gender: values.gender,
-                birthYear: values.birthYear,
-                father: attrs.gender === 'male' ? attrs.id : null,
-                mother: attrs.gender === 'female' ? attrs.id : null,
+                birthDate: values.birthYear ? new Date(values.birthYear, 0, 1) : null,
+                deathDate: values.deathYear ? new Date(values.deathYear, 0, 1) : null,
+                parentId: attrs.id, // Use parentId - works for both male/female parent
                 generation: (attrs.generation || 1) + 1,
-                isDeceased: false
+                isDeceased: !!values.deathYear
             };
             await membersAPI.create(childData);
             message.success(`Đã thêm con: ${values.fullName}`);
