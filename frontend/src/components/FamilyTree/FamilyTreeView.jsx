@@ -55,8 +55,8 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
         const isMale = attrs.gender === 'male';
         const isDeceased = attrs.isDeceased;
         const borderColor = isMale ? COLORS.male : COLORS.female;
-        const cardWidth = isSpouse ? 140 : 165;
-        const cardHeight = isSpouse ? 85 : 95;
+        const cardWidth = 165;
+        const cardHeight = 95;
 
         // Format years display like "(1800-1890)" or "(1980-nay)"
         const getYearsDisplay = () => {
@@ -188,8 +188,8 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
         const hasSpouses = spouses.length > 0;
 
         // Calculate widths for spouse pair layout - dynamic based on number of spouses
-        const cardWidth = 160;
-        const gapWidth = 30; // Heart + gap
+        const cardWidth = 170;
+        const gapWidth = 12; // Gap between cards
         const numCards = 1 + spouses.length;
         const totalWidth = (cardWidth * numCards) + (gapWidth * spouses.length);
         const offsetX = -totalWidth / 2;
@@ -198,9 +198,9 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
             <g>
                 <foreignObject
                     width={totalWidth + 20}
-                    height={115}
+                    height={120}
                     x={offsetX - 10}
-                    y={-52}
+                    y={-55}
                     style={{ overflow: 'visible' }}
                 >
                     <div style={{
