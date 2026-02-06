@@ -239,9 +239,6 @@ const MembersPage = () => {
                         <Select.Option value="alive">Còn sống</Select.Option>
                         <Select.Option value="deceased">Đã mất</Select.Option>
                     </Select>
-                    <Button icon={<ReloadOutlined />} onClick={loadMembers} loading={loading}>
-                        Tải lại
-                    </Button>
                     <Search
                         placeholder="Tìm kiếm..."
                         allowClear
