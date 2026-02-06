@@ -40,6 +40,12 @@ const memberSchema = new mongoose.Schema({
         ref: 'Member',
         default: null
     },
+    // Support multiple spouses (e.g. vợ cả, vợ hai...)
+    spouseIds: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Member'
+    }],
+    // Keep spouseId for backward compatibility (deprecated)
     spouseId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Member',

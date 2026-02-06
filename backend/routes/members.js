@@ -58,7 +58,7 @@ router.get('/', async (req, res) => {
 router.get('/tree', async (req, res) => {
     try {
         const members = await Member.find()
-            .select('fullName gender birthDate deathDate generation parentId avatar isDeceased birthOrder anniversaryDate spouseId')
+            .select('fullName gender birthDate deathDate generation parentId avatar isDeceased birthOrder anniversaryDate spouseIds spouseId')
             .sort({ generation: 1, birthOrder: 1 });
 
         // Create a map for quick spouse lookup
@@ -73,8 +73,26 @@ router.get('/tree', async (req, res) => {
                     return m.parentId && m.parentId.toString() === parentId;
                 })
                 .map(m => {
-                    // Find spouse data if exists
-                    const spouse = m.spouseId ? memberMap.get(m.spouseId.toString()) : null;
+                    // Get all spouses - support both new spouseIds array and legacy spouseId
+                    let spouseIdsList = m.spouseIds || [];
+                    // Also include legacy spouseId if it exists and not already in array
+                    if (m.spouseId && !spouseIdsList.some(sid => sid.toString() === m.spouseId.toString())) {
+                        spouseIdsList = [m.spouseId, ...spouseIdsList];
+                    }
+
+                    // Build spouses array with full data
+                    const spouses = spouseIdsList
+                        .map(sid => memberMap.get(sid.toString()))
+                        .filter(Boolean)
+                        .map(spouse => ({
+                            _id: spouse._id,
+                            fullName: spouse.fullName,
+                            gender: spouse.gender,
+                            birthYear: spouse.birthDate ? new Date(spouse.birthDate).getFullYear() : null,
+                            deathYear: spouse.deathDate ? new Date(spouse.deathDate).getFullYear() : null,
+                            isDeceased: spouse.isDeceased,
+                            avatar: spouse.avatar
+                        }));
 
                     return {
                         name: m.fullName,
@@ -87,17 +105,12 @@ router.get('/tree', async (req, res) => {
                             isDeceased: m.isDeceased,
                             avatar: m.avatar,
                             anniversaryDate: m.anniversaryDate,
-                            spouseId: m.spouseId,
-                            // Include populated spouse data for frontend rendering
-                            spouse: spouse ? {
-                                _id: spouse._id,
-                                fullName: spouse.fullName,
-                                gender: spouse.gender,
-                                birthYear: spouse.birthDate ? new Date(spouse.birthDate).getFullYear() : null,
-                                deathYear: spouse.deathDate ? new Date(spouse.deathDate).getFullYear() : null,
-                                isDeceased: spouse.isDeceased,
-                                avatar: spouse.avatar
-                            } : null
+                            spouseIds: spouseIdsList,
+                            // Include populated spouses array for frontend rendering
+                            spouses: spouses,
+                            // Keep legacy spouse for backward compatibility
+                            spouse: spouses.length > 0 ? spouses[0] : null,
+                            spouseId: m.spouseId
                         },
                         children: buildTree(m._id.toString())
                     };

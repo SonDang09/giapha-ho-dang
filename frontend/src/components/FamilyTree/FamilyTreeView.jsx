@@ -173,26 +173,31 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
     // Custom node using foreignObject for crisp HTML rendering
     const renderCustomNode = ({ nodeDatum }) => {
         const attrs = nodeDatum.attributes || {};
-        const hasSpouse = attrs.spouse; // spouse data populated from backend
+        // Support both new spouses array and legacy spouse object
+        const spouses = attrs.spouses || (attrs.spouse ? [attrs.spouse] : []);
+        const hasSpouses = spouses.length > 0;
 
-        // Calculate widths for spouse pair layout
-        const totalWidth = hasSpouse ? 360 : 180;
-        const offsetX = hasSpouse ? -180 : -90;
+        // Calculate widths for spouse pair layout - dynamic based on number of spouses
+        const cardWidth = 160;
+        const gapWidth = 30; // Heart + gap
+        const numCards = 1 + spouses.length;
+        const totalWidth = (cardWidth * numCards) + (gapWidth * spouses.length);
+        const offsetX = -totalWidth / 2;
 
         return (
             <g>
                 <foreignObject
-                    width={totalWidth}
-                    height={105}
-                    x={offsetX}
+                    width={totalWidth + 20}
+                    height={115}
+                    x={offsetX - 10}
                     y={-52}
                     style={{ overflow: 'visible' }}
                 >
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px',
-                        justifyContent: hasSpouse ? 'center' : 'flex-start'
+                        justifyContent: 'center',
+                        gap: '4px'
                     }}>
                         {/* Main member card */}
                         {renderMemberCard(
@@ -202,35 +207,51 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                             false
                         )}
 
-                        {/* Heart connector and spouse card if exists */}
-                        {hasSpouse && (
-                            <>
+                        {/* Heart connectors and spouse cards */}
+                        {hasSpouses && spouses.map((spouse, index) => (
+                            <div key={spouse._id || index} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                {/* Heart connector */}
                                 <div style={{
-                                    fontSize: '18px',
+                                    fontSize: spouses.length > 1 ? '14px' : '18px',
                                     color: COLORS.male,
-                                    textShadow: '0 1px 2px rgba(0,0,0,0.2)'
-                                }}>❤️</div>
+                                    textShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center'
+                                }}>
+                                    ❤️
+                                    {spouses.length > 1 && (
+                                        <span style={{
+                                            fontSize: '9px',
+                                            color: '#666',
+                                            marginTop: '-2px'
+                                        }}>
+                                            {index === 0 ? 'Cả' : index + 1}
+                                        </span>
+                                    )}
+                                </div>
+                                {/* Spouse card */}
                                 {renderMemberCard(
-                                    attrs.spouse.fullName,
+                                    spouse.fullName,
                                     {
-                                        gender: attrs.spouse.gender,
-                                        isDeceased: attrs.spouse.isDeceased,
-                                        birthYear: attrs.spouse.birthYear,
-                                        deathYear: attrs.spouse.deathYear,
+                                        gender: spouse.gender,
+                                        isDeceased: spouse.isDeceased,
+                                        birthYear: spouse.birthYear,
+                                        deathYear: spouse.deathYear,
                                         generation: attrs.generation
                                     },
                                     () => handleNodeClick({
-                                        name: attrs.spouse.fullName,
+                                        name: spouse.fullName,
                                         attributes: {
-                                            id: attrs.spouse._id || attrs.spouseId,
-                                            ...attrs.spouse,
+                                            id: spouse._id,
+                                            ...spouse,
                                             generation: attrs.generation
                                         }
                                     }),
                                     true
                                 )}
-                            </>
-                        )}
+                            </div>
+                        ))}
                     </div>
                 </foreignObject>
             </g>
@@ -346,13 +367,17 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                 ...values,
                 gender: spouseGender,
                 generation: attrs.generation,
-                spouseId: attrs.id // Link back to current member
+                // New spouse links back to current member
+                spouseIds: [attrs.id]
             };
             const res = await membersAPI.create(newSpouseData);
             const newSpouseId = res.data.data._id;
 
-            // Update current member with new spouse
-            await membersAPI.update(attrs.id, { spouseId: newSpouseId });
+            // Add new spouse to current member's spouseIds array
+            // Get existing spouseIds and add new one
+            const existingSpouseIds = attrs.spouseIds || [];
+            const updatedSpouseIds = [...existingSpouseIds, newSpouseId];
+            await membersAPI.update(attrs.id, { spouseIds: updatedSpouseIds });
 
             message.success(`Đã thêm ${spouseGender === 'female' ? 'vợ' : 'chồng'} thành công!`);
             setAddSpouseVisible(false);
