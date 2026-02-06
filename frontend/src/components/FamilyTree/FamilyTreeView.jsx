@@ -207,7 +207,7 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: '8px'
+                        gap: '0px'
                     }}>
                         {/* Main member card */}
                         {renderMemberCard(
@@ -217,9 +217,17 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                             false
                         )}
 
-                        {/* Spouse cards */}
+                        {/* Spouse cards with connector lines */}
                         {hasSpouses && spouses.map((spouse, index) => (
-                            <div key={spouse._id || index} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div key={spouse._id || index} style={{ display: 'flex', alignItems: 'center' }}>
+                                {/* Connector line between cards */}
+                                <div style={{
+                                    width: '20px',
+                                    height: '3px',
+                                    background: '#8B4513',
+                                    marginLeft: '-1px',
+                                    marginRight: '-1px'
+                                }} />
                                 {/* Spouse card */}
                                 {renderMemberCard(
                                     spouse.fullName,
