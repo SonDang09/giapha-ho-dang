@@ -4,15 +4,21 @@ import { saveAs } from 'file-saver';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, AlignmentType } from 'docx';
 
 // Export to PDF with Vietnamese font support using html2pdf
-export const exportToPDF = async (members, fileName = 'gia-pha-ho-dang') => {
+export const exportToPDF = async (members, options = {}) => {
+    const {
+        fileName = 'gia-pha-dang-duc-toc',
+        title = 'GIA PHẢ ĐẶNG ĐỨC TỘC',
+        slogan = 'Uống nước nhớ nguồn - Ăn quả nhớ kẻ trồng cây'
+    } = options;
+
     // Create HTML content for PDF
     const html = `
         <div style="font-family: 'Times New Roman', serif; padding: 20px;">
             <h1 style="color: #228B22; text-align: center; margin-bottom: 10px;">
-                GIA PHẢ HỌ ĐẶNG ĐÀ NẴNG
+                ${title}
             </h1>
             <p style="text-align: center; color: #666; font-style: italic; margin-bottom: 10px;">
-                "Uống nước nhớ nguồn - Ăn quả nhớ kẻ trồng cây"
+                "${slogan}"
             </p>
             <p style="text-align: center; color: #666; margin-bottom: 20px;">
                 Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}
@@ -42,7 +48,7 @@ export const exportToPDF = async (members, fileName = 'gia-pha-ho-dang') => {
                 </tbody>
             </table>
             <p style="text-align: center; color: #999; margin-top: 20px; font-size: 10px;">
-                Gia Phả Họ Đặng Đà Nẵng - Tổng số: ${members.length} thành viên
+                ${title} - Tổng số: ${members.length} thành viên
             </p>
         </div>
     `;
