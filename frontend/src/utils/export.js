@@ -1,5 +1,5 @@
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, AlignmentType } from 'docx';
@@ -34,7 +34,7 @@ export const exportToPDF = async (members, fileName = 'gia-pha-ho-dang') => {
     ]);
 
     // Add table
-    doc.autoTable({
+    autoTable(doc, {
         startY: 50,
         head: [['STT', 'Họ tên', 'Giới tính', 'Đời', 'Năm sinh', 'Năm mất', 'Ghi chú']],
         body: tableData,
