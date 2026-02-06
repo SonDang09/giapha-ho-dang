@@ -84,13 +84,39 @@ const MembersPage = () => {
             key: 'member',
             render: (_, record) => (
                 <Space>
-                    <Avatar
-                        src={record.avatar}
-                        icon={record.gender === 'male' ? <ManOutlined /> : <WomanOutlined />}
-                        style={{
-                            backgroundColor: record.gender === 'male' ? '#3b82f6' : '#ec4899'
-                        }}
-                    />
+                    <div style={{ position: 'relative' }}>
+                        <Avatar
+                            src={record.avatar}
+                            icon={record.gender === 'male' ? <ManOutlined /> : <WomanOutlined />}
+                            size={44}
+                            style={{
+                                backgroundColor: record.gender === 'male' ? '#8B0000' : '#1B5E20',
+                                border: `2px solid ${record.gender === 'male' ? '#8B0000' : '#1B5E20'}`
+                            }}
+                        />
+                        <div style={{
+                            position: 'absolute',
+                            top: -6,
+                            right: -6,
+                            width: 20,
+                            height: 20,
+                            background: 'linear-gradient(135deg, #DAA520 0%, #B8860B 100%)',
+                            transform: 'rotate(45deg)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                        }}>
+                            <span style={{
+                                transform: 'rotate(-45deg)',
+                                color: 'white',
+                                fontSize: 10,
+                                fontWeight: 'bold'
+                            }}>
+                                {record.generation}
+                            </span>
+                        </div>
+                    </div>
                     <div>
                         <div style={{ fontWeight: 500 }}>{record.fullName}</div>
                         <div style={{ fontSize: 12, color: '#64748b' }}>
