@@ -357,7 +357,7 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
             message.success(`Đã thêm ${spouseGender === 'female' ? 'vợ' : 'chồng'} thành công!`);
             setAddSpouseVisible(false);
             spouseForm.resetFields();
-            loadTreeData();
+            if (onRefresh) onRefresh();
             setSelectedMember(null);
         } catch (error) {
             message.error('Lỗi: ' + (error.response?.data?.message || error.message));
