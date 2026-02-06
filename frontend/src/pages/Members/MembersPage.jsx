@@ -348,18 +348,19 @@ const MembersPage = () => {
                                             hoverable
                                             style={{
                                                 borderRadius: 12,
-                                                overflow: 'hidden',
-                                                border: `2px solid ${member.gender === 'male' ? '#8B0000' : '#1B5E20'}`
+                                                overflow: 'visible',
+                                                border: `2px solid ${member.gender === 'male' ? '#8B0000' : '#1B5E20'}`,
+                                                marginTop: 20
                                             }}
-                                            styles={{ body: { padding: 0 } }}
+                                            styles={{ body: { padding: 0, overflow: 'visible' } }}
                                         >
                                             {/* Header with gradient */}
                                             <div style={{
                                                 background: member.gender === 'male'
                                                     ? 'linear-gradient(135deg, #8B0000 0%, #CD5C5C 100%)'
                                                     : 'linear-gradient(135deg, #1B5E20 0%, #4CAF50 100%)',
-                                                height: 50,
-                                                position: 'relative'
+                                                height: 40,
+                                                borderRadius: '10px 10px 0 0'
                                             }} />
 
                                             {/* Avatar */}
