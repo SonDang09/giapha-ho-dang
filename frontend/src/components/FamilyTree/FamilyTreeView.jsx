@@ -210,26 +210,17 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                         {/* Heart connectors and spouse cards */}
                         {hasSpouses && spouses.map((spouse, index) => (
                             <div key={spouse._id || index} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                {/* Heart connector */}
-                                <div style={{
-                                    fontSize: spouses.length > 1 ? '14px' : '18px',
-                                    color: COLORS.male,
-                                    textShadow: '0 1px 2px rgba(0,0,0,0.2)',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center'
-                                }}>
-                                    ❤️
-                                    {spouses.length > 1 && (
-                                        <span style={{
-                                            fontSize: '9px',
-                                            color: '#666',
-                                            marginTop: '-2px'
-                                        }}>
-                                            {index === 0 ? 'Cả' : index + 1}
-                                        </span>
-                                    )}
-                                </div>
+                                {/* Spouse separator (no heart, just small label if multiple) */}
+                                {spouses.length > 1 && (
+                                    <div style={{
+                                        fontSize: '10px',
+                                        color: '#888',
+                                        padding: '0 2px',
+                                        fontWeight: 'bold'
+                                    }}>
+                                        {index === 0 ? 'Cả' : index + 1}
+                                    </div>
+                                )}
                                 {/* Spouse card */}
                                 {renderMemberCard(
                                     spouse.fullName,
