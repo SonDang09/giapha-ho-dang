@@ -209,7 +209,7 @@ const AppLayout = ({ children }) => {
             </Footer>
 
             <style>{`
-        /* Mobile first - base styles */
+        /* Mobile first - base styles (< 1200px shows hamburger menu) */
         .site-logo .logo-text {
           font-size: 18px !important;
         }
@@ -218,21 +218,35 @@ const AppLayout = ({ children }) => {
         .user-name { display: none; }
         .header-search { display: none !important; }
         
-        /* Desktop - 1024px+ (shows horizontal menu) */
-        @media (min-width: 1024px) {
+        /* Desktop - 1200px+ (shows horizontal menu) */
+        @media (min-width: 1200px) {
           .site-logo .logo-text {
-            font-size: 20px !important;
+            font-size: 18px !important;
           }
           .desktop-menu { 
             display: flex !important;
             flex: 1;
             justify-content: center;
+            min-width: 0;
+          }
+          .desktop-menu .ant-menu-item {
+            padding: 0 8px !important;
+            font-size: 12px !important;
+          }
+          .mobile-menu-btn { display: none !important; }
+          .user-name { display: none; }
+          .header-search { display: none !important; }
+        }
+        
+        /* Desktop medium - 1400px+ */
+        @media (min-width: 1400px) {
+          .site-logo .logo-text {
+            font-size: 20px !important;
           }
           .desktop-menu .ant-menu-item {
             padding: 0 12px !important;
             font-size: 13px !important;
           }
-          .mobile-menu-btn { display: none !important; }
           .user-name { display: inline; }
           .header-search { 
             display: flex !important;
@@ -270,14 +284,14 @@ const AppLayout = ({ children }) => {
           }
         }
         
-        /* Desktop large - 1280px+ */
-        @media (min-width: 1280px) {
+        /* Desktop large - 1600px+ */
+        @media (min-width: 1600px) {
           .site-logo .logo-text {
             font-size: 24px !important;
           }
           .desktop-menu .ant-menu-item {
-            padding: 0 20px !important;
-            font-size: 15px !important;
+            padding: 0 16px !important;
+            font-size: 14px !important;
           }
         }
       `}</style>
