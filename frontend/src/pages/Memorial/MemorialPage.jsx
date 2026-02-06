@@ -4,6 +4,7 @@ import { Card, Row, Col, Avatar, Spin, Empty, List, Form, Input, Button, message
 import { UserOutlined, HeartOutlined, CalendarOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import MemorialCandle from '../../components/Memorial/MemorialCandle';
 import { memorialsAPI, membersAPI } from '../../api';
+import { useAuth } from '../../context/AuthContext';
 import dayjs from 'dayjs';
 import useDocumentTitle from '../../hooks/useDocumentTitle';
 
@@ -12,6 +13,7 @@ const { TextArea } = Input;
 const MemorialPage = () => {
     useDocumentTitle('Nghĩa Trang Trực Tuyến', 'Nghĩa trang trực tuyến dòng họ Đặng Đà Nẵng. Tưởng nhớ và thắp nén hương lòng cho các cụ đã khuất.');
     const { memberId } = useParams();
+    const { isAuthenticated } = useAuth();
     const [loading, setLoading] = useState(true);
     const [member, setMember] = useState(null);
     const [memorial, setMemorial] = useState(null);
@@ -279,7 +281,7 @@ const MemorialPage = () => {
                 />
             </Card>
 
-            {/* Condolence Form */}
+            {/* Condolence Form - Only for logged-in members */}
             <Card
                 style={{
                     background: 'rgba(255,255,255,0.05)',
@@ -291,53 +293,66 @@ const MemorialPage = () => {
                     <HeartOutlined /> Gửi Lời Tưởng Nhớ
                 </h3>
 
-                <Form
-                    form={form}
-                    onFinish={handleCondolence}
-                    layout="vertical"
-                >
-                    <Row gutter={16}>
-                        <Col xs={24} sm={12}>
-                            <Form.Item
-                                name="name"
-                                rules={[{ required: true, message: 'Vui lòng nhập tên' }]}
-                            >
-                                <Input
-                                    placeholder="Họ tên của bạn"
-                                    style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white' }}
-                                />
-                            </Form.Item>
-                        </Col>
-                        <Col xs={24} sm={12}>
-                            <Form.Item name="relationship">
-                                <Input
-                                    placeholder="Quan hệ với người đã khuất"
-                                    style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white' }}
-                                />
-                            </Form.Item>
-                        </Col>
-                    </Row>
-
-                    <Form.Item
-                        name="message"
-                        rules={[{ required: true, message: 'Vui lòng nhập lời tưởng nhớ' }]}
+                {isAuthenticated ? (
+                    <Form
+                        form={form}
+                        onFinish={handleCondolence}
+                        layout="vertical"
                     >
-                        <TextArea
-                            rows={4}
-                            placeholder="Lời tưởng nhớ..."
-                            style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white' }}
-                        />
-                    </Form.Item>
+                        <Row gutter={16}>
+                            <Col xs={24} sm={12}>
+                                <Form.Item
+                                    name="name"
+                                    rules={[{ required: true, message: 'Vui lòng nhập tên' }]}
+                                >
+                                    <Input
+                                        placeholder="Họ tên của bạn"
+                                        style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white' }}
+                                    />
+                                </Form.Item>
+                            </Col>
+                            <Col xs={24} sm={12}>
+                                <Form.Item name="relationship">
+                                    <Input
+                                        placeholder="Quan hệ với người đã khuất"
+                                        style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white' }}
+                                    />
+                                </Form.Item>
+                            </Col>
+                        </Row>
 
-                    <Button
-                        type="primary"
-                        htmlType="submit"
-                        loading={submitting}
-                        style={{ background: '#D4AF37', borderColor: '#D4AF37' }}
-                    >
-                        Gửi Lời Tưởng Nhớ
-                    </Button>
-                </Form>
+                        <Form.Item
+                            name="message"
+                            rules={[{ required: true, message: 'Vui lòng nhập lời tưởng nhớ' }]}
+                        >
+                            <TextArea
+                                rows={4}
+                                placeholder="Lời tưởng nhớ..."
+                                style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white' }}
+                            />
+                        </Form.Item>
+
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            loading={submitting}
+                            style={{ background: '#D4AF37', borderColor: '#D4AF37' }}
+                        >
+                            Gửi Lời Tưởng Nhớ
+                        </Button>
+                    </Form>
+                ) : (
+                    <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                        <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: 16 }}>
+                            Vui lòng đăng nhập để gửi lời tưởng nhớ
+                        </p>
+                        <Link to="/login">
+                            <Button type="primary" style={{ background: '#D4AF37', borderColor: '#D4AF37' }}>
+                                Đăng nhập
+                            </Button>
+                        </Link>
+                    </div>
+                )}
             </Card>
 
             {/* Condolences List */}
