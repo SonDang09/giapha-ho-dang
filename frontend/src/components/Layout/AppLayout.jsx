@@ -146,7 +146,7 @@ const AppLayout = ({ children }) => {
                                 <Avatar
                                     src={user?.avatar}
                                     icon={<UserOutlined />}
-                                    style={{ backgroundColor: '#D4AF37' }}
+                                    style={{ backgroundColor: '#228B22' }}
                                 />
                                 <span className="user-name">{user?.fullName}</span>
                             </Space>
