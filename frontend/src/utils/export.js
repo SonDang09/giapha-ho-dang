@@ -26,7 +26,6 @@ export const exportToPDF = async (members, fileName = 'gia-pha-ho-dang') => {
                         <th style="border: 1px solid #ddd; padding: 8px;">Đời</th>
                         <th style="border: 1px solid #ddd; padding: 8px;">Năm sinh</th>
                         <th style="border: 1px solid #ddd; padding: 8px;">Năm mất</th>
-                        <th style="border: 1px solid #ddd; padding: 8px;">Ghi chú</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -38,7 +37,6 @@ export const exportToPDF = async (members, fileName = 'gia-pha-ho-dang') => {
                             <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">Đời ${m.generation || '-'}</td>
                             <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${m.birthDate ? new Date(m.birthDate).getFullYear() : '-'}</td>
                             <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${m.deathDate ? new Date(m.deathDate).getFullYear() : (m.isDeceased ? '-' : 'Còn sống')}</td>
-                            <td style="border: 1px solid #ddd; padding: 8px;">${(m.biography || '').substring(0, 50)}</td>
                         </tr>
                     `).join('')}
                 </tbody>
