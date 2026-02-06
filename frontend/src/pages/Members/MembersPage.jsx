@@ -84,38 +84,24 @@ const MembersPage = () => {
             key: 'member',
             render: (_, record) => (
                 <Space>
-                    <div style={{ position: 'relative' }}>
-                        <Avatar
-                            src={record.avatar}
-                            icon={record.gender === 'male' ? <ManOutlined /> : <WomanOutlined />}
-                            size={44}
+                    <div style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: '50%',
+                        border: `3px solid ${record.gender === 'male' ? '#8B0000' : '#1B5E20'}`,
+                        overflow: 'hidden',
+                        background: '#E8E8E8',
+                        flexShrink: 0
+                    }}>
+                        <img
+                            src={record.avatar || (record.gender === 'male' ? '/avatar-male.png' : '/avatar-female.png')}
+                            alt={record.fullName}
                             style={{
-                                backgroundColor: record.gender === 'male' ? '#8B0000' : '#1B5E20',
-                                border: `2px solid ${record.gender === 'male' ? '#8B0000' : '#1B5E20'}`
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover'
                             }}
                         />
-                        <div style={{
-                            position: 'absolute',
-                            top: -6,
-                            right: -6,
-                            width: 20,
-                            height: 20,
-                            background: 'linear-gradient(135deg, #DAA520 0%, #B8860B 100%)',
-                            transform: 'rotate(45deg)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
-                        }}>
-                            <span style={{
-                                transform: 'rotate(-45deg)',
-                                color: 'white',
-                                fontSize: 10,
-                                fontWeight: 'bold'
-                            }}>
-                                {record.generation}
-                            </span>
-                        </div>
                     </div>
                     <div>
                         <div style={{ fontWeight: 500 }}>{record.fullName}</div>
