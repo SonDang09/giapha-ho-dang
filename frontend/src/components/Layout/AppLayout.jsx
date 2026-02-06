@@ -112,8 +112,7 @@ const AppLayout = ({ children }) => {
                         flex: 1,
                         marginLeft: 24,
                         background: 'transparent',
-                        borderBottom: 'none',
-                        display: 'none'
+                        borderBottom: 'none'
                     }}
                     className="desktop-menu"
                 />
