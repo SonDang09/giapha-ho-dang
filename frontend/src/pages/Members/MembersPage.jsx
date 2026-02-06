@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Table, Card, Button, Space, Input, Tag, Avatar, Modal, Form, Select, DatePicker, message, Popconfirm, Dropdown, Alert } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, UserOutlined, ManOutlined, WomanOutlined, DownloadOutlined, FilePdfOutlined, FileExcelOutlined, FileWordOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Table, Card, Button, Space, Input, Tag, Avatar, Modal, Form, Select, DatePicker, message, Popconfirm, Alert } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, UserOutlined, ManOutlined, WomanOutlined, FilePdfOutlined } from '@ant-design/icons';
 import { membersAPI } from '../../api';
 import { useAuth } from '../../context/AuthContext';
-import { exportToPDF, exportToExcel, exportToWord } from '../../utils/export';
+import { exportToPDF } from '../../utils/export';
 import dayjs from 'dayjs';
 import useDocumentTitle from '../../hooks/useDocumentTitle';
 
@@ -245,30 +245,21 @@ const MembersPage = () => {
                         onSearch={setSearchText}
                         style={{ width: 200 }}
                     />
-                    <Dropdown
-                        menu={{
-                            items: [
-                                { key: 'pdf', label: 'Xuất PDF', icon: <FilePdfOutlined /> },
-                                { key: 'excel', label: 'Xuất Excel', icon: <FileExcelOutlined /> },
-                                { key: 'word', label: 'Xuất Word', icon: <FileWordOutlined /> }
-                            ],
-                            onClick: async ({ key }) => {
-                                message.loading('Đang xuất file...', 1);
-                                try {
-                                    if (key === 'pdf') await exportToPDF(members);
-                                    else if (key === 'excel') await exportToExcel(members);
-                                    else if (key === 'word') await exportToWord(members);
-                                    message.success('Xuất file thành công!');
-                                } catch (error) {
-                                    message.error('Có lỗi khi xuất file');
-                                }
+                    <Button
+                        icon={<FilePdfOutlined />}
+                        onClick={async () => {
+                            message.loading('Đang xuất PDF...', 1);
+                            try {
+                                await exportToPDF(members);
+                                message.success('Xuất PDF thành công!');
+                            } catch (error) {
+                                console.error('Export error:', error);
+                                message.error('Có lỗi khi xuất PDF: ' + error.message);
                             }
                         }}
                     >
-                        <Button icon={<DownloadOutlined />}>
-                            Xuất file
-                        </Button>
-                    </Dropdown>
+                        Xuất PDF
+                    </Button>
                     {canEdit() && (
                         <Button
                             type="primary"
