@@ -23,12 +23,13 @@ const LoginPage = () => {
 
         if (result.success) {
             message.success('Đăng nhập thành công!');
-            navigate(from, { replace: true });
+            // Use window.location to force full page reload
+            // This ensures all contexts (Auth, SiteSettings) re-initialize properly
+            window.location.href = from;
         } else {
             setError(result.message);
+            setLoading(false);
         }
-
-        setLoading(false);
     };
 
     return (
