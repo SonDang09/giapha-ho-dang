@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Table, Card, Button, Space, Input, Tag, Avatar, Modal, Form, Select, DatePicker, message, Popconfirm, Alert, Row, Col, Segmented } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, UserOutlined, ManOutlined, WomanOutlined, FilePdfOutlined, TableOutlined, AppstoreOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, UserOutlined, ManOutlined, WomanOutlined, FilePdfOutlined, TableOutlined, AppstoreOutlined, FacebookOutlined, YoutubeOutlined, InstagramOutlined, LinkOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import { membersAPI } from '../../api';
 import { useAuth } from '../../context/AuthContext';
@@ -498,6 +498,40 @@ const MembersPage = () => {
                     <Form.Item name="biography" label="Tiểu sử">
                         <TextArea rows={4} placeholder="Giới thiệu ngắn về thành viên..." />
                     </Form.Item>
+
+                    {/* Social Media Links */}
+                    <div style={{ marginBottom: 16 }}>
+                        <div style={{ fontWeight: 500, marginBottom: 8, color: '#1677ff' }}>
+                            <LinkOutlined /> Mạng xã hội
+                        </div>
+                        <Row gutter={12}>
+                            <Col span={12}>
+                                <Form.Item name={['socialLinks', 'facebook']} label="Facebook" style={{ marginBottom: 8 }}>
+                                    <Input prefix={<FacebookOutlined style={{ color: '#1877F2' }} />} placeholder="Link Facebook" />
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item name={['socialLinks', 'zalo']} label="Zalo" style={{ marginBottom: 8 }}>
+                                    <Input prefix={<span style={{ color: '#0068FF', fontWeight: 700, fontSize: 12 }}>Z</span>} placeholder="Số điện thoại Zalo" />
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item name={['socialLinks', 'youtube']} label="YouTube" style={{ marginBottom: 8 }}>
+                                    <Input prefix={<YoutubeOutlined style={{ color: '#FF0000' }} />} placeholder="Link YouTube" />
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item name={['socialLinks', 'tiktok']} label="TikTok" style={{ marginBottom: 8 }}>
+                                    <Input prefix={<span style={{ fontWeight: 700, fontSize: 12 }}>TT</span>} placeholder="Link TikTok" />
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item name={['socialLinks', 'instagram']} label="Instagram" style={{ marginBottom: 8 }}>
+                                    <Input prefix={<InstagramOutlined style={{ color: '#E4405F' }} />} placeholder="Link Instagram" />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                    </div>
 
                     <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
                         <Space>

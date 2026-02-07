@@ -77,6 +77,15 @@ const memberSchema = new mongoose.Schema({
         lowercase: true
     },
 
+    // Social Media Links
+    socialLinks: {
+        facebook: { type: String, trim: true },
+        zalo: { type: String, trim: true },
+        youtube: { type: String, trim: true },
+        tiktok: { type: String, trim: true },
+        instagram: { type: String, trim: true }
+    },
+
     // Additional Info
     occupation: {
         type: String,

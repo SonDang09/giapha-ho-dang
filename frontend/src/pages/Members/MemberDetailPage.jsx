@@ -5,7 +5,8 @@ import {
     UserOutlined, ArrowLeftOutlined, HeartOutlined, CalendarOutlined,
     ManOutlined, WomanOutlined, HomeOutlined, PhoneOutlined,
     MailOutlined, EditOutlined, TeamOutlined, ApartmentOutlined,
-    EnvironmentOutlined, IdcardOutlined
+    EnvironmentOutlined, IdcardOutlined, FacebookOutlined, YoutubeOutlined,
+    InstagramOutlined, LinkOutlined
 } from '@ant-design/icons';
 import MemorialCandle from '../../components/Memorial/MemorialCandle';
 import { membersAPI, memorialsAPI } from '../../api';
@@ -276,6 +277,57 @@ const MemberDetailPage = () => {
                                 <InfoRow icon={<CalendarOutlined />} label="Ngày giỗ (Âm lịch)" value={`${member.anniversaryDate.lunarDay}/${member.anniversaryDate.lunarMonth}`} />
                             )}
                         </div>
+
+                        {/* Social Media Links */}
+                        {member.socialLinks && Object.values(member.socialLinks).some(v => v) && (
+                            <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #f0f0f0' }}>
+                                <div style={{ fontSize: 13, color: '#888', marginBottom: 10 }}>
+                                    <LinkOutlined /> Mạng xã hội
+                                </div>
+                                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                                    {member.socialLinks.facebook && (
+                                        <a href={member.socialLinks.facebook} target="_blank" rel="noopener noreferrer"
+                                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: '50%', background: '#1877F2', color: '#fff', fontSize: 18, transition: 'transform 0.2s' }}
+                                            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.15)'}
+                                            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                                            <FacebookOutlined />
+                                        </a>
+                                    )}
+                                    {member.socialLinks.zalo && (
+                                        <a href={`https://zalo.me/${member.socialLinks.zalo}`} target="_blank" rel="noopener noreferrer"
+                                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: '50%', background: '#0068FF', color: '#fff', fontSize: 14, fontWeight: 700, transition: 'transform 0.2s' }}
+                                            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.15)'}
+                                            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                                            Zalo
+                                        </a>
+                                    )}
+                                    {member.socialLinks.youtube && (
+                                        <a href={member.socialLinks.youtube} target="_blank" rel="noopener noreferrer"
+                                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: '50%', background: '#FF0000', color: '#fff', fontSize: 18, transition: 'transform 0.2s' }}
+                                            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.15)'}
+                                            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                                            <YoutubeOutlined />
+                                        </a>
+                                    )}
+                                    {member.socialLinks.tiktok && (
+                                        <a href={member.socialLinks.tiktok} target="_blank" rel="noopener noreferrer"
+                                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: '50%', background: '#010101', color: '#fff', fontSize: 14, fontWeight: 700, transition: 'transform 0.2s' }}
+                                            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.15)'}
+                                            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                                            TT
+                                        </a>
+                                    )}
+                                    {member.socialLinks.instagram && (
+                                        <a href={member.socialLinks.instagram} target="_blank" rel="noopener noreferrer"
+                                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', color: '#fff', fontSize: 18, transition: 'transform 0.2s' }}
+                                            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.15)'}
+                                            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                                            <InstagramOutlined />
+                                        </a>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </Card>
                 </Col>
 
