@@ -28,6 +28,7 @@ router.get('/', async (req, res) => {
         const members = await Member.find(query)
             .populate('parentId', 'fullName')
             .populate('spouseId', 'fullName')
+            .populate('spouseIds', 'fullName gender birthDate deathDate generation isDeceased avatar')
             .sort({ generation: 1, birthOrder: 1 })
             .skip((page - 1) * limit)
             .limit(parseInt(limit));
@@ -192,8 +193,9 @@ router.get('/anniversaries', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const member = await Member.findById(req.params.id)
-            .populate('parentId', 'fullName generation')
-            .populate('spouseId', 'fullName')
+            .populate('parentId', 'fullName generation gender birthDate deathDate isDeceased avatar')
+            .populate('spouseId', 'fullName gender birthDate deathDate generation isDeceased avatar')
+            .populate('spouseIds', 'fullName gender birthDate deathDate generation isDeceased avatar')
             .populate('children');
 
         if (!member) {

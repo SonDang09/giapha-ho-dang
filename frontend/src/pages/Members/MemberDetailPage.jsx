@@ -41,47 +41,36 @@ const MemberDetailPage = () => {
     const loadMemberDetail = async () => {
         setLoading(true);
         try {
-            // Load member info
+            // Load member info (backend now populates parentId, spouseId, spouseIds, children)
             const memberRes = await membersAPI.getById(id);
             const memberData = memberRes.data?.data || memberRes.data;
             setMember(memberData);
 
-            // Load parent info
-            if (memberData.parentId) {
-                try {
-                    const parentId = typeof memberData.parentId === 'object' ? memberData.parentId._id : memberData.parentId;
-                    const parentRes = await membersAPI.getById(parentId);
-                    setParent(parentRes.data?.data || parentRes.data);
-                } catch (e) {
-                    console.log('Parent not found');
+            // Use populated parent data directly
+            if (memberData.parentId && typeof memberData.parentId === 'object') {
+                setParent(memberData.parentId);
+            }
+
+            // Use populated spouse data directly
+            const populatedSpouses = [];
+            // Check spouseIds array first (new multi-spouse support)
+            if (memberData.spouseIds?.length > 0) {
+                memberData.spouseIds.forEach(s => {
+                    if (typeof s === 'object' && s._id) populatedSpouses.push(s);
+                });
+            }
+            // Also include legacy spouseId if not already in list
+            if (memberData.spouseId && typeof memberData.spouseId === 'object') {
+                const legacyId = memberData.spouseId._id;
+                if (!populatedSpouses.some(s => s._id === legacyId)) {
+                    populatedSpouses.unshift(memberData.spouseId);
                 }
             }
+            setSpouses(populatedSpouses);
 
-            // Load spouse info
-            const spouseIdList = memberData.spouseIds?.length
-                ? memberData.spouseIds
-                : memberData.spouseId ? [memberData.spouseId] : [];
-
-            if (spouseIdList.length > 0) {
-                const spousePromises = spouseIdList.map(sid => {
-                    const spId = typeof sid === 'object' ? sid._id : sid;
-                    return membersAPI.getById(spId).catch(() => null);
-                });
-                const spouseResults = await Promise.all(spousePromises);
-                setSpouses(spouseResults.filter(r => r).map(r => r.data?.data || r.data));
-            }
-
-            // Load children
-            try {
-                const allMembers = await membersAPI.getAll({ limit: 500 });
-                const allData = allMembers.data?.data || [];
-                const memberChildren = allData.filter(m => {
-                    const pid = typeof m.parentId === 'object' ? m.parentId?._id : m.parentId;
-                    return pid === id;
-                });
-                setChildren(memberChildren);
-            } catch (e) {
-                console.log('Could not load children');
+            // Use populated children virtual
+            if (memberData.children?.length > 0) {
+                setChildren(memberData.children);
             }
 
             // Load memorial data if deceased

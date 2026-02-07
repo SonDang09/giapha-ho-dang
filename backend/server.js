@@ -103,8 +103,8 @@ app.use('/api/albums', apiLimiter, albumRoutes);
 app.use('/api/memorials', apiLimiter, memorialRoutes);
 app.use('/api/upload', apiLimiter, uploadRoutes);
 app.use('/api/transactions', apiLimiter, transactionRoutes);
-app.use('/api/users', authLimiter, userRoutes);          // Strict: sensitive user management
-app.use('/api/settings', authLimiter, settingsRoutes);   // Strict: site config
+app.use('/api/users', apiLimiter, userRoutes);           // General: user management
+app.use('/api/settings', apiLimiter, settingsRoutes);    // General: site config
 
 // Health check
 app.get('/api/health', (req, res) => {

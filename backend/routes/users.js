@@ -75,7 +75,7 @@ router.post('/', protect, authorize('admin_toc'), [
     body('username').trim().notEmpty().withMessage('Tên đăng nhập là bắt buộc'),
     body('password').isLength({ min: 6 }).withMessage('Mật khẩu tối thiểu 6 ký tự'),
     body('fullName').trim().notEmpty().withMessage('Họ tên là bắt buộc'),
-    body('role').optional().isIn(['admin_toc', 'chi_ho', 'member']).withMessage('Vai trò không hợp lệ')
+    body('role').optional().isIn(['admin_toc', 'chi_ho', 'thanh_vien']).withMessage('Vai trò không hợp lệ')
 ], async (req, res) => {
     try {
         const errors = validationResult(req);
@@ -83,7 +83,7 @@ router.post('/', protect, authorize('admin_toc'), [
             return res.status(400).json({ success: false, errors: errors.array() });
         }
 
-        const { username, password, fullName, role = 'member', email, phone } = req.body;
+        const { username, password, fullName, role = 'thanh_vien', email, phone } = req.body;
 
         // Check if username exists
         const existingUser = await User.findOne({ username });
