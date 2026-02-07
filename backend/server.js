@@ -44,8 +44,8 @@ const apiLimiter = rateLimit({
     legacyHeaders: false
 });
 
-// Rate limiting - Auth endpoints (stricter: 10 attempts per 15 minutes)
-const authLimiter = rateLimit({
+// Rate limiting - Login only (stricter: 10 attempts per 15 minutes)
+const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 10,
     message: {
@@ -93,7 +93,10 @@ app.use('/api', (req, res, next) => {
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Routes with Rate Limiting
-app.use('/api/auth', authLimiter, authRoutes);           // Strict: 10 requests/15min
+// Login/Register: strict 10 req/15min, other auth endpoints: general 100 req/15min
+app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth/register', loginLimiter);
+app.use('/api/auth', apiLimiter, authRoutes);
 app.use('/api/members', apiLimiter, memberRoutes);       // General: 100 requests/15min
 app.use('/api/news', apiLimiter, newsRoutes);
 app.use('/api/albums', apiLimiter, albumRoutes);
