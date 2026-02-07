@@ -261,76 +261,88 @@ const MembersPage = () => {
                 />
             )}
 
-            <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-                <h1 className="page-title" style={{ margin: 0 }}>
+            <div className="members-toolbar">
+                <h1 className="page-title" style={{ margin: '0 0 12px 0' }}>
                     <UserOutlined style={{ color: '#D4AF37' }} /> Danh Sách Thành Viên
                 </h1>
 
-                <Space wrap>
-                    <Select
-                        placeholder="Lọc theo đời"
-                        allowClear
-                        style={{ width: 130 }}
-                        value={filterGeneration}
-                        onChange={setFilterGeneration}
-                    >
-                        {availableGenerations.map(i => (
-                            <Select.Option key={i} value={i}>Đời {i}</Select.Option>
-                        ))}
-                    </Select>
-                    <Select
-                        placeholder="Trạng thái"
-                        allowClear
-                        style={{ width: 130 }}
-                        value={filterStatus}
-                        onChange={setFilterStatus}
-                    >
-                        <Select.Option value="alive">Còn sống</Select.Option>
-                        <Select.Option value="deceased">Đã mất</Select.Option>
-                    </Select>
-                    <Search
-                        placeholder="Tìm kiếm..."
-                        allowClear
-                        onSearch={setSearchText}
-                        style={{ width: 200 }}
-                    />
-                    <Segmented
-                        value={viewMode}
-                        onChange={setViewMode}
-                        options={[
-                            { value: 'table', icon: <TableOutlined /> },
-                            { value: 'card', icon: <AppstoreOutlined /> }
-                        ]}
-                    />
-                    <Button
-                        icon={<FilePdfOutlined />}
-                        onClick={async () => {
-                            message.loading('Đang xuất PDF...', 1);
-                            try {
-                                await exportToPDF(members);
-                                message.success('Xuất PDF thành công!');
-                            } catch (error) {
-                                console.error('Export error:', error);
-                                message.error('Có lỗi khi xuất PDF: ' + error.message);
-                            }
-                        }}
-                    >
-                        Xuất PDF
-                    </Button>
-                    {canEdit() && (
+                {/* Search bar - full width */}
+                <Search
+                    placeholder="Tìm kiếm thành viên..."
+                    allowClear
+                    onSearch={setSearchText}
+                    className="members-search"
+                />
+
+                {/* Filters + Actions row */}
+                <div className="members-filters-row">
+                    <div className="members-filters">
+                        <Select
+                            placeholder="Lọc đời"
+                            allowClear
+                            style={{ minWidth: 100, flex: 1 }}
+                            value={filterGeneration}
+                            onChange={setFilterGeneration}
+                            size="small"
+                        >
+                            {availableGenerations.map(i => (
+                                <Select.Option key={i} value={i}>Đời {i}</Select.Option>
+                            ))}
+                        </Select>
+                        <Select
+                            placeholder="Trạng thái"
+                            allowClear
+                            style={{ minWidth: 100, flex: 1 }}
+                            value={filterStatus}
+                            onChange={setFilterStatus}
+                            size="small"
+                        >
+                            <Select.Option value="alive">Còn sống</Select.Option>
+                            <Select.Option value="deceased">Đã mất</Select.Option>
+                        </Select>
+                    </div>
+                    <div className="members-actions">
+                        <Segmented
+                            value={viewMode}
+                            onChange={setViewMode}
+                            size="small"
+                            options={[
+                                { value: 'table', icon: <TableOutlined /> },
+                                { value: 'card', icon: <AppstoreOutlined /> }
+                            ]}
+                        />
                         <Button
-                            type="primary"
-                            icon={<PlusOutlined />}
-                            onClick={() => {
-                                setEditingMember(null);
-                                form.resetFields();
-                                setModalVisible(true);
+                            icon={<FilePdfOutlined />}
+                            size="small"
+                            onClick={async () => {
+                                message.loading('Đang xuất PDF...', 1);
+                                try {
+                                    await exportToPDF(members);
+                                    message.success('Xuất PDF thành công!');
+                                } catch (error) {
+                                    console.error('Export error:', error);
+                                    message.error('Có lỗi khi xuất PDF: ' + error.message);
+                                }
                             }}
                         >
-                            Thêm mới
+                            <span className="btn-text-desktop">Xuất PDF</span>
                         </Button>
-                    )}
-                </Space>
+                        {canEdit() && (
+                            <Button
+                                type="primary"
+                                icon={<PlusOutlined />}
+                                size="small"
+                                onClick={() => {
+                                    setEditingMember(null);
+                                    form.resetFields();
+                                    setModalVisible(true);
+                                }}
+                            >
+                                <span className="btn-text-desktop">Thêm mới</span>
+                            </Button>
+                        )}
+                    </div>
+                </div>
             </div>
 
             {viewMode === 'table' ? (
@@ -570,11 +582,68 @@ const MembersPage = () => {
                 </Form>
             </Modal>
             <style>{`
+                .members-toolbar {
+                    margin-bottom: 16px;
+                }
+                .members-search {
+                    margin-bottom: 10px;
+                }
+                .members-filters-row {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                }
+                .members-filters {
+                    display: flex;
+                    gap: 8px;
+                    flex: 1;
+                    min-width: 0;
+                }
+                .members-actions {
+                    display: flex;
+                    gap: 6px;
+                    align-items: center;
+                    flex-shrink: 0;
+                }
                 @media (max-width: 767px) {
                     .mobile-member-tags {
                         display: flex !important;
                         flex-wrap: wrap;
                         gap: 4px;
+                    }
+                    .members-toolbar .page-title {
+                        font-size: 18px !important;
+                        margin-bottom: 8px !important;
+                    }
+                    .members-search {
+                        margin-bottom: 8px;
+                    }
+                    .members-search .ant-input-search {
+                        width: 100% !important;
+                    }
+                    .members-filters-row {
+                        gap: 6px;
+                    }
+                    .members-filters {
+                        flex: 1;
+                        gap: 6px;
+                    }
+                    .members-filters .ant-select {
+                        min-width: 0 !important;
+                        flex: 1 !important;
+                    }
+                    .members-actions {
+                        gap: 4px;
+                    }
+                    .btn-text-desktop {
+                        display: none;
+                    }
+                }
+                @media (min-width: 768px) {
+                    .members-search .ant-input-search {
+                        max-width: 300px;
                     }
                 }
             `}</style>
