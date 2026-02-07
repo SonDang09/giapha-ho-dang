@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Table, Card, Button, Space, Input, Tag, Avatar, Modal, Form, Select, DatePicker, message, Popconfirm, Alert, Row, Col, Segmented } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, UserOutlined, ManOutlined, WomanOutlined, FilePdfOutlined, TableOutlined, AppstoreOutlined } from '@ant-design/icons';
+import { Link } from 'react-router-dom';
 import { membersAPI } from '../../api';
 import { useAuth } from '../../context/AuthContext';
 import { exportToPDF } from '../../utils/export';
@@ -105,7 +106,7 @@ const MembersPage = () => {
                         />
                     </div>
                     <div>
-                        <div style={{ fontWeight: 500 }}>{record.fullName}</div>
+                        <Link to={`/members/${record._id}`} style={{ fontWeight: 500, color: '#333' }}>{record.fullName}</Link>
                         <div style={{ fontSize: 12, color: '#64748b' }}>
                             {record.birthDate && dayjs(record.birthDate).format('YYYY')}
                             {record.deathDate && ` - ${dayjs(record.deathDate).format('YYYY')}`}
@@ -388,7 +389,9 @@ const MembersPage = () => {
 
                                             {/* Info */}
                                             <div style={{ padding: '10px 12px', textAlign: 'center' }}>
-                                                <h4 style={{ margin: '0 0 4px', fontSize: 14 }}>{member.fullName}</h4>
+                                                <Link to={`/members/${member._id}`}>
+                                                    <h4 style={{ margin: '0 0 4px', fontSize: 14, color: '#333' }}>{member.fullName}</h4>
+                                                </Link>
                                                 <div style={{ color: '#666', fontSize: 12, marginBottom: 6 }}>
                                                     {member.birthDate && dayjs(member.birthDate).format('YYYY')}
                                                     {member.deathDate ? ` - ${dayjs(member.deathDate).format('YYYY')}` : ' - nay'}

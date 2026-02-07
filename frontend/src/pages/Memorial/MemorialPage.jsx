@@ -162,7 +162,7 @@ const MemorialPage = () => {
                 <Row gutter={[24, 24]}>
                     {deceasedMembers.map((m) => (
                         <Col xs={24} sm={12} md={8} lg={6} key={m._id}>
-                            <Link to={`/memorial/${m._id}`}>
+                            <Link to={`/members/${m._id}`}>
                                 <Card
                                     hoverable
                                     style={{

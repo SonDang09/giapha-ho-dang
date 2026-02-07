@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { Spin } from 'antd';
 import { lazy, Suspense } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -11,6 +11,7 @@ const HomePage = lazy(() => import('./pages/Home/HomePage'));
 const TreePage = lazy(() => import('./pages/Tree/TreePage'));
 const LoginPage = lazy(() => import('./pages/Login/LoginPage'));
 const MembersPage = lazy(() => import('./pages/Members/MembersPage'));
+const MemberDetailPage = lazy(() => import('./pages/Members/MemberDetailPage'));
 const NewsPage = lazy(() => import('./pages/News/NewsPage'));
 const AlbumsPage = lazy(() => import('./pages/Albums/AlbumsPage'));
 const MemorialPage = lazy(() => import('./pages/Memorial/MemorialPage'));
@@ -45,6 +46,12 @@ const ProtectedRoute = ({ children, roles }) => {
   return children;
 };
 
+// Redirect /memorial/:memberId to /members/:memberId
+const MemorialRedirect = () => {
+  const { memberId } = useParams();
+  return <Navigate to={`/members/${memberId}`} replace />;
+};
+
 // App Routes with Suspense
 const AppRoutes = () => {
   return (
@@ -57,12 +64,14 @@ const AppRoutes = () => {
         <Route path="/" element={<AppLayout><HomePage /></AppLayout>} />
         <Route path="/tree" element={<AppLayout><TreePage /></AppLayout>} />
         <Route path="/members" element={<AppLayout><MembersPage /></AppLayout>} />
+        <Route path="/members/:id" element={<AppLayout><MemberDetailPage /></AppLayout>} />
         <Route path="/news" element={<AppLayout><NewsPage /></AppLayout>} />
         <Route path="/news/:slug" element={<AppLayout><NewsPage /></AppLayout>} />
         <Route path="/albums" element={<AppLayout><AlbumsPage /></AppLayout>} />
         <Route path="/albums/:id" element={<AppLayout><AlbumsPage /></AppLayout>} />
         <Route path="/memorial" element={<AppLayout><MemorialPage /></AppLayout>} />
-        <Route path="/memorial/:memberId" element={<AppLayout><MemorialPage /></AppLayout>} />
+        {/* Redirect old memorial/:memberId to unified members/:id */}
+        <Route path="/memorial/:memberId" element={<MemorialRedirect />} />
 
         {/* New Feature Pages */}
         <Route path="/dashboard" element={<AppLayout><DashboardPage /></AppLayout>} />
