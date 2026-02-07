@@ -283,7 +283,6 @@ const MembersPage = () => {
                             style={{ minWidth: 100, flex: 1 }}
                             value={filterGeneration}
                             onChange={setFilterGeneration}
-                            size="small"
                         >
                             {availableGenerations.map(i => (
                                 <Select.Option key={i} value={i}>Đời {i}</Select.Option>
@@ -295,7 +294,6 @@ const MembersPage = () => {
                             style={{ minWidth: 100, flex: 1 }}
                             value={filterStatus}
                             onChange={setFilterStatus}
-                            size="small"
                         >
                             <Select.Option value="alive">Còn sống</Select.Option>
                             <Select.Option value="deceased">Đã mất</Select.Option>
@@ -639,6 +637,13 @@ const MembersPage = () => {
                     }
                     .btn-text-desktop {
                         display: none;
+                    }
+                    /* Prevent iOS auto-zoom on input focus */
+                    .members-toolbar input,
+                    .members-toolbar .ant-select-selection-search-input,
+                    .members-toolbar .ant-select-selection-item,
+                    .members-toolbar .ant-select-selection-placeholder {
+                        font-size: 16px !important;
                     }
                 }
                 @media (min-width: 768px) {
