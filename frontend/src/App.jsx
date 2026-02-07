@@ -14,7 +14,7 @@ const MembersPage = lazy(() => import('./pages/Members/MembersPage'));
 const MemberDetailPage = lazy(() => import('./pages/Members/MemberDetailPage'));
 const NewsPage = lazy(() => import('./pages/News/NewsPage'));
 const AlbumsPage = lazy(() => import('./pages/Albums/AlbumsPage'));
-const MemorialPage = lazy(() => import('./pages/Memorial/MemorialPage'));
+
 const ProfilePage = lazy(() => import('./pages/Profile/ProfilePage'));
 const DashboardPage = lazy(() => import('./pages/Dashboard/DashboardPage'));
 const LunarCalendarPage = lazy(() => import('./pages/Calendar/LunarCalendarPage'));
@@ -70,7 +70,7 @@ const AppRoutes = () => {
         <Route path="/news/:slug" element={<AppLayout><NewsPage /></AppLayout>} />
         <Route path="/albums" element={<AppLayout><AlbumsPage /></AppLayout>} />
         <Route path="/albums/:id" element={<AppLayout><AlbumsPage /></AppLayout>} />
-        <Route path="/memorial" element={<AppLayout><MemorialPage /></AppLayout>} />
+        {/* /memorial removed - memorial features are integrated into /members/:id */}
         {/* Redirect old memorial/:memberId to unified members/:id */}
         <Route path="/memorial/:memberId" element={<MemorialRedirect />} />
 

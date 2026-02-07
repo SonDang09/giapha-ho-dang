@@ -40,8 +40,7 @@ const AppLayout = ({ children }) => {
         { key: '/dashboard', icon: <DashboardOutlined />, label: <Link to="/dashboard">Thống kê</Link> },
         { key: '/calendar', icon: <CalendarOutlined />, label: <Link to="/calendar">Lịch giỗ</Link> },
         { key: '/news', icon: <FileTextOutlined />, label: <Link to="/news">Tin tức</Link> },
-        { key: '/albums', icon: <PictureOutlined />, label: <Link to="/albums">Hình ảnh</Link> },
-        { key: '/memorial', icon: <HeartOutlined />, label: <Link to="/memorial">Tưởng niệm</Link> }
+        { key: '/albums', icon: <PictureOutlined />, label: <Link to="/albums">Hình ảnh</Link> }
     ];
 
     const userMenuItems = [
