@@ -23,7 +23,10 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
     const [selectedMember, setSelectedMember] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [translate, setTranslate] = useState({ x: 0, y: 0 });
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+    const isMobile = screenWidth < 768;
+    const isTablet = screenWidth >= 768 && screenWidth < 1024;
+    const isTouchDevice = isMobile || isTablet;
 
     // Admin check
     const [isAdmin, setIsAdmin] = useState(false);
@@ -43,9 +46,9 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
     const [allMembers, setAllMembers] = useState([]);
     const [currentMemberGender, setCurrentMemberGender] = useState(null);
 
-    // Detect mobile on resize - MUST be useEffect not useState!
+    // Detect screen size on resize
     useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        const handleResize = () => setScreenWidth(window.innerWidth);
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -197,17 +200,18 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
         return (
             <g>
                 <foreignObject
-                    width={totalWidth + 20}
-                    height={120}
-                    x={offsetX - 10}
-                    y={-55}
-                    style={{ overflow: 'visible' }}
+                    width={totalWidth + 50}
+                    height={140}
+                    x={offsetX - 25}
+                    y={-70}
                 >
-                    <div style={{
+                    <div xmlns="http://www.w3.org/1999/xhtml" style={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: '0px'
+                        gap: '0px',
+                        width: '100%',
+                        height: '100%'
                     }}>
                         {/* Main member card */}
                         {renderMemberCard(
@@ -399,14 +403,20 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
     const treeConfig = useMemo(() => ({
         orientation: 'vertical',
         pathFunc: 'step',
-        separation: { siblings: isMobile ? 1.3 : 1.4, nonSiblings: isMobile ? 1.8 : 2.0 },
-        nodeSize: { x: isMobile ? 200 : 220, y: isMobile ? 140 : 160 },
+        separation: {
+            siblings: isMobile ? 1.3 : (isTablet ? 1.35 : 1.4),
+            nonSiblings: isMobile ? 1.8 : (isTablet ? 1.9 : 2.0)
+        },
+        nodeSize: {
+            x: isMobile ? 200 : (isTablet ? 210 : 220),
+            y: isMobile ? 140 : (isTablet ? 150 : 160)
+        },
         translate,
-        zoom: isMobile ? 0.45 : 0.85,
+        zoom: isMobile ? 0.45 : (isTablet ? 0.65 : 0.85),
         scaleExtent: { min: 0.15, max: 2.5 },
         enableLegacyTransitions: true,
         transitionDuration: 400
-    }), [translate, isMobile]);
+    }), [translate, isMobile, isTablet]);
 
     if (loading) {
         return (
@@ -440,7 +450,9 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
 
             {/* Instructions */}
             <div className="tree-instructions">
-                Click vào thành viên để xem chi tiết • Cuộn chuột để zoom • Kéo để di chuyển
+                {isTouchDevice
+                    ? 'Chạm vào thành viên để xem • Chụm ngón tay để zoom • Vuốt để di chuyển'
+                    : 'Click vào thành viên để xem chi tiết • Cuộn chuột để zoom • Kéo để di chuyển'}
             </div>
 
             {/* Legend */}
@@ -542,7 +554,7 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                         </div>
                     </div>
                 }
-                width={420}
+                width={isMobile ? '92%' : 420}
                 styles={{
                     header: { display: 'none' },
                     body: { padding: 0 },
@@ -675,7 +687,7 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                 open={addChildVisible}
                 onCancel={() => setAddChildVisible(false)}
                 footer={null}
-                width={400}
+                width={isMobile ? '92%' : 400}
             >
                 <Form
                     form={addForm}
@@ -733,7 +745,7 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                 open={editVisible}
                 onCancel={() => setEditVisible(false)}
                 footer={null}
-                width={400}
+                width={isMobile ? '92%' : 400}
             >
                 <Form
                     form={editForm}
@@ -893,6 +905,7 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                     display: flex;
                     flex-direction: column;
                     height: calc(100vh - 180px);
+                    height: calc(100dvh - 180px);
                     min-height: 600px;
                     background: ${COLORS.cream};
                     background-image: 
@@ -1014,6 +1027,7 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                     align-items: center;
                     justify-content: center;
                     height: calc(100vh - 180px);
+                    height: calc(100dvh - 180px);
                     min-height: 600px;
                     background: ${COLORS.cream};
                 }
@@ -1023,51 +1037,81 @@ const FamilyTreeView = ({ data, loading, onRefresh }) => {
                     stroke-width: 2px !important;
                 }
 
-                @media (max-width: 768px) {
+                /* Tablet breakpoint */
+                @media (max-width: 1024px) {
                     .family-tree-container {
-                        min-height: 500px;
+                        height: calc(100vh - 140px);
+                        height: calc(100dvh - 140px);
                     }
                     .tree-header {
-                        padding: 12px 8px;
-                    }
-                    .header-content {
-                        padding: 0 8px;
+                        padding: 14px 16px;
                     }
                     .header-content h1 {
-                        font-size: 16px;
+                        font-size: 22px;
+                        letter-spacing: 2px;
+                    }
+                    .header-content p {
+                        font-size: 12px;
+                    }
+                    .header-decoration {
+                        font-size: 28px;
+                    }
+                    .tree-wrapper {
+                        overflow: auto;
+                        -webkit-overflow-scrolling: touch;
+                    }
+                }
+
+                /* Mobile breakpoint */
+                @media (max-width: 767px) {
+                    .family-tree-container {
+                        min-height: 400px;
+                        height: calc(100vh - 120px);
+                        height: calc(100dvh - 120px);
+                        border-width: 2px;
+                        border-radius: 4px;
+                    }
+                    .tree-header {
+                        padding: 10px 8px;
+                    }
+                    .header-content {
+                        padding: 0 6px;
+                    }
+                    .header-content h1 {
+                        font-size: 15px;
                         letter-spacing: 1px;
                     }
                     .header-content p {
-                        font-size: 11px;
-                        letter-spacing: 1px;
+                        font-size: 10px;
+                        letter-spacing: 0.5px;
                     }
                     .header-decoration {
-                        font-size: 20px;
+                        font-size: 18px;
                     }
                     .tree-instructions {
                         font-size: 10px;
-                        padding: 6px;
+                        padding: 5px 8px;
                     }
                     .tree-legend {
-                        gap: 8px;
+                        gap: 6px;
                         flex-wrap: wrap;
                         justify-content: center;
-                        padding: 8px;
+                        padding: 6px 8px;
                     }
                     .legend-item {
-                        font-size: 11px;
+                        font-size: 10px;
                     }
                     .legend-box {
-                        width: 14px;
-                        height: 14px;
+                        width: 12px;
+                        height: 12px;
                     }
                     .tree-wrapper {
                         overflow: auto;
                         -webkit-overflow-scrolling: touch;
                     }
                     .tree-footer {
-                        font-size: 10px;
-                        padding: 8px;
+                        font-size: 9px;
+                        padding: 6px;
                     }
                 }
             `}</style>

@@ -79,10 +79,11 @@ const MembersPage = () => {
             title: 'Thành viên',
             key: 'member',
             render: (_, record) => (
-                <Space>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div style={{
                         width: 44,
                         height: 44,
+                        minWidth: 44,
                         borderRadius: '50%',
                         border: `3px solid ${record.gender === 'male' ? '#8B0000' : '#1B5E20'}`,
                         overflow: 'hidden',
@@ -99,14 +100,35 @@ const MembersPage = () => {
                             }}
                         />
                     </div>
-                    <div>
-                        <Link to={`/members/${record._id}`} style={{ fontWeight: 500, color: '#333' }}>{record.fullName}</Link>
-                        <div style={{ fontSize: 12, color: '#64748b' }}>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                        <Link to={`/members/${record._id}`} style={{
+                            fontWeight: 600,
+                            color: '#333',
+                            fontSize: 14,
+                            whiteSpace: 'nowrap',
+                            display: 'block'
+                        }}>
+                            {record.fullName}
+                        </Link>
+                        <div style={{ fontSize: 12, color: '#64748b', whiteSpace: 'nowrap' }}>
                             {record.birthDate && dayjs(record.birthDate).format('YYYY')}
                             {record.deathDate && ` - ${dayjs(record.deathDate).format('YYYY')}`}
+                            {!record.birthDate && !record.deathDate && '—'}
+                        </div>
+                        {/* Show gender + generation tags inline on mobile (since those columns are hidden) */}
+                        <div className="mobile-member-tags" style={{ marginTop: 4, display: 'none' }}>
+                            <Tag color={record.gender === 'male' ? 'blue' : 'pink'} style={{ fontSize: 11, lineHeight: '18px', padding: '0 6px' }}>
+                                {record.gender === 'male' ? 'Nam' : 'Nữ'}
+                            </Tag>
+                            <Tag color="gold" style={{ fontSize: 11, lineHeight: '18px', padding: '0 6px' }}>
+                                Đời {record.generation}
+                            </Tag>
+                            {record.isDeceased && (
+                                <Tag color="default" style={{ fontSize: 11, lineHeight: '18px', padding: '0 6px' }}>Đã mất</Tag>
+                            )}
                         </div>
                     </div>
-                </Space>
+                </div>
             )
         },
         {
@@ -114,6 +136,7 @@ const MembersPage = () => {
             dataIndex: 'gender',
             key: 'gender',
             width: 100,
+            responsive: ['md'],
             render: (gender) => (
                 <Tag color={gender === 'male' ? 'blue' : 'pink'}>
                     {gender === 'male' ? 'Nam' : 'Nữ'}
@@ -125,12 +148,14 @@ const MembersPage = () => {
             dataIndex: 'generation',
             key: 'generation',
             width: 100,
+            responsive: ['md'],
             render: (gen) => <Tag color="gold">Đời {gen}</Tag>
         },
         {
             title: 'Trạng thái',
             key: 'status',
             width: 100,
+            responsive: ['md'],
             render: (_, record) => (
                 record.isDeceased ?
                     <Tag color="default">Đã mất</Tag> :
@@ -142,6 +167,7 @@ const MembersPage = () => {
             dataIndex: 'currentResidence',
             key: 'currentResidence',
             width: 150,
+            responsive: ['lg'],
             render: (residence) => residence || '-'
         },
         // Only include action column if user can edit
@@ -543,6 +569,15 @@ const MembersPage = () => {
                     </Form.Item>
                 </Form>
             </Modal>
+            <style>{`
+                @media (max-width: 767px) {
+                    .mobile-member-tags {
+                        display: flex !important;
+                        flex-wrap: wrap;
+                        gap: 4px;
+                    }
+                }
+            `}</style>
         </div>
     );
 };
