@@ -24,17 +24,28 @@ const MembersPage = () => {
     const [viewMode, setViewMode] = useState('table'); // 'table' or 'card'
     const [modalVisible, setModalVisible] = useState(false);
     const [editingMember, setEditingMember] = useState(null);
-    const [apiConnected, setApiConnected] = useState(false);
+    const [apiConnected, setApiConnected] = useState(true);
+    const [apiError, setApiError] = useState(false);
+    const [retryCount, setRetryCount] = useState(0);
     const [form] = Form.useForm();
 
     useEffect(() => {
         loadMembers();
     }, [pagination.page, searchText, filterGeneration, filterStatus]);
 
+    // Auto-retry every 5 seconds when API fails (Render cold start)
+    useEffect(() => {
+        if (!apiError) return;
+        const timer = setTimeout(() => {
+            setRetryCount(prev => prev + 1);
+            loadMembers();
+        }, 5000);
+        return () => clearTimeout(timer);
+    }, [apiError, retryCount]);
+
     const loadMembers = async () => {
         setLoading(true);
         try {
-            // Use API service with auth token
             const response = await membersAPI.getAll({
                 page: pagination.page,
                 limit: pagination.limit,
@@ -43,41 +54,24 @@ const MembersPage = () => {
                 deceased: filterStatus === 'deceased' ? 'true' : filterStatus === 'alive' ? 'false' : undefined
             });
 
-            if (response?.data?.data?.length > 0) {
-                setMembers(response.data.data);
-                setPagination(prev => ({
-                    ...prev,
-                    total: response.data.pagination?.total || response.data.data.length
-                }));
-                // Extract unique generations from all members (not just current page)
-                const gens = [...new Set(response.data.data.map(m => m.generation))].filter(Boolean).sort((a, b) => a - b);
-                if (gens.length > 0) setAvailableGenerations(gens);
-                setApiConnected(true);
-                setLoading(false);
-                return;
-            }
+            const data = response?.data?.data || [];
+            setMembers(data);
+            setPagination(prev => ({
+                ...prev,
+                total: response.data.pagination?.total || data.length
+            }));
+            const gens = [...new Set(data.map(m => m.generation))].filter(Boolean).sort((a, b) => a - b);
+            if (gens.length > 0) setAvailableGenerations(gens);
+            setApiConnected(true);
+            setApiError(false);
         } catch (error) {
-            console.log('API not available, using demo data');
+            console.log('API not available, retrying...', error.message);
             setApiConnected(false);
+            setApiError(true);
+        } finally {
+            setLoading(false);
         }
-
-        // Fallback to demo data
-        setMembers(getDemoMembers());
-        setLoading(false);
     };
-
-    const getDemoMembers = () => [
-        { _id: '1', fullName: 'Đặng Văn Tổ', gender: 'male', generation: 1, birthDate: '1850-01-01', deathDate: '1920-03-15', isDeceased: true },
-        { _id: '2', fullName: 'Đặng Văn Nhất', gender: 'male', generation: 2, birthDate: '1880-05-10', deathDate: '1950-08-20', isDeceased: true },
-        { _id: '3', fullName: 'Đặng Văn Nhì', gender: 'male', generation: 2, birthDate: '1885-07-15', deathDate: '1960-12-25', isDeceased: true },
-        { _id: '4', fullName: 'Đặng Văn An', gender: 'male', generation: 3, birthDate: '1910-03-20', isDeceased: false },
-        { _id: '5', fullName: 'Đặng Thị Bình', gender: 'female', generation: 3, birthDate: '1915-09-05', deathDate: '2000-11-10', isDeceased: true },
-        { _id: '6', fullName: 'Đặng Văn Cường', gender: 'male', generation: 3, birthDate: '1920-06-12', deathDate: '1995-04-28', isDeceased: true },
-        { _id: '7', fullName: 'Đặng Văn Minh', gender: 'male', generation: 4, birthDate: '1945-11-30', isDeceased: false },
-        { _id: '8', fullName: 'Đặng Thị Hương', gender: 'female', generation: 4, birthDate: '1948-04-18', isDeceased: false },
-        { _id: '9', fullName: 'Đặng Văn Đức', gender: 'male', generation: 4, birthDate: '1950-08-25', isDeceased: false },
-        { _id: '10', fullName: 'Đặng Văn Em', gender: 'male', generation: 5, birthDate: '1980-02-14', isDeceased: false },
-    ];
 
     // Only show action column if user can edit
     const columns = [
@@ -226,10 +220,18 @@ const MembersPage = () => {
         <div className="page-container">
             {!apiConnected && (
                 <Alert
-                    type="info"
-                    message="Đang hiển thị dữ liệu mẫu. Kết nối backend để xem dữ liệu thực."
+                    type="warning"
+                    message="Đang kết nối đến máy chủ..."
+                    description={
+                        <div>
+                            <p style={{ margin: '4px 0' }}>Máy chủ đang khởi động, vui lòng đợi trong giây lát (thường mất 30-60 giây).</p>
+                            <Button size="small" type="primary" loading={loading} onClick={() => { setRetryCount(prev => prev + 1); loadMembers(); }}>
+                                Thử lại ngay
+                            </Button>
+                        </div>
+                    }
                     style={{ marginBottom: 16 }}
-                    closable
+                    showIcon
                 />
             )}
 
