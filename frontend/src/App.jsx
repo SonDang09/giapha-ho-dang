@@ -18,7 +18,7 @@ const MemorialPage = lazy(() => import('./pages/Memorial/MemorialPage'));
 const ProfilePage = lazy(() => import('./pages/Profile/ProfilePage'));
 const DashboardPage = lazy(() => import('./pages/Dashboard/DashboardPage'));
 const LunarCalendarPage = lazy(() => import('./pages/Calendar/LunarCalendarPage'));
-const FundPage = lazy(() => import('./pages/Fund/FundPage'));
+
 const AdminPage = lazy(() => import('./pages/Admin/AdminPage'));
 
 // Loading fallback component
@@ -77,7 +77,7 @@ const AppRoutes = () => {
         {/* New Feature Pages */}
         <Route path="/dashboard" element={<AppLayout><DashboardPage /></AppLayout>} />
         <Route path="/calendar" element={<AppLayout><LunarCalendarPage /></AppLayout>} />
-        <Route path="/fund" element={<AppLayout><FundPage /></AppLayout>} />
+
 
         <Route path="/profile" element={
           <ProtectedRoute>
