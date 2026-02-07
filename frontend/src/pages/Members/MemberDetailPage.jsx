@@ -254,10 +254,10 @@ const MemberDetailPage = () => {
                 </div>
             </Card>
 
+            {/* Two-column: Personal Info + Family Relationships */}
             <Row gutter={[24, 24]}>
                 {/* Left Column: Personal Info */}
                 <Col xs={24} lg={14}>
-                    {/* Personal Details */}
                     <Card bordered={false} style={{ marginBottom: 24, borderRadius: 12 }}>
                         <h3 style={{ color: '#D4AF37', marginBottom: 16 }}>
                             <IdcardOutlined /> Thông tin cá nhân
@@ -277,47 +277,15 @@ const MemberDetailPage = () => {
                             )}
                         </div>
                     </Card>
-
-                    {/* Biography */}
-                    {member.biography && (
-                        <Card bordered={false} style={{ marginBottom: 24, borderRadius: 12 }}>
-                            <h3 style={{ color: '#D4AF37', marginBottom: 16 }}>📜 Tiểu sử</h3>
-                            <p style={{ lineHeight: 1.8, color: '#555', whiteSpace: 'pre-wrap' }}>
-                                {member.biography}
-                            </p>
-                        </Card>
-                    )}
-
-                    {/* Photos */}
-                    {member.photos?.length > 0 && (
-                        <Card bordered={false} style={{ marginBottom: 24, borderRadius: 12 }}>
-                            <h3 style={{ color: '#D4AF37', marginBottom: 16 }}>📷 Hình ảnh</h3>
-                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                <Image.PreviewGroup>
-                                    {member.photos.map((photo, i) => (
-                                        <Image
-                                            key={i}
-                                            width={100}
-                                            height={100}
-                                            src={photo.url || photo}
-                                            style={{ objectFit: 'cover', borderRadius: 8 }}
-                                        />
-                                    ))}
-                                </Image.PreviewGroup>
-                            </div>
-                        </Card>
-                    )}
                 </Col>
 
-                {/* Right Column: Family + Memorial */}
+                {/* Right Column: Family Relationships */}
                 <Col xs={24} lg={10}>
-                    {/* Family Relationships */}
                     <Card bordered={false} style={{ marginBottom: 24, borderRadius: 12 }}>
                         <h3 style={{ color: '#D4AF37', marginBottom: 16 }}>
                             <TeamOutlined /> Quan hệ gia đình
                         </h3>
 
-                        {/* Parent */}
                         {parent && (
                             <div style={{ marginBottom: 16 }}>
                                 <div style={{ fontSize: 12, color: '#888', marginBottom: 4 }}>Cha/Mẹ</div>
@@ -325,7 +293,6 @@ const MemberDetailPage = () => {
                             </div>
                         )}
 
-                        {/* Spouses */}
                         {spouses.length > 0 && (
                             <div style={{ marginBottom: 16 }}>
                                 <div style={{ fontSize: 12, color: '#888', marginBottom: 4 }}>
@@ -337,7 +304,6 @@ const MemberDetailPage = () => {
                             </div>
                         )}
 
-                        {/* Children */}
                         {children.length > 0 && (
                             <div>
                                 <div style={{ fontSize: 12, color: '#888', marginBottom: 4 }}>
@@ -355,15 +321,57 @@ const MemberDetailPage = () => {
                             </div>
                         )}
                     </Card>
+                </Col>
+            </Row>
 
-                    {/* MEMORIAL SECTION - Only for deceased */}
-                    {isDeceased && (
-                        <>
-                            {/* Incense */}
+            {/* Biography - Full Width */}
+            {member.biography && (
+                <Card bordered={false} style={{ marginBottom: 24, borderRadius: 12 }}>
+                    <h3 style={{ color: '#D4AF37', marginBottom: 16 }}>📜 Tiểu sử</h3>
+                    <p style={{ lineHeight: 1.8, color: '#555', whiteSpace: 'pre-wrap' }}>
+                        {member.biography}
+                    </p>
+                </Card>
+            )}
+
+            {/* Photos - Full Width */}
+            {member.photos?.length > 0 && (
+                <Card bordered={false} style={{ marginBottom: 24, borderRadius: 12 }}>
+                    <h3 style={{ color: '#D4AF37', marginBottom: 16 }}>📷 Hình ảnh</h3>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <Image.PreviewGroup>
+                            {member.photos.map((photo, i) => (
+                                <Image
+                                    key={i}
+                                    width={120}
+                                    height={120}
+                                    src={photo.url || photo}
+                                    style={{ objectFit: 'cover', borderRadius: 8 }}
+                                />
+                            ))}
+                        </Image.PreviewGroup>
+                    </div>
+                </Card>
+            )}
+
+            {/* MEMORIAL SECTION - Full Width, Only for deceased */}
+            {isDeceased && (
+                <>
+                    {/* Memorial Header */}
+                    <Divider style={{ borderColor: 'rgba(212,175,55,0.3)', margin: '8px 0 24px' }}>
+                        <span style={{ color: '#D4AF37', fontSize: 16, fontWeight: 600 }}>
+                            🕯️ Tưởng Niệm
+                        </span>
+                    </Divider>
+
+                    {/* Incense + Condolence Form side by side */}
+                    <Row gutter={[24, 24]}>
+                        {/* Incense - Left */}
+                        <Col xs={24} md={12}>
                             <Card
                                 bordered={false}
                                 style={{
-                                    marginBottom: 24,
+                                    height: '100%',
                                     borderRadius: 12,
                                     background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
                                     border: '1px solid rgba(212,175,55,0.3)'
@@ -375,12 +383,14 @@ const MemberDetailPage = () => {
                                     memberName={member.fullName}
                                 />
                             </Card>
+                        </Col>
 
-                            {/* Condolence Form */}
+                        {/* Condolence Form - Right */}
+                        <Col xs={24} md={12}>
                             <Card
                                 bordered={false}
                                 style={{
-                                    marginBottom: 24,
+                                    height: '100%',
                                     borderRadius: 12,
                                     background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
                                     border: '1px solid rgba(212,175,55,0.3)'
@@ -412,7 +422,7 @@ const MemberDetailPage = () => {
                                             rules={[{ required: true, message: 'Vui lòng nhập lời tưởng nhớ' }]}
                                         >
                                             <TextArea
-                                                rows={3}
+                                                rows={4}
                                                 placeholder="Lời tưởng nhớ..."
                                                 style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white' }}
                                             />
@@ -421,78 +431,81 @@ const MemberDetailPage = () => {
                                             type="primary"
                                             htmlType="submit"
                                             loading={submitting}
-                                            style={{ background: '#D4AF37', borderColor: '#D4AF37' }}
+                                            block
+                                            size="large"
+                                            style={{ background: '#D4AF37', borderColor: '#D4AF37', fontWeight: 600 }}
                                         >
-                                            Gửi Lời Tưởng Nhớ
+                                            💐 Gửi Lời Tưởng Nhớ
                                         </Button>
                                     </Form>
                                 ) : (
-                                    <div style={{ textAlign: 'center', padding: '12px 0' }}>
-                                        <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: 12 }}>
+                                    <div style={{ textAlign: 'center', padding: '24px 0' }}>
+                                        <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: 16, fontSize: 15 }}>
                                             Vui lòng đăng nhập để gửi lời tưởng nhớ
                                         </p>
                                         <Link to="/login">
-                                            <Button type="primary" style={{ background: '#D4AF37', borderColor: '#D4AF37' }}>
+                                            <Button type="primary" size="large" style={{ background: '#D4AF37', borderColor: '#D4AF37' }}>
                                                 Đăng nhập
                                             </Button>
                                         </Link>
                                     </div>
                                 )}
                             </Card>
+                        </Col>
+                    </Row>
 
-                            {/* Condolences List */}
-                            {condolences.length > 0 && (
-                                <Card
-                                    bordered={false}
-                                    style={{
-                                        borderRadius: 12,
-                                        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-                                        border: '1px solid rgba(212,175,55,0.3)'
-                                    }}
-                                >
-                                    <h3 style={{ color: '#D4AF37', marginBottom: 16 }}>
-                                        Lời Tưởng Nhớ ({condolences.length})
-                                    </h3>
-                                    <List
-                                        dataSource={condolences}
-                                        renderItem={(item) => (
-                                            <List.Item style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', padding: '12px 0' }}>
-                                                <List.Item.Meta
-                                                    avatar={
-                                                        <Avatar style={{ backgroundColor: '#228B22' }}>
-                                                            {item.name?.charAt(0)}
-                                                        </Avatar>
-                                                    }
-                                                    title={
-                                                        <span style={{ color: 'white' }}>
-                                                            {item.name}
-                                                            {item.relationship && (
-                                                                <span style={{ color: 'rgba(255,255,255,0.5)', marginLeft: 8, fontSize: 13 }}>
-                                                                    ({item.relationship})
-                                                                </span>
-                                                            )}
+                    {/* Condolences List - Full Width */}
+                    {condolences.length > 0 && (
+                        <Card
+                            bordered={false}
+                            style={{
+                                marginTop: 24,
+                                borderRadius: 12,
+                                background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                                border: '1px solid rgba(212,175,55,0.3)'
+                            }}
+                        >
+                            <h3 style={{ color: '#D4AF37', marginBottom: 16 }}>
+                                Lời Tưởng Nhớ ({condolences.length})
+                            </h3>
+                            <List
+                                dataSource={condolences}
+                                renderItem={(item) => (
+                                    <List.Item style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', padding: '12px 0' }}>
+                                        <List.Item.Meta
+                                            avatar={
+                                                <Avatar style={{ backgroundColor: '#228B22' }}>
+                                                    {item.name?.charAt(0)}
+                                                </Avatar>
+                                            }
+                                            title={
+                                                <span style={{ color: 'white' }}>
+                                                    {item.name}
+                                                    {item.relationship && (
+                                                        <span style={{ color: 'rgba(255,255,255,0.5)', marginLeft: 8, fontSize: 13 }}>
+                                                            ({item.relationship})
                                                         </span>
-                                                    }
-                                                    description={
-                                                        <div>
-                                                            <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: 4 }}>
-                                                                {item.message}
-                                                            </p>
-                                                            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>
-                                                                {item.createdAt && dayjs(item.createdAt).format('DD/MM/YYYY HH:mm')}
-                                                            </span>
-                                                        </div>
-                                                    }
-                                                />
-                                            </List.Item>
-                                        )}
-                                    />
-                                </Card>
-                            )}
-                        </>
+                                                    )}
+                                                </span>
+                                            }
+                                            description={
+                                                <div>
+                                                    <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: 4 }}>
+                                                        {item.message}
+                                                    </p>
+                                                    <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>
+                                                        {item.createdAt && dayjs(item.createdAt).format('DD/MM/YYYY HH:mm')}
+                                                    </span>
+                                                </div>
+                                            }
+                                        />
+                                    </List.Item>
+                                )}
+                            />
+                        </Card>
                     )}
-                </Col>
-            </Row>
+                </>
+            )}
         </div>
     );
 };
